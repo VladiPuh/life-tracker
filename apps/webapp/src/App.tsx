@@ -183,14 +183,11 @@ export default function App() {
   }, [today, selectedId]);
 
   async function loadToday() {
-    setErr(null);
-    const data = await apiGet<TodayResponse>("/today");
+   console.log("[TEST] direct fetch /today");
+    const res = await fetch("https://sculpturesque-unprosperously-darlene.ngrok-free.dev/today");
+    const data = await res.json();
+    console.log("[TEST] data", data);
     setToday(data);
-
-    // если на сегодня нет WAITING-челенджей — сразу показываем список
-    if (!data.first_uncompleted) {
-      setShowAll(true);
-    }
   }
 
   async function loadChallenge(challengeId: number) {
