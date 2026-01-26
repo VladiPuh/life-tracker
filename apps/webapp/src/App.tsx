@@ -66,28 +66,30 @@ export default function App() {
   useEffect(() => {
     if (!tgOk) return;
 
-    const tg = (window as any).Telegram?.WebApp;
-    if (!tg?.BackButton) return;
+    // используем SDK (он у тебя уже импортирован как WebApp)
+    const bb = WebApp?.BackButton;
+    if (!bb) return;
 
-    // показываем системный Back Telegram только там, где он реально нужен
+    // Показываем системный Back Telegram только на экранах, где он нужен
     const shouldShow = screen === "DETAIL" || screen === "ADD" || screen === "TEMPLATES";
 
-    const onBack = () => {
+    const onTgBack = () => {
       setShowAllDbg(false);
       goToday();
     };
 
     if (shouldShow) {
-      try { tg.BackButton.show(); } catch {}
-      tg.BackButton.onClick(onBack);
+      try { bb.show(); } catch {}
+      bb.onClick(onTgBack);
 
       return () => {
-        try { tg.BackButton.offClick(onBack); } catch {}
+        try { bb.offClick(onTgBack); } catch {}
       };
     } else {
-      try { tg.BackButton.hide(); } catch {}
+      try { bb.hide(); } catch {}
     }
   }, [tgOk, screen, goToday]);
+
 
 
   // Add wizard state (MVP)
