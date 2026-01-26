@@ -68,11 +68,7 @@ async function apiGet<T>(path: string): Promise<T> {
   console.log("[apiGet]", {
     url: `${API_BASE}${path}`,
     initDataLen: initData.length,
-    headers: {
-      "ngrok-skip-browser-warning": "1",
-     "X-Telegram-Init-Data": initData ? initData.slice(0, 20) + "…" : "",
-    },
-  })
+  });
   const r = await fetch(`${API_BASE}${path}`, {
     headers: {
       "ngrok-skip-browser-warning": "1",
