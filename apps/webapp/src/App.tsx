@@ -11,11 +11,10 @@ import { AddScreen } from "./features/add/AddScreen";
 import { useTodayState } from "./state/today";
 import { useDetailState } from "./state/detail";
 import {hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
-import type { TemplateItem } from "./shared/domain/types";
+import { useTemplatesState } from "./state/templates";
 
 
-export default function App() {  
-  const [templates, setTemplates] = useState<TemplateItem[] | null>(null);
+export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const {today, showAll, loadToday, setFlag, resetShowAll, toggleShowAll,} = useTodayState();
@@ -25,6 +24,8 @@ export default function App() {
   const initLen = initData.length;
   const tgOk = tgPresent && initLen > 0;
   const { screen, go, goToday, goTemplates, goAdd } = useNav();
+  const { templates, loadTemplates, addTemplate } = useTemplatesState();
+
 
   useEffect(() => {
     if (screen === "TODAY") {
@@ -96,19 +97,6 @@ export default function App() {
     return today.all.find(x => x.challenge_id === selectedId) ?? null;
   }, [today, selectedId]);
 
-
-  async function loadTemplates() {
-    setErr(null);
-    const data = await LifeTrackerApi.getTemplates();
-    setTemplates(data);
-  }
-
-  async function addTemplate(template_id: number) {
-    setErr(null);
-    await LifeTrackerApi.addTemplate(template_id);
-    await loadToday();
-    goToday();
-  }
 
   async function createChallenge() {
     setErr(null);
