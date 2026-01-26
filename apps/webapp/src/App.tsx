@@ -51,6 +51,22 @@ export default function App() {
   const { screen, go, goToday, goTemplates, goAdd } = useNav();
 
   useEffect(() => {
+  if (!tgPresent) return;
+
+  try {
+    WebApp.ready();     // важно для iOS
+    WebApp.expand();    // на всякий случай (панель/viewport)
+  } catch {}
+
+  // диагностический лог (оставь на время теста)
+  console.log("[TG] ready", {
+    platform: WebApp.platform,
+    initDataLen: (WebApp.initData ?? "").length,
+    hasBackButton: Boolean(WebApp?.BackButton),
+  });
+}, [tgPresent]);
+
+  useEffect(() => {
     console.log("[DBG] screen=", screen, "showAll=", showAll);
   }, [screen, showAll]);
 
