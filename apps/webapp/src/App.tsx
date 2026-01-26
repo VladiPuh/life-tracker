@@ -185,7 +185,8 @@ export default function App() {
       loadToday().catch((e) => setErr(String(e)));
     }, [tgOk])
     useEffect(() => {
-      if (screen !== "TODAY") setShowAll(false);
+      // при любом переходе между экранами — возвращаясь на TODAY тоже — список сворачиваем
+      setShowAll(false);
     }, [screen]);
 
   // Add wizard state (MVP)
