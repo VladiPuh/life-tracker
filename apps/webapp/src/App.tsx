@@ -1,6 +1,5 @@
 ﻿
 import { useEffect, useMemo, useState } from "react";;
-import { LifeTrackerApi } from "./shared/api/lifetracker";
 import { getInitData } from "./shared/tg/initData";
 import { useNav } from "./app/router/useNav";
 import { useBack } from "./app/router/useBack";
@@ -12,6 +11,7 @@ import { useTodayState } from "./state/today";
 import { useDetailState } from "./state/detail";
 import {hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
 import { useTemplatesState } from "./state/templates";
+import { useAddState } from "./state/add";
 
 
 export default function App() {
@@ -25,6 +25,7 @@ export default function App() {
   const tgOk = tgPresent && initLen > 0;
   const { screen, go, goToday, goTemplates, goAdd } = useNav();
   const { templates, loadTemplates, addTemplate } = useTemplatesState();
+  const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create,} = useAddState();
 
 
   useEffect(() => {
@@ -88,31 +89,11 @@ export default function App() {
 
 
   // Add wizard state (MVP)
-  const [newTitle, setNewTitle] = useState("");
-  const [newDesc, setNewDesc] = useState("");
-  const [newMissPolicy, setNewMissPolicy] = useState<"FAIL"|"MIN"|"BONUS"|"SKIP">("FAIL");
-
   const selected = useMemo(() => {
     if (!today || selectedId == null) return null;
     return today.all.find(x => x.challenge_id === selectedId) ?? null;
   }, [today, selectedId]);
 
-
-  async function createChallenge() {
-    setErr(null);
-    if (!newTitle.trim()) {
-      setErr("Название обязательно");
-      return;
-    }
-    await LifeTrackerApi.createChallenge({
-      title: newTitle.trim(),
-      description: newDesc.trim() || null,
-      miss_policy: newMissPolicy,
-    });
-    setNewTitle(""); setNewDesc(""); setNewMissPolicy("FAIL");
-    await loadToday();
-    goToday();
-  }
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
@@ -243,7 +224,16 @@ export default function App() {
             resetShowAll();
             goToday();
           }}
-          onCreate={createChallenge}
+          onCreate={async () => {
+            setErr(null);
+            try {
+              await create();
+              await loadToday();
+              goToday();
+            } catch (e) {
+              setErr(String(e));
+            }
+          }}
         />
       )}
     </div>
