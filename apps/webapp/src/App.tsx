@@ -565,8 +565,7 @@ export default function App() {
       {/* ADD */}
       {screen === "ADD" && (
         <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-          <button onClick={() => setScreen("TODAY")}>← Назад</button>
-
+          <button onClick={() => { setShowAll(false); setScreen("TODAY"); }}>← Назад</button>
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <div style={{ fontSize: 18, fontWeight: 700 }}>Добавить челендж</div>
             <div style={{ opacity: 0.7, fontSize: 12, marginTop: 4 }}>
