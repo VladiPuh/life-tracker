@@ -1,5 +1,5 @@
 ﻿import WebApp from "@twa-dev/sdk";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";;
 import { getInitData } from "./tg/initData";
 import { apiGet, apiPost, apiPatch } from "./api/client";
 import { StatusPill } from "./ui/StatusPill";
@@ -34,6 +34,7 @@ export default function App() {
   const [today, setToday] = useState<TodayResponse | null>(null);
   const [todayFetchState, setTodayFetchState] = useState<string>("idle");
   const [showAll, setShowAll] = useState(false);
+  const setShowAllDbg = (next: boolean | ((prev: boolean) => boolean)) => {setShowAll(prev => {const v = typeof next === "function" ? next(prev) : next; console.log("[DBG] setShowAll ->", v, "screen=", screen); return v;});};
   const [templates, setTemplates] = useState<TemplateItem[] | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -49,10 +50,15 @@ export default function App() {
   const [challengeFull, setChallengeFull] = useState<ChallengeFull | null>(null);
   const { screen, go, goToday, goTemplates, goAdd } = useNav();
 
+  useEffect(() => {
+    console.log("[DBG] screen=", screen, "showAll=", showAll);
+  }, [screen, showAll]);
+
+
   useBack({
     enabled: tgOk && screen !== "TODAY",
     onBack: () => {
-      setShowAll(false);
+      setShowAllDbg(false);
       goToday();
     },
   });
@@ -186,7 +192,7 @@ export default function App() {
         )}
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => { setShowAll(false); goToday(); loadToday(); }}>Сегодня</button>
+          <button onClick={() => { setShowAllDbg(false); goToday(); loadToday(); }}>Сегодня</button>
           <button onClick={() => { goTemplates(); loadTemplates(); }}>Шаблоны</button>
           <button onClick={() => goAdd()}>Добавить</button>
         </div>
@@ -232,7 +238,7 @@ export default function App() {
               )}
             </div>
 
-            <button onClick={() => setShowAll((v) => !v)}>
+            <button onClick={() => setShowAllDbg((v) => !v)}>
               {showAll ? "Скрыть" : "Показать все"}
             </button>
           </div>
@@ -266,7 +272,7 @@ export default function App() {
       {/* DETAIL */}
       {screen === "DETAIL" && selected && (
         <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-          <button onClick={() => { setShowAll(false); goToday(); }}>← Назад</button>
+          <button onClick={() => { setShowAllDbg(false); goToday(); }}>← Назад</button>
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: 18, fontWeight: 700 }}>{selected.title}</div>
@@ -434,7 +440,7 @@ export default function App() {
       {/* ADD */}
       {screen === "ADD" && (
         <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-          <button onClick={() => { setShowAll(false); goToday(); }}>← Назад</button>
+          <button onClick={() => { setShowAllDbg(false); goToday(); }}>← Назад</button>
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <div style={{ fontSize: 18, fontWeight: 700 }}>Добавить челендж</div>
             <div style={{ opacity: 0.7, fontSize: 12, marginTop: 4 }}>
