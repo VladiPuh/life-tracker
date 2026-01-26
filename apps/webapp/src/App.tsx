@@ -184,7 +184,14 @@ export default function App() {
 
   async function loadToday() {
    console.log("[TEST] direct fetch /today");
-    const res = await fetch("https://sculpturesque-unprosperously-darlene.ngrok-free.dev/today");
+    const res = await fetch(
+      "https://sculpturesque-unprosperously-darlene.ngrok-free.dev/today",
+      {
+       headers: {
+          "ngrok-skip-browser-warning": "1",
+       },
+     }
+    );
     const data = await res.json();
     console.log("[TEST] data", data);
     setToday(data);
