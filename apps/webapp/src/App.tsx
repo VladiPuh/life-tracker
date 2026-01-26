@@ -2,10 +2,10 @@
 import { useEffect, useMemo, useState } from "react";;
 import { LifeTrackerApi } from "./shared/api/lifetracker";
 import { getInitData } from "./shared/tg/initData";
-import { StatusPill } from "./shared/ui/StatusPill";
-import { FlagButtons } from "./shared/ui/FlagButtons";
 import { useNav } from "./app/router/useNav";
 import { useBack } from "./app/router/useBack";
+import { TodayScreen } from "./features/today/TodayScreen";
+import { DetailScreen } from "./features/detail/DetailScreen";
 import type {
   TodayResponse,
   TemplateItem,
@@ -265,208 +265,60 @@ export default function App() {
 
       {/* TODAY */}
       {screen === "TODAY" && (
-        <>
-          <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-            <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                <div>
-                  <div style={{ fontSize: 14, opacity: 0.7 }}>Первый невыполненный</div>
-                  <div style={{ fontSize: 18, fontWeight: 600 }}>
-                    {today
-                      ? (today.first_uncompleted ? today.first_uncompleted.title : "Все выполнено ✅")
-                      : "Загрузка..."}
-                  </div>
-                </div>
-                <StatusPill s={today ? (today.first_uncompleted?.status_view ?? "WAITING") : "WAITING"} />
-              </div>
+        <TodayScreen
+          today={today}
+          showAll={showAll}
+          onToggleShowAll={() => setShowAllDbg((v) => !v)}
+          onSetFlagFirst={(flag: "MIN" | "BONUS" | "SKIP" | "FAIL") =>
+            setFlag(today!.first_uncompleted!.challenge_id, flag)
+          }
+          onGoDetail={(challengeId: number) => {
+            setSelectedId(challengeId);
 
-              {today?.first_uncompleted ? (
-                <div style={{ marginTop: 10 }}>
-                  <FlagButtons onSet={(flag) => setFlag(today.first_uncompleted!.challenge_id, flag)} />
-                </div>
-              ) : (
-                <div style={{ marginTop: 10, opacity: 0.6, fontSize: 12 }}>
-                  На сегодня всё отмечено. Нажми “Показать все”, чтобы увидеть список.
-                </div>
-              )}
-            </div>
+            const found = today?.all.find((x) => x.challenge_id === challengeId) ?? null;
+            if (found) {
+              setEditTitle(found.title);
+            }
 
-            <button onClick={() => setShowAllDbg((v) => !v)}>
-              {showAll ? "Скрыть" : "Показать все"}
-            </button>
-          </div>
-
-          {showAll && (
-            <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
-              {today?.all.map((ch) => (
-                <div
-                  key={ch.challenge_id}
-                  style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, cursor: "pointer" }}
-                  onClick={() => {
-                    setSelectedId(ch.challenge_id);
-                    setEditTitle(ch.title);
-                    setEditDesc("");
-                    go("DETAIL");
-                    loadHistory(ch.challenge_id).catch((e) => setErr(String(e)));
-                    loadChallenge(ch.challenge_id).catch((e) => setErr(String(e)));
-                  }}
-                  >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontWeight: 600 }}>{ch.title}</div>
-                    <StatusPill s={ch.status_view} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
+            setEditDesc("");
+            go("DETAIL");
+            loadHistory(challengeId).catch((e) => setErr(String(e)));
+            loadChallenge(challengeId).catch((e) => setErr(String(e)));
+          }}
+        />
       )}
 
       {/* DETAIL */}
       {screen === "DETAIL" && selected && (
-        <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-          <button onClick={() => { setShowAllDbg(false); goToday(); }}>← Назад</button>
-          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{selected.title}</div>
-              <StatusPill s={selected.status_view} />
-              </div>
-
-<div style={{ marginTop: 12, width: "100%" }}>
-                <div style={{ display: "grid", gap: 8 }}>
-                  <div style={{ fontSize: 12, opacity: 0.8 }}>
-                    Название
-                  </div>
-
-                  <input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    style={{
-                     width: "100%",
-                     padding: 10,
-                     borderRadius: 8,
-                      border: "1px solid #ccc",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <button
-                    style={{ alignSelf: "flex-start" }}
-                    onClick={() => saveTitle(selected.challenge_id)}
-                  >
-                   Сохранить
-                  </button>
-                </div>
-
-                <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
-                  <div style={{ fontSize: 12, opacity: 0.8 }}>Если не отметил до конца дня</div>
-
-                  <select
-                   value={editMiss}
-                   onChange={(e) => setEditMiss(e.target.value as any)}
-                   style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-                 >
-                   <option value="FAIL">FAIL</option>
-                   <option value="SKIP">SKIP</option>
-                   <option value="MIN">MIN</option>
-                   <option value="BONUS">BONUS</option>
-                  </select>
-
-                  <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                   <input
-                     type="checkbox"
-                      checked={editActive}
-                      onChange={(e) => setEditActive(e.target.checked)}
-                    />
-                    Активен
-                  </label>
-
-                  <button
-                    style={{ alignSelf: "flex-start" }}
-                    onClick={async () => {
-                      setErr(null);
-                      await LifeTrackerApi.patchChallenge(selected.challenge_id, {
-                        miss_policy: editMiss,
-                        is_active: editActive,
-                      });
-                      await loadToday();
-                      await loadChallenge(selected.challenge_id);
-                   }}
-                 >
-                    Сохранить политику и активность
-                 </button>
-                </div>
-
-            </div>
-            <div style={{ marginTop: 10 }}>
-              <FlagButtons onSet={(flag) => setFlag(selected.challenge_id, flag)} />
-            </div>
-            <div style={{ marginTop: 12, width: "100%" }}>
-              <div style={{ display: "grid", gap: 8 }}>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>Описание</div>
-
-                <textarea
-                 value={editDesc}
-                 onChange={(e) => setEditDesc(e.target.value)}
-                  style={{
-                   width: "100%",
-                    padding: 10,
-                   borderRadius: 8,
-                    border: "1px solid #ccc",
-                    boxSizing: "border-box",
-                  }}
-                  rows={4}
-                  placeholder="Что именно делать"
-                />
-
-                <button
-                 style={{ alignSelf: "flex-start" }}
-                  onClick={() => saveDesc(selected.challenge_id)}
-                >
-                 Сохранить описание
-                </button>
-
-                <div style={{ opacity: 0.7, fontSize: 12 }}>
-                  Текущее: {challengeFull && challengeFull.id === selected.challenge_id
-                   ? (challengeFull.description ?? "— нет описания —")
-                   : "Загрузка..."}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 10, opacity: 0.7, fontSize: 12 }}>
-              История и редактор — следующий шаг (подключим /history и PATCH).
-            </div>
-          </div>
-          <div style={{ marginTop: 12 }}>
-            <div style={{ fontWeight: 700, marginBottom: 6 }}>История (30 дней)</div>
-
-            {!history || history.challenge_id !== selected.challenge_id ? (
-              <div style={{ opacity: 0.7, fontSize: 12 }}>Загрузка...</div>
-            ) : history.items.length === 0 ? (
-              <div style={{ opacity: 0.7, fontSize: 12 }}>Пока нет записей</div>
-            ) : (
-              <div style={{ display: "grid", gap: 6 }}>
-                {history.items.map((it) => (
-                  <div key={it.date} style={{ padding: 10, border: "1px solid #eee", borderRadius: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ fontSize: 13 }}>{it.date}</div>
-                      <StatusPill s={it.status_view} />
-                    </div>
-                    {(it.minutes_fact != null || it.comment) && (
-                      <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>
-                        {it.minutes_fact != null ? `Мин: ${it.minutes_fact}` : ""}
-                        {it.minutes_fact != null && it.comment ? " • " : ""}
-                        {it.comment ?? ""}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-        </div>
+        <DetailScreen
+          selected={selected}
+          challengeFull={challengeFull}
+          history={history}
+          editTitle={editTitle}
+          setEditTitle={setEditTitle}
+          editDesc={editDesc}
+          setEditDesc={setEditDesc}
+          editMiss={editMiss}
+          setEditMiss={setEditMiss}
+          editActive={editActive}
+          setEditActive={setEditActive}
+          onBack={() => {
+            setShowAllDbg(false);
+            goToday();
+          }}
+          onSetFlag={(flag) => setFlag(selected.challenge_id, flag)}
+          onSaveTitle={() => saveTitle(selected.challenge_id)}
+          onSaveDesc={() => saveDesc(selected.challenge_id)}
+          onSavePolicyAndActive={async () => {
+            setErr(null);
+            await LifeTrackerApi.patchChallenge(selected.challenge_id, {
+              miss_policy: editMiss,
+              is_active: editActive,
+            });
+            await loadToday();
+            await loadChallenge(selected.challenge_id);
+          }}
+        />
       )}
 
       {/* TEMPLATES */}
