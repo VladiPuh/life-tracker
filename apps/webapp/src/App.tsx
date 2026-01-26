@@ -8,17 +8,16 @@ import { TodayScreen } from "./features/today/TodayScreen";
 import { DetailScreen } from "./features/detail/DetailScreen";
 import { TemplatesScreen } from "./features/templates/TemplatesScreen";
 import { AddScreen } from "./features/add/AddScreen";
+import { useTodayState } from "./state/today";
 import {hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
-import type {TodayResponse, TemplateItem, HistoryResponse, ChallengePatch, ChallengeFull,} from "./shared/domain/types";
+import type { TemplateItem, HistoryResponse, ChallengePatch, ChallengeFull } from "./shared/domain/types";
 
 
-export default function App() {
-  const [today, setToday] = useState<TodayResponse | null>(null);
-  const [showAll, setShowAll] = useState(false);
-  const setShowAllDbg = (next: boolean | ((prev: boolean) => boolean)) => {setShowAll(prev => {const v = typeof next === "function" ? next(prev) : next; console.log("[DBG] setShowAll ->", v, "screen=", screen); return v;});};
+export default function App() {  
   const [templates, setTemplates] = useState<TemplateItem[] | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const {today, showAll, loadToday, setFlag, resetShowAll, toggleShowAll,} = useTodayState();
   const [history, setHistory] = useState<HistoryResponse | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
@@ -33,7 +32,7 @@ export default function App() {
 
   useEffect(() => {
     if (screen === "TODAY") {
-      setShowAllDbg(false);
+      resetShowAll();
     }
   }, [screen]);
 
@@ -52,7 +51,7 @@ export default function App() {
   useBack({
     enabled: tgOk && screen !== "TODAY",
     onBack: () => {
-      setShowAllDbg(false);
+      resetShowAll();
       goToday();
     },
   });
@@ -61,7 +60,7 @@ export default function App() {
   // Наша цель: при любом системном back/history/restore — свернуть список.
   useEffect(() => {
     const onSystemNav = () => {
-      setShowAllDbg(false);
+      resetShowAll();
     };
 
     window.addEventListener("popstate", onSystemNav);
@@ -79,7 +78,7 @@ export default function App() {
     const shouldShow = screen === "DETAIL" || screen === "ADD" || screen === "TEMPLATES";
 
     const onTgBack = () => {
-      setShowAllDbg(false);
+      resetShowAll();
       goToday();
     };
 
@@ -101,16 +100,6 @@ export default function App() {
     return today.all.find(x => x.challenge_id === selectedId) ?? null;
   }, [today, selectedId]);
 
-  async function loadToday() {
-    setErr(null);
-
-    try {
-     const data = await LifeTrackerApi.getToday();
-      setToday(data);
-    } catch (e) {     
-     throw e;
-    }
-  }
 
   async function loadChallenge(challengeId: number) {
     setErr(null);
@@ -125,12 +114,6 @@ export default function App() {
     setErr(null);
     const data = await LifeTrackerApi.getHistory(challengeId, 30);    
     setHistory(data);
-  }
-
-  async function setFlag(challenge_id: number, flag: "MIN"|"BONUS"|"SKIP"|"FAIL") {
-    setErr(null);
-    await LifeTrackerApi.setDailyFlag(challenge_id, flag);
-    await loadToday();
   }
 
   async function loadTemplates() {
@@ -216,7 +199,7 @@ export default function App() {
         )}
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => { setShowAllDbg(false); goToday(); loadToday(); }}>Сегодня</button>
+          <button onClick={() => { resetShowAll(); goToday(); loadToday(); }}>Сегодня</button>
           <button onClick={() => { goTemplates(); loadTemplates(); }}>Шаблоны</button>
           <button onClick={() => goAdd()}>Добавить</button>
         </div>
@@ -239,7 +222,7 @@ export default function App() {
         <TodayScreen
           today={today}
           showAll={showAll}
-          onToggleShowAll={() => setShowAllDbg((v) => !v)}
+          onToggleShowAll={toggleShowAll}
           onSetFlagFirst={(flag: "MIN" | "BONUS" | "SKIP" | "FAIL") =>
             setFlag(today!.first_uncompleted!.challenge_id, flag)
           }
@@ -274,7 +257,7 @@ export default function App() {
           editActive={editActive}
           setEditActive={setEditActive}
           onBack={() => {
-            setShowAllDbg(false);
+            resetShowAll();
             goToday();
           }}
           onSetFlag={(flag) => setFlag(selected.challenge_id, flag)}
@@ -310,7 +293,7 @@ export default function App() {
           newMissPolicy={newMissPolicy}
           setNewMissPolicy={setNewMissPolicy}
           onBack={() => {
-            setShowAllDbg(false);
+            resetShowAll();
             goToday();
           }}
           onCreate={createChallenge}
