@@ -1,7 +1,7 @@
 ﻿
 import { useEffect, useMemo, useState } from "react";;
+import { LifeTrackerApi } from "./shared/api/lifetracker";
 import { getInitData } from "./shared/tg/initData";
-import { apiGet, apiPost, apiPatch } from "./shared/api/client";
 import { StatusPill } from "./shared/ui/StatusPill";
 import { FlagButtons } from "./shared/ui/FlagButtons";
 import { useNav } from "./app/router/useNav";
@@ -131,7 +131,7 @@ export default function App() {
     setErr(null);
 
     try {
-     const data = await apiGet<TodayResponse>("/today");
+     const data = await LifeTrackerApi.getToday();
       setTodayFetchState("json ok");
       setToday(data);
     } catch (e) {
@@ -142,7 +142,7 @@ export default function App() {
 
   async function loadChallenge(challengeId: number) {
     setErr(null);
-    const data = await apiGet<ChallengeFull>(`/challenges/${challengeId}`);
+    const data = await LifeTrackerApi.getChallenge(challengeId);
     setChallengeFull(data);
     setEditMiss(data.miss_policy);
     setEditActive(data.is_active);
@@ -151,25 +151,25 @@ export default function App() {
 
   async function loadHistory(challengeId: number) {
     setErr(null);
-    const data = await apiGet<HistoryResponse>(`/challenges/${challengeId}/history?days=30`);
+    const data = await LifeTrackerApi.getHistory(challengeId, 30);    
     setHistory(data);
   }
 
   async function setFlag(challenge_id: number, flag: "MIN"|"BONUS"|"SKIP"|"FAIL") {
     setErr(null);
-    await apiPost("/daily-log/upsert", { challenge_id, flag });
+    await LifeTrackerApi.setDailyFlag(challenge_id, flag);
     await loadToday();
   }
 
   async function loadTemplates() {
     setErr(null);
-    const data = await apiGet<TemplateItem[]>("/templates");
+    const data = await LifeTrackerApi.getTemplates();
     setTemplates(data);
   }
 
   async function addTemplate(template_id: number) {
     setErr(null);
-    await apiPost(`/templates/${template_id}/add`);
+    await LifeTrackerApi.addTemplate(template_id);
     await loadToday();
     goToday();
   }
@@ -180,7 +180,7 @@ export default function App() {
       setErr("Название обязательно");
       return;
     }
-    await apiPost("/challenges", {
+    await LifeTrackerApi.createChallenge({
       title: newTitle.trim(),
       description: newDesc.trim() || null,
       miss_policy: newMissPolicy,
@@ -193,7 +193,7 @@ export default function App() {
   async function saveTitle(challengeId: number) {
     setErr(null);
     const payload: ChallengePatch = { title: editTitle.trim() || null };
-    await apiPatch(`/challenges/${challengeId}`, payload);
+    await LifeTrackerApi.patchChallenge(challengeId, payload);
     await loadToday();
     await loadChallenge(challengeId);
     // обновим selected (чтобы сразу отрисовалось)
@@ -203,7 +203,7 @@ export default function App() {
   async function saveDesc(challengeId: number) {
     setErr(null);
     const payload: ChallengePatch = { description: editDesc.trim() || null };
-    await apiPatch(`/challenges/${challengeId}`, payload);
+    await LifeTrackerApi.patchChallenge(challengeId, payload);
     await loadToday();
     await loadChallenge(challengeId);
   };
@@ -385,7 +385,7 @@ export default function App() {
                     style={{ alignSelf: "flex-start" }}
                     onClick={async () => {
                       setErr(null);
-                      await apiPatch(`/challenges/${selected.challenge_id}`, {
+                      await LifeTrackerApi.patchChallenge(selected.challenge_id, {
                         miss_policy: editMiss,
                         is_active: editActive,
                       });
