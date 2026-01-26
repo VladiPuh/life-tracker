@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TG Probe</title>
+    <style>
+      body { font-family: system-ui, Arial; padding: 16px; }
+      pre { white-space: pre-wrap; word-break: break-word; background:#f6f6f6; padding:12px; border-radius:12px; }
+      .ok { color: #0a7; font-weight: 700; }
+      .bad { color: #c00; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <h2>TG Probe</h2>
+    <div id="status"></div>
+    <pre id="out">loading...</pre>
+
+    <script>
+      const tg = window.Telegram;
+      const wa = tg && tg.WebApp ? tg.WebApp : null;
+
+      const info = {
+        hasTelegram: !!tg,
+        hasWebApp: !!wa,
+        initDataLen: wa && wa.initData ? wa.initData.length : 0,
+        initDataUnsafe_user: wa && wa.initDataUnsafe ? wa.initDataUnsafe.user : null,
+        platform: wa ? wa.platform : null,
+        version: wa ? wa.version : null,
+        colorScheme: wa ? wa.colorScheme : null,
+        href: location.href,
+      };
+
+      const ok = info.hasWebApp && info.initDataLen > 0;
+
+      document.getElementById("status").innerHTML =
+        ok ? `<div class="ok">OK: initData присутствует</div>` :
+             `<div class="bad">BAD: initData отсутствует</div>`;
+
+      document.getElementById("out").textContent = JSON.stringify(info, null, 2);
+
+      try { if (wa) { wa.ready(); wa.expand(); } } catch (e) {}
+      console.log("[TG_PROBE]", info);
+    </script>
+  </body>
+</html>
