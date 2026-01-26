@@ -1,4 +1,4 @@
-﻿import WebApp from "@twa-dev/sdk";
+﻿
 import { useEffect, useMemo, useState } from "react";;
 import { getInitData } from "./shared/tg/initData";
 import { apiGet, apiPost, apiPatch } from "./shared/api/client";
@@ -13,26 +13,27 @@ import type {
   ChallengePatch,
   ChallengeFull,
 } from "./shared/domain/types";
+import {
+  hasTelegramWebApp,
+  getPlatform,
+  getSdkInitDataLen,
+  initTelegram,
+  logTelegramReady,
+  bindTelegramBackButton,
+} from "./shared/tg/webapp";
 
 
 const DEV = import.meta.env.DEV;
 
 DEV && console.log("[env]", {
-  hasTelegram: typeof (window as any).Telegram !== "undefined",
-  initDataLen: (WebApp?.initData ?? "").length,
-  platform: WebApp?.platform,
+  hasTelegram: hasTelegramWebApp(),
+  initDataLen: getSdkInitDataLen(),
+  platform: getPlatform(),
 });
 
-DEV && console.log("[DEPLOY]", {
-  build: "CF-PAGES",
-  time: new Date().toISOString(),
-});
-
-DEV && console.log("[TG DEBUG] initDataLen:", (WebApp?.initData ?? "").length);
-
-
-DEV && console.log("[Telegram.WebApp]", (window as any).Telegram?.WebApp ? "PRESENT" : "MISSING");
-DEV && console.log("[initDataLen]", (WebApp?.initData ?? "").length);
+DEV && console.log("[TG DEBUG] initDataLen:", getSdkInitDataLen());
+DEV && console.log("[Telegram.WebApp]", hasTelegramWebApp() ? "PRESENT" : "MISSING");
+DEV && console.log("[initDataLen]", getSdkInitDataLen());
 
 
 export default function App() {
@@ -48,7 +49,7 @@ export default function App() {
   const [editDesc, setEditDesc] = useState("");
   const [editMiss, setEditMiss] = useState<"FAIL"|"MIN"|"BONUS"|"SKIP">("FAIL");
   const [editActive, setEditActive] = useState(true);
-  const tgPresent = Boolean((window as any).Telegram?.WebApp);
+  const tgPresent = hasTelegramWebApp();
   const initData = getInitData();
   const initLen = initData.length;
   const tgOk = tgPresent && initLen > 0;
@@ -64,17 +65,8 @@ export default function App() {
   useEffect(() => {
   if (!tgPresent) return;
 
-  try {
-    WebApp.ready();     // важно для iOS
-    WebApp.expand();    // на всякий случай (панель/viewport)
-  } catch {}
-
-  // диагностический лог (оставь на время теста)
-  console.log("[TG] ready", {
-    platform: WebApp.platform,
-    initDataLen: (WebApp.initData ?? "").length,
-    hasBackButton: Boolean(WebApp?.BackButton),
-  });
+  initTelegram();
+  logTelegramReady();
 }, [tgPresent]);
 
   useEffect(() => {
@@ -109,13 +101,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!tgOk) return;
-
-    // используем SDK (он у тебя уже импортирован как WebApp)
-    const bb = WebApp?.BackButton;
-    if (!bb) return;
-
-    // Показываем системный Back Telegram только на экранах, где он нужен
     const shouldShow = screen === "DETAIL" || screen === "ADD" || screen === "TEMPLATES";
 
     const onTgBack = () => {
@@ -123,18 +108,12 @@ export default function App() {
       goToday();
     };
 
-    if (shouldShow) {
-      try { bb.show(); } catch {}
-      bb.onClick(onTgBack);
-
-      return () => {
-        try { bb.offClick(onTgBack); } catch {}
-      };
-    } else {
-      try { bb.hide(); } catch {}
-    }
+    return bindTelegramBackButton({
+      enabled: tgOk,
+      shouldShow,
+      onBack: onTgBack,
+    });
   }, [tgOk, screen, goToday]);
-
 
 
   // Add wizard state (MVP)
