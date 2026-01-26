@@ -9,8 +9,9 @@ import { DetailScreen } from "./features/detail/DetailScreen";
 import { TemplatesScreen } from "./features/templates/TemplatesScreen";
 import { AddScreen } from "./features/add/AddScreen";
 import { useTodayState } from "./state/today";
+import { useDetailState } from "./state/detail";
 import {hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
-import type { TemplateItem, HistoryResponse, ChallengePatch, ChallengeFull } from "./shared/domain/types";
+import type { TemplateItem } from "./shared/domain/types";
 
 
 export default function App() {  
@@ -18,16 +19,11 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const {today, showAll, loadToday, setFlag, resetShowAll, toggleShowAll,} = useTodayState();
-  const [history, setHistory] = useState<HistoryResponse | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDesc, setEditDesc] = useState("");
-  const [editMiss, setEditMiss] = useState<"FAIL"|"MIN"|"BONUS"|"SKIP">("FAIL");
-  const [editActive, setEditActive] = useState(true);
+  const {challengeFull, history, editTitle, setEditTitle, editDesc, setEditDesc, editMiss, setEditMiss, editActive, setEditActive, loadChallenge, loadHistory, saveTitle, saveDesc, savePolicyAndActive,} = useDetailState(); 
   const tgPresent = hasTelegramWebApp();
   const initData = getInitData();
   const initLen = initData.length;
   const tgOk = tgPresent && initLen > 0;
-  const [challengeFull, setChallengeFull] = useState<ChallengeFull | null>(null);
   const { screen, go, goToday, goTemplates, goAdd } = useNav();
 
   useEffect(() => {
@@ -101,21 +97,6 @@ export default function App() {
   }, [today, selectedId]);
 
 
-  async function loadChallenge(challengeId: number) {
-    setErr(null);
-    const data = await LifeTrackerApi.getChallenge(challengeId);
-    setChallengeFull(data);
-    setEditMiss(data.miss_policy);
-    setEditActive(data.is_active);
-    setEditDesc(data.description ?? "");
-  }
-
-  async function loadHistory(challengeId: number) {
-    setErr(null);
-    const data = await LifeTrackerApi.getHistory(challengeId, 30);    
-    setHistory(data);
-  }
-
   async function loadTemplates() {
     setErr(null);
     const data = await LifeTrackerApi.getTemplates();
@@ -144,24 +125,6 @@ export default function App() {
     await loadToday();
     goToday();
   }
-
-  async function saveTitle(challengeId: number) {
-    setErr(null);
-    const payload: ChallengePatch = { title: editTitle.trim() || null };
-    await LifeTrackerApi.patchChallenge(challengeId, payload);
-    await loadToday();
-    await loadChallenge(challengeId);
-    // обновим selected (чтобы сразу отрисовалось)
-    setSelectedId(challengeId);
-  }
-
-  async function saveDesc(challengeId: number) {
-    setErr(null);
-    const payload: ChallengePatch = { description: editDesc.trim() || null };
-    await LifeTrackerApi.patchChallenge(challengeId, payload);
-    await loadToday();
-    await loadChallenge(challengeId);
-  };
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
@@ -265,12 +228,8 @@ export default function App() {
           onSaveDesc={() => saveDesc(selected.challenge_id)}
           onSavePolicyAndActive={async () => {
             setErr(null);
-            await LifeTrackerApi.patchChallenge(selected.challenge_id, {
-              miss_policy: editMiss,
-              is_active: editActive,
-            });
+            await savePolicyAndActive(selected.challenge_id);
             await loadToday();
-            await loadChallenge(selected.challenge_id);
           }}
         />
       )}
