@@ -51,6 +51,12 @@ export default function App() {
   const { screen, go, goToday, goTemplates, goAdd } = useNav();
 
   useEffect(() => {
+    if (screen === "TODAY") {
+      setShowAllDbg(false);
+    }
+  }, [screen]);
+
+  useEffect(() => {
   if (!tgPresent) return;
 
   try {
