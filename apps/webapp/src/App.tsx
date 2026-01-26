@@ -266,8 +266,6 @@ export default function App() {
   };
 
   return (
-    <>
-    <div style={{ color: "red", fontSize: 20 }}>RENDER TEST</div>
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <h2 style={{ margin: 0 }}>Life-Tracker</h2>
@@ -579,7 +577,6 @@ export default function App() {
         </div>
       )}
     </div>
-  </>
   );
 }
 
