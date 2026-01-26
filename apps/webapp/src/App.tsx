@@ -49,25 +49,37 @@ type ChallengeFull = {
   is_active: boolean;
 };
 
-const API_BASE = "https://sculpturesque-unprosperously-darlene.ngrok-free.dev";
+const API_BASE = "/api";
+const DEV = import.meta.env.DEV;
 
-console.log("[env]", {
+function getInitData(): string {
+  // 1) если Telegram WebApp уже инициализировался
+  const fromWebApp = WebApp?.initData ?? "";
+  if (fromWebApp) return fromWebApp;
+
+  // 2) fallback: если Telegram передал данные в URL hash
+  const hash = window.location.hash || "";
+  const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
+  return params.get("tgWebAppData") ?? "";
+}
+
+DEV && console.log("[env]", {
   hasTelegram: typeof (window as any).Telegram !== "undefined",
   initDataLen: (WebApp?.initData ?? "").length,
   platform: WebApp?.platform,
 });
 
-console.log("[DEPLOY]", {
+DEV && console.log("[DEPLOY]", {
   build: "CF-PAGES",
   time: new Date().toISOString(),
 });
 
-console.log("[TG DEBUG] initDataLen:", (WebApp?.initData ?? "").length);
+DEV && console.log("[TG DEBUG] initDataLen:", (WebApp?.initData ?? "").length);
 
 
 async function apiGet<T>(path: string): Promise<T> {
-  const initData = WebApp?.initData ?? "";
-  console.log("[apiGet]", {
+  const initData = getInitData();
+  DEV && console.log("[apiGet]", {
     url: `${API_BASE}${path}`,
     initDataLen: initData.length,
   });
@@ -84,7 +96,7 @@ async function apiGet<T>(path: string): Promise<T> {
 
 
 async function apiPost<T>(path: string, body?: any): Promise<T> {
-  const initData = WebApp?.initData ?? "";
+  const initData = getInitData();
   const r = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     headers: {
@@ -99,7 +111,7 @@ async function apiPost<T>(path: string, body?: any): Promise<T> {
 }
 
 async function apiPatch<T>(path: string, body: any): Promise<T> {
-  const initData = WebApp?.initData ?? "";
+  const initData = getInitData();
   const r = await fetch(`${API_BASE}${path}`, {
     method: "PATCH",
     headers: {
@@ -146,8 +158,8 @@ function FlagButtons({ onSet }: { onSet: (flag: "MIN"|"BONUS"|"SKIP"|"FAIL") => 
 
 type Screen = "TODAY" | "TEMPLATES" | "ADD" | "DETAIL";
 
-console.log("[Telegram.WebApp]", (window as any).Telegram?.WebApp ? "PRESENT" : "MISSING");
-console.log("[initDataLen]", (WebApp?.initData ?? "").length);
+DEV && console.log("[Telegram.WebApp]", (window as any).Telegram?.WebApp ? "PRESENT" : "MISSING");
+DEV && console.log("[initDataLen]", (WebApp?.initData ?? "").length);
 
 
 export default function App() {
@@ -164,12 +176,17 @@ export default function App() {
   const [editMiss, setEditMiss] = useState<"FAIL"|"MIN"|"BONUS"|"SKIP">("FAIL");
   const [editActive, setEditActive] = useState(true);
   const tgPresent = Boolean((window as any).Telegram?.WebApp);
-  const initLen = (WebApp?.initData ?? "").length;
-  const tgOk = true;
+  const initData = getInitData();
+  const initLen = initData.length;
+  const tgOk = tgPresent && initLen > 0;
   const [challengeFull, setChallengeFull] = useState<ChallengeFull | null>(null);
     useEffect(() => {
+      if (!tgOk) return;
       loadToday().catch((e) => setErr(String(e)));
-   }, []);
+    }, [tgOk])
+    useEffect(() => {
+      if (screen !== "TODAY") setShowAll(false);
+    }, [screen]);
 
   // Add wizard state (MVP)
   const [newTitle, setNewTitle] = useState("");
@@ -183,28 +200,17 @@ export default function App() {
 
   async function loadToday() {
     setTodayFetchState("started");
+    setErr(null);
 
-    const res = await fetch(
-      "https://life-tracker.pages.dev/api/today",
-
-     {
-        headers: {
-         "ngrok-skip-browser-warning": "1",
-       },
-      }
-    );
-
-   setTodayFetchState("response:" + res.status);
-
-   if (!res.ok) {
-      throw new Error(`loadToday failed: ${res.status}`);
-   }
-
-   const data = await res.json();
-   setTodayFetchState("json ok");
-   setToday(data);
+    try {
+     const data = await apiGet<TodayResponse>("/today");
+      setTodayFetchState("json ok");
+      setToday(data);
+    } catch (e) {
+     setTodayFetchState("error");
+     throw e;
+    }
   }
-
 
   async function loadChallenge(challengeId: number) {
     setErr(null);
@@ -277,22 +283,25 @@ export default function App() {
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <div style={{
-          marginTop: 10,
-          padding: 10,
-          border: "1px dashed #555",
-          borderRadius: 10,
-          fontSize: 12,
-          opacity: 0.9
-        }}>
-          <div><b>DEBUG</b></div>
-          <div>tgPresent: {String(tgPresent)}</div>
-          <div>initDataLen: {initLen}</div>
-          <div>API_BASE: {API_BASE}</div>
-          <div>todayLoaded: {String(Boolean(today))}</div>
-          <div>todayFetchState: {todayFetchState}</div>
-         <div>err: {err ?? "—"}</div>
-        </div>
+        {!tgOk && (
+          <div style={{
+            marginTop: 10,
+            padding: 10,
+            border: "1px dashed #555",
+            borderRadius: 10,
+            fontSize: 12,
+            opacity: 0.9
+          }}>
+            <div><b>DEBUG</b></div>
+            <div>tgPresent: {String(tgPresent)}</div>
+            <div>initDataLen: {initLen}</div>
+            <div>tgOk: {String(tgOk)}</div>
+            <div>API_BASE: {API_BASE}</div>
+            <div>todayLoaded: {String(Boolean(today))}</div>
+            <div>todayFetchState: {todayFetchState}</div>
+          <div>err: {err ?? "—"}</div>
+          </div>
+        )}
 
         <h2 style={{ margin: 0 }}>Life-Tracker</h2>
         {!tgOk && (
@@ -308,7 +317,7 @@ export default function App() {
         )}
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => { setScreen("TODAY"); loadToday(); }}>Сегодня</button>
+          <button onClick={() => {setShowAll(false);setScreen("TODAY");loadToday();}}>Сегодня</button>
           <button onClick={() => { setScreen("TEMPLATES"); loadTemplates(); }}>Шаблоны</button>
           <button onClick={() => setScreen("ADD")}>Добавить</button>
         </div>
@@ -328,49 +337,52 @@ export default function App() {
 
       {/* TODAY */}
       {screen === "TODAY" && (
-        <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-              <div>
-                <div style={{ fontSize: 14, opacity: 0.7 }}>Первый невыполненный</div>
-                <div style={{ fontSize: 18, fontWeight: 600 }}>
-                  {today
-                    ? (today.first_uncompleted ? today.first_uncompleted.title : "Все выполнено ✅")
-                    : "Загрузка..."}
+        <>
+          <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
+            <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                <div>
+                  <div style={{ fontSize: 14, opacity: 0.7 }}>Первый невыполненный</div>
+                  <div style={{ fontSize: 18, fontWeight: 600 }}>
+                    {today
+                      ? (today.first_uncompleted ? today.first_uncompleted.title : "Все выполнено ✅")
+                      : "Загрузка..."}
+                  </div>
                 </div>
+                <StatusPill s={today ? (today.first_uncompleted?.status_view ?? "WAITING") : "WAITING"} />
               </div>
-              <StatusPill s={today ? (today.first_uncompleted?.status_view ?? "WAITING") : "WAITING"} />
+
+              {today?.first_uncompleted ? (
+                <div style={{ marginTop: 10 }}>
+                  <FlagButtons onSet={(flag) => setFlag(today.first_uncompleted!.challenge_id, flag)} />
+                </div>
+              ) : (
+                <div style={{ marginTop: 10, opacity: 0.6, fontSize: 12 }}>
+                  На сегодня всё отмечено. Нажми “Показать все”, чтобы увидеть список.
+                </div>
+              )}
             </div>
 
-            {today?.first_uncompleted ? (
-              <div style={{ marginTop: 10 }}>
-                <FlagButtons onSet={(flag) => setFlag(today.first_uncompleted!.challenge_id, flag)} />
-              </div>
-            ) : (
-              <div style={{ marginTop: 10, opacity: 0.6, fontSize: 12 }}>
-                На сегодня всё отмечено. Нажми “Показать все”, чтобы увидеть список.
-              </div>
-            )}
+            <button onClick={() => setShowAll((v) => !v)}>
+              {showAll ? "Скрыть" : "Показать все"}
+            </button>
           </div>
 
-          <button onClick={() => setShowAll(v => !v)}>
-            {showAll ? "Скрыть" : "Показать все"}
-          </button>
-
           {showAll && (
-            <div style={{ display: "grid", gap: 8 }}>
-              {today?.all.map(ch => (
-                <div key={ch.challenge_id}
+            <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
+              {today?.all.map((ch) => (
+                <div
+                  key={ch.challenge_id}
                   style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12, cursor: "pointer" }}
                   onClick={() => {
                     setSelectedId(ch.challenge_id);
                     setEditTitle(ch.title);
                     setEditDesc("");
                     setScreen("DETAIL");
-                    loadHistory(ch.challenge_id).catch(e => setErr(String(e)));
-                    loadChallenge(ch.challenge_id).catch(e => setErr(String(e)));
+                    loadHistory(ch.challenge_id).catch((e) => setErr(String(e)));
+                    loadChallenge(ch.challenge_id).catch((e) => setErr(String(e)));
                   }}
-                >
+                  >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ fontWeight: 600 }}>{ch.title}</div>
                     <StatusPill s={ch.status_view} />
@@ -379,7 +391,7 @@ export default function App() {
               ))}
             </div>
           )}
-        </div>
+        </>
       )}
 
       {/* DETAIL */}
