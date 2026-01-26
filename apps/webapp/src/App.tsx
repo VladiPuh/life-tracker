@@ -153,6 +153,7 @@ console.log("[initDataLen]", (WebApp?.initData ?? "").length);
 export default function App() {
   const [screen, setScreen] = useState<Screen>("TODAY");
   const [today, setToday] = useState<TodayResponse | null>(null);
+  const [todayFetchState, setTodayFetchState] = useState<string>("idle");
   const [showAll, setShowAll] = useState(false);
   const [templates, setTemplates] = useState<TemplateItem[] | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -181,25 +182,28 @@ export default function App() {
   }, [today, selectedId]);
 
   async function loadToday() {
-    console.log("[loadToday] public fetch");
+    setTodayFetchState("started");
 
-   const res = await fetch(
+    const res = await fetch(
      "https://sculpturesque-unprosperously-darlene.ngrok-free.dev/today",
      {
         headers: {
-          "ngrok-skip-browser-warning": "1",
+         "ngrok-skip-browser-warning": "1",
        },
       }
-   );
+    );
 
-    if (!res.ok) {
+   setTodayFetchState("response:" + res.status);
+
+   if (!res.ok) {
       throw new Error(`loadToday failed: ${res.status}`);
    }
 
    const data = await res.json();
-   console.log("[loadToday] data", data);
+   setTodayFetchState("json ok");
    setToday(data);
   }
+
 
   async function loadChallenge(challengeId: number) {
     setErr(null);
@@ -285,6 +289,7 @@ export default function App() {
           <div>initDataLen: {initLen}</div>
           <div>API_BASE: {API_BASE}</div>
           <div>todayLoaded: {String(Boolean(today))}</div>
+          <div>todayFetchState: {todayFetchState}</div>
          <div>err: {err ?? "—"}</div>
         </div>
 
