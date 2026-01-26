@@ -62,6 +62,8 @@ console.log("[DEPLOY]", {
   time: new Date().toISOString(),
 });
 
+console.log("[TG DEBUG] initDataLen:", (WebApp?.initData ?? "").length);
+
 
 async function apiGet<T>(path: string): Promise<T> {
   const initData = WebApp?.initData ?? "";
