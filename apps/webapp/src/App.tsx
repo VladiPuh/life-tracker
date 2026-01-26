@@ -169,12 +169,6 @@ export default function App() {
   const tgOk = tgPresent && initLen > 0;
   const [challengeFull, setChallengeFull] = useState<ChallengeFull | null>(null);
     useEffect(() => {
-      // Telegram WebApp init (DEV)
-      try {
-        WebApp.ready();
-        WebApp.expand();
-      } catch {}
-
       loadToday().catch((e) => setErr(String(e)));
    }, []);
 
