@@ -79,6 +79,24 @@ export default function App() {
     },
   });
 
+    // iOS Telegram может дергать history/back без BackButton UI.
+  // Наша цель: при любом системном back/history/restore — свернуть список.
+  useEffect(() => {
+    const onSystemNav = () => {
+      setShowAllDbg(false);
+    };
+
+    window.addEventListener("popstate", onSystemNav);
+    window.addEventListener("hashchange", onSystemNav);
+    window.addEventListener("pageshow", onSystemNav);
+
+    return () => {
+      window.removeEventListener("popstate", onSystemNav);
+      window.removeEventListener("hashchange", onSystemNav);
+      window.removeEventListener("pageshow", onSystemNav);
+    };
+  }, []);
+
   useEffect(() => {
     if (!tgOk) return;
 
