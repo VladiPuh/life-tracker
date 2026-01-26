@@ -7,6 +7,7 @@ import { useBack } from "./app/router/useBack";
 import { TodayScreen } from "./features/today/TodayScreen";
 import { DetailScreen } from "./features/detail/DetailScreen";
 import { TemplatesScreen } from "./features/templates/TemplatesScreen";
+import { AddScreen } from "./features/add/AddScreen";
 import type {
   TodayResponse,
   TemplateItem,
@@ -332,54 +333,19 @@ export default function App() {
 
       {/* ADD */}
       {screen === "ADD" && (
-        <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-          <button onClick={() => { setShowAllDbg(false); goToday(); }}>← Назад</button>
-          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>Добавить челендж</div>
-            <div style={{ opacity: 0.7, fontSize: 12, marginTop: 4 }}>
-              MVP: делаем короткий мастер (название + политика пропуска).
-            </div>
-
-            <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
-              <label>
-                Название*
-                <input
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-                  placeholder="Напр. Reading"
-                />
-              </label>
-
-              <label>
-                Описание (опционально)
-                <textarea
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-                  placeholder="Что именно делать"
-                  rows={3}
-                />
-              </label>
-
-              <label>
-                Если не отметил до конца дня:
-                <select
-                  value={newMissPolicy}
-                  onChange={(e) => setNewMissPolicy(e.target.value as any)}
-                  style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-                >
-                  <option value="FAIL">FAIL</option>
-                  <option value="SKIP">SKIP</option>
-                  <option value="MIN">MIN</option>
-                  <option value="BONUS">BONUS</option>
-                </select>
-              </label>
-
-              <button onClick={createChallenge}>Создать</button>
-            </div>
-          </div>
-        </div>
+        <AddScreen
+          newTitle={newTitle}
+          setNewTitle={setNewTitle}
+          newDesc={newDesc}
+          setNewDesc={setNewDesc}
+          newMissPolicy={newMissPolicy}
+          setNewMissPolicy={setNewMissPolicy}
+          onBack={() => {
+            setShowAllDbg(false);
+            goToday();
+          }}
+          onCreate={createChallenge}
+        />
       )}
     </div>
   );
