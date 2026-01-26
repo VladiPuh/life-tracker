@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Screen } from "../../domain/types";
+import type { Screen } from "../../shared/domain/types";
 
 export function useNav() {
   const [screen, setScreen] = useState<Screen>("TODAY");

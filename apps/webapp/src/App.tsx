@@ -1,13 +1,18 @@
 ﻿import WebApp from "@twa-dev/sdk";
 import { useEffect, useMemo, useState } from "react";;
-import { getInitData } from "./tg/initData";
-import { apiGet, apiPost, apiPatch } from "./api/client";
-import { StatusPill } from "./ui/StatusPill";
-import { FlagButtons } from "./ui/FlagButtons";
+import { getInitData } from "./shared/tg/initData";
+import { apiGet, apiPost, apiPatch } from "./shared/api/client";
+import { StatusPill } from "./shared/ui/StatusPill";
+import { FlagButtons } from "./shared/ui/FlagButtons";
 import { useNav } from "./app/router/useNav";
 import { useBack } from "./app/router/useBack";
-import type { TodayResponse, TemplateItem, HistoryResponse, ChallengePatch, ChallengeFull } from "./domain/types";
-
+import type {
+  TodayResponse,
+  TemplateItem,
+  HistoryResponse,
+  ChallengePatch,
+  ChallengeFull,
+} from "./shared/domain/types";
 
 
 const DEV = import.meta.env.DEV;
