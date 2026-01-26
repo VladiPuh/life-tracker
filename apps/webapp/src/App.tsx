@@ -397,7 +397,7 @@ export default function App() {
       {/* DETAIL */}
       {screen === "DETAIL" && selected && (
         <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-          <button onClick={() => setScreen("TODAY")}>← Назад</button>
+          <button onClick={() => { setShowAll(false); setScreen("TODAY"); }}>← Назад</button>
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: 18, fontWeight: 700 }}>{selected.title}</div>
