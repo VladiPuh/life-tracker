@@ -272,6 +272,22 @@ export default function App() {
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <div style={{
+          marginTop: 10,
+          padding: 10,
+          border: "1px dashed #555",
+          borderRadius: 10,
+          fontSize: 12,
+          opacity: 0.9
+        }}>
+          <div><b>DEBUG</b></div>
+          <div>tgPresent: {String(tgPresent)}</div>
+          <div>initDataLen: {initLen}</div>
+          <div>API_BASE: {API_BASE}</div>
+          <div>todayLoaded: {String(Boolean(today))}</div>
+         <div>err: {err ?? "—"}</div>
+        </div>
+
         <h2 style={{ margin: 0 }}>Life-Tracker</h2>
         {!tgOk && (
           <div style={{ marginTop: 10, padding: 10, border: "1px solid #f99", borderRadius: 10 }}>
