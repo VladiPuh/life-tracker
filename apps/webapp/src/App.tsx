@@ -1,16 +1,16 @@
 ﻿
-import { useEffect, useMemo, useState } from "react";;
 import { getInitData } from "./shared/tg/initData";
+import { useEffect, useMemo, useState } from "react";;
+import { hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
 import { useNav } from "./app/router/useNav";
 import { useBack } from "./app/router/useBack";
 import { TodayScreen } from "./features/today/TodayScreen";
 import { DetailScreen } from "./features/detail/DetailScreen";
 import { TemplatesScreen } from "./features/templates/TemplatesScreen";
+import { useTemplatesState } from "./state/templates";
 import { AddScreen } from "./features/add/AddScreen";
 import { useTodayState } from "./state/today";
 import { useDetailState } from "./state/detail";
-import {hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
-import { useTemplatesState } from "./state/templates";
 import { useAddState } from "./state/add";
 
 
@@ -39,7 +39,7 @@ export default function App() {
 
   initTelegram();
   logTelegramReady();
-}, [tgPresent]);
+  }, [tgPresent]);
 
   useEffect(() => {
     console.log("[DBG] screen=", screen, "showAll=", showAll);
