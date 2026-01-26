@@ -185,7 +185,8 @@ export default function App() {
     setTodayFetchState("started");
 
     const res = await fetch(
-     "https://sculpturesque-unprosperously-darlene.ngrok-free.dev/today",
+      "https://life-tracker.pages.dev/api/today",
+
      {
         headers: {
          "ngrok-skip-browser-warning": "1",
