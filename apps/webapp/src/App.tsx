@@ -1,67 +1,16 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import WebApp from "@twa-dev/sdk";
+﻿import WebApp from "@twa-dev/sdk";
+import { useMemo, useState } from "react";
+import { getInitData } from "./tg/initData";
+import { apiGet, apiPost, apiPatch } from "./api/client";
+import { StatusPill } from "./ui/StatusPill";
+import { FlagButtons } from "./ui/FlagButtons";
+import { useNav } from "./app/router/useNav";
+import { useBack } from "./app/router/useBack";
+import type { TodayResponse, TemplateItem, HistoryResponse, ChallengePatch, ChallengeFull } from "./domain/types";
 
-type StatusView = "WAITING" | "MIN" | "BONUS" | "SKIP" | "FAIL";
 
-type TodayItem = {
-  challenge_id: number;
-  title: string;
-  status_view: StatusView;
-};
 
-type TodayResponse = {
-  date: string;
-  first_uncompleted: TodayItem | null;
-  all: TodayItem[];
-};
-
-type TemplateItem = {
-  id: number;
-  title: string;
-  description?: string | null;
-  miss_policy: "FAIL" | "MIN" | "BONUS" | "SKIP";
-};
-
-type HistoryItem = {
-  date: string;
-  status_view: StatusView;
-  minutes_fact: number | null;
-  comment: string | null;
-};
-
-type HistoryResponse = {
-  challenge_id: number;
-  items: HistoryItem[];
-};
-
-type ChallengePatch = {
-  title?: string | null;
-  description?: string | null;
-  miss_policy?: "FAIL" | "MIN" | "BONUS" | "SKIP";
-  is_active?: boolean;
-};
-
-type ChallengeFull = {
-  id: number;
-  title: string;
-  description: string | null;
-  miss_policy: "FAIL" | "MIN" | "BONUS" | "SKIP";
-  is_active: boolean;
-};
-
-const API_BASE = "/api";
 const DEV = import.meta.env.DEV;
-
-function getInitData(): string {
-  // 1) если Telegram WebApp уже инициализировался
-  const fromWebApp = WebApp?.initData ?? "";
-  if (fromWebApp) return fromWebApp;
-
-  // 2) fallback: если Telegram передал данные в URL hash
-  const hash = window.location.hash || "";
-  const params = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash);
-  return params.get("tgWebAppData") ?? "";
-}
 
 DEV && console.log("[env]", {
   hasTelegram: typeof (window as any).Telegram !== "undefined",
@@ -77,93 +26,11 @@ DEV && console.log("[DEPLOY]", {
 DEV && console.log("[TG DEBUG] initDataLen:", (WebApp?.initData ?? "").length);
 
 
-async function apiGet<T>(path: string): Promise<T> {
-  const initData = getInitData();
-  DEV && console.log("[apiGet]", {
-    url: `${API_BASE}${path}`,
-    initDataLen: initData.length,
-  });
-  const r = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      "ngrok-skip-browser-warning": "1",
-      "X-Telegram-Init-Data": initData,
-    },
-  });
-
-  if (!r.ok) throw new Error(`GET ${path} failed: ${r.status}`);
-  return r.json();
-}
-
-
-async function apiPost<T>(path: string, body?: any): Promise<T> {
-  const initData = getInitData();
-  const r = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "1",
-      "X-Telegram-Init-Data": initData,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!r.ok) throw new Error(`POST ${path} failed: ${r.status}`);
-  return r.json();
-}
-
-async function apiPatch<T>(path: string, body: any): Promise<T> {
-  const initData = getInitData();
-  const r = await fetch(`${API_BASE}${path}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      "ngrok-skip-browser-warning": "1",
-      "X-Telegram-Init-Data": initData,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!r.ok) throw new Error(`PATCH ${path} failed: ${r.status}`);
-  return r.json();
-}
-
-function StatusPill({ s }: { s: StatusView }) {
-  const label =
-    s === "WAITING" ? "В ожидании" :
-    s === "MIN" ? "MIN" :
-    s === "BONUS" ? "BONUS" :
-    s === "SKIP" ? "SKIP" : "FAIL";
-
-  return (
-    <span style={{
-      display: "inline-block",
-      padding: "4px 10px",
-      borderRadius: 999,
-      border: "1px solid #ccc",
-      fontSize: 12
-    }}>
-      {label}
-    </span>
-  );
-}
-
-function FlagButtons({ onSet }: { onSet: (flag: "MIN"|"BONUS"|"SKIP"|"FAIL") => void }) {
-  return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-      <button onClick={() => onSet("MIN")}>MIN</button>
-      <button onClick={() => onSet("BONUS")}>BONUS</button>
-      <button onClick={() => onSet("SKIP")}>SKIP</button>
-      <button onClick={() => onSet("FAIL")}>FAIL</button>
-    </div>
-  );
-}
-
-type Screen = "TODAY" | "TEMPLATES" | "ADD" | "DETAIL";
-
 DEV && console.log("[Telegram.WebApp]", (window as any).Telegram?.WebApp ? "PRESENT" : "MISSING");
 DEV && console.log("[initDataLen]", (WebApp?.initData ?? "").length);
 
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("TODAY");
   const [today, setToday] = useState<TodayResponse | null>(null);
   const [todayFetchState, setTodayFetchState] = useState<string>("idle");
   const [showAll, setShowAll] = useState(false);
@@ -180,14 +47,15 @@ export default function App() {
   const initLen = initData.length;
   const tgOk = tgPresent && initLen > 0;
   const [challengeFull, setChallengeFull] = useState<ChallengeFull | null>(null);
-    useEffect(() => {
-      if (!tgOk) return;
-      loadToday().catch((e) => setErr(String(e)));
-    }, [tgOk])
-    useEffect(() => {
-      // при любом переходе между экранами — возвращаясь на TODAY тоже — список сворачиваем
+  const { screen, go, goToday, goTemplates, goAdd } = useNav();
+
+  useBack({
+    enabled: tgOk && screen !== "TODAY",
+    onBack: () => {
       setShowAll(false);
-    }, [screen]);
+      goToday();
+    },
+  });
 
   // Add wizard state (MVP)
   const [newTitle, setNewTitle] = useState("");
@@ -244,7 +112,7 @@ export default function App() {
     setErr(null);
     await apiPost(`/templates/${template_id}/add`);
     await loadToday();
-    setScreen("TODAY");
+    goToday();
   }
 
   async function createChallenge() {
@@ -260,7 +128,7 @@ export default function App() {
     });
     setNewTitle(""); setNewDesc(""); setNewMissPolicy("FAIL");
     await loadToday();
-    setScreen("TODAY");
+    goToday();
   }
 
   async function saveTitle(challengeId: number) {
@@ -297,7 +165,7 @@ export default function App() {
             <div>tgPresent: {String(tgPresent)}</div>
             <div>initDataLen: {initLen}</div>
             <div>tgOk: {String(tgOk)}</div>
-            <div>API_BASE: {API_BASE}</div>
+            <div>API_BASE: /api</div>
             <div>todayLoaded: {String(Boolean(today))}</div>
             <div>todayFetchState: {todayFetchState}</div>
           <div>err: {err ?? "—"}</div>
@@ -318,9 +186,9 @@ export default function App() {
         )}
 
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => {setShowAll(false);setScreen("TODAY");loadToday();}}>Сегодня</button>
-          <button onClick={() => { setScreen("TEMPLATES"); loadTemplates(); }}>Шаблоны</button>
-          <button onClick={() => setScreen("ADD")}>Добавить</button>
+          <button onClick={() => { setShowAll(false); goToday(); loadToday(); }}>Сегодня</button>
+          <button onClick={() => { goTemplates(); loadTemplates(); }}>Шаблоны</button>
+          <button onClick={() => goAdd()}>Добавить</button>
         </div>
       </div>
 
@@ -379,7 +247,7 @@ export default function App() {
                     setSelectedId(ch.challenge_id);
                     setEditTitle(ch.title);
                     setEditDesc("");
-                    setScreen("DETAIL");
+                    go("DETAIL");
                     loadHistory(ch.challenge_id).catch((e) => setErr(String(e)));
                     loadChallenge(ch.challenge_id).catch((e) => setErr(String(e)));
                   }}
@@ -398,7 +266,7 @@ export default function App() {
       {/* DETAIL */}
       {screen === "DETAIL" && selected && (
         <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-          <button onClick={() => { setShowAll(false); setScreen("TODAY"); }}>← Назад</button>
+          <button onClick={() => { setShowAll(false); goToday(); }}>← Назад</button>
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: 18, fontWeight: 700 }}>{selected.title}</div>
@@ -566,7 +434,7 @@ export default function App() {
       {/* ADD */}
       {screen === "ADD" && (
         <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-          <button onClick={() => { setShowAll(false); setScreen("TODAY"); }}>← Назад</button>
+          <button onClick={() => { setShowAll(false); goToday(); }}>← Назад</button>
           <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
             <div style={{ fontSize: 18, fontWeight: 700 }}>Добавить челендж</div>
             <div style={{ opacity: 0.7, fontSize: 12, marginTop: 4 }}>

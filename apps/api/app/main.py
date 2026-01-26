@@ -371,6 +371,7 @@ async def add_template_to_user(
         title=t.title,
         description=t.description,
         miss_policy=t.miss_policy,
+        is_active=True,
         goal=t.goal,
         checkpoints=t.checkpoints,
         min_activity_text=t.min_activity_text,
