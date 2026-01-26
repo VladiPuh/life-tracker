@@ -166,7 +166,7 @@ export default function App() {
   const [editActive, setEditActive] = useState(true);
   const tgPresent = Boolean((window as any).Telegram?.WebApp);
   const initLen = (WebApp?.initData ?? "").length;
-  const tgOk = tgPresent && initLen > 0;
+  const tgOk = true;
   const [challengeFull, setChallengeFull] = useState<ChallengeFull | null>(null);
     useEffect(() => {
       loadToday().catch((e) => setErr(String(e)));
