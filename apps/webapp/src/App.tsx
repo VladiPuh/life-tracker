@@ -49,7 +49,7 @@ type ChallengeFull = {
   is_active: boolean;
 };
 
-const API_BASE = import.meta.env.VITE_API_BASE as string;
+const API_BASE = "https://sculpturesque-unprosperously-darlene.ngrok-free.dev";
 
 console.log("[env]", {
   hasTelegram: typeof (window as any).Telegram !== "undefined",
