@@ -179,18 +179,24 @@ export default function App() {
   }, [today, selectedId]);
 
   async function loadToday() {
-   console.log("[TEST] direct fetch /today");
-    const res = await fetch(
-      "https://sculpturesque-unprosperously-darlene.ngrok-free.dev/today",
-      {
-       headers: {
+    console.log("[loadToday] public fetch");
+
+   const res = await fetch(
+     "https://sculpturesque-unprosperously-darlene.ngrok-free.dev/today",
+     {
+        headers: {
           "ngrok-skip-browser-warning": "1",
        },
-     }
-    );
-    const data = await res.json();
-    console.log("[TEST] data", data);
-    setToday(data);
+      }
+   );
+
+    if (!res.ok) {
+      throw new Error(`loadToday failed: ${res.status}`);
+   }
+
+   const data = await res.json();
+   console.log("[loadToday] data", data);
+   setToday(data);
   }
 
   async function loadChallenge(challengeId: number) {
