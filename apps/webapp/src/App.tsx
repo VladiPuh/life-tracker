@@ -63,6 +63,33 @@ export default function App() {
     },
   });
 
+  useEffect(() => {
+    if (!tgOk) return;
+
+    const tg = (window as any).Telegram?.WebApp;
+    if (!tg?.BackButton) return;
+
+    // показываем системный Back Telegram только там, где он реально нужен
+    const shouldShow = screen === "DETAIL" || screen === "ADD" || screen === "TEMPLATES";
+
+    const onBack = () => {
+      setShowAllDbg(false);
+      goToday();
+    };
+
+    if (shouldShow) {
+      try { tg.BackButton.show(); } catch {}
+      tg.BackButton.onClick(onBack);
+
+      return () => {
+        try { tg.BackButton.offClick(onBack); } catch {}
+      };
+    } else {
+      try { tg.BackButton.hide(); } catch {}
+    }
+  }, [tgOk, screen, goToday]);
+
+
   // Add wizard state (MVP)
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
