@@ -8,39 +8,12 @@ import { TodayScreen } from "./features/today/TodayScreen";
 import { DetailScreen } from "./features/detail/DetailScreen";
 import { TemplatesScreen } from "./features/templates/TemplatesScreen";
 import { AddScreen } from "./features/add/AddScreen";
-import type {
-  TodayResponse,
-  TemplateItem,
-  HistoryResponse,
-  ChallengePatch,
-  ChallengeFull,
-} from "./shared/domain/types";
-import {
-  hasTelegramWebApp,
-  getPlatform,
-  getSdkInitDataLen,
-  initTelegram,
-  logTelegramReady,
-  bindTelegramBackButton,
-} from "./shared/tg/webapp";
-
-
-const DEV = import.meta.env.DEV;
-
-DEV && console.log("[env]", {
-  hasTelegram: hasTelegramWebApp(),
-  initDataLen: getSdkInitDataLen(),
-  platform: getPlatform(),
-});
-
-DEV && console.log("[TG DEBUG] initDataLen:", getSdkInitDataLen());
-DEV && console.log("[Telegram.WebApp]", hasTelegramWebApp() ? "PRESENT" : "MISSING");
-DEV && console.log("[initDataLen]", getSdkInitDataLen());
+import {hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
+import type {TodayResponse, TemplateItem, HistoryResponse, ChallengePatch, ChallengeFull,} from "./shared/domain/types";
 
 
 export default function App() {
   const [today, setToday] = useState<TodayResponse | null>(null);
-  const [todayFetchState, setTodayFetchState] = useState<string>("idle");
   const [showAll, setShowAll] = useState(false);
   const setShowAllDbg = (next: boolean | ((prev: boolean) => boolean)) => {setShowAll(prev => {const v = typeof next === "function" ? next(prev) : next; console.log("[DBG] setShowAll ->", v, "screen=", screen); return v;});};
   const [templates, setTemplates] = useState<TemplateItem[] | null>(null);
@@ -129,15 +102,12 @@ export default function App() {
   }, [today, selectedId]);
 
   async function loadToday() {
-    setTodayFetchState("started");
     setErr(null);
 
     try {
      const data = await LifeTrackerApi.getToday();
-      setTodayFetchState("json ok");
       setToday(data);
-    } catch (e) {
-     setTodayFetchState("error");
+    } catch (e) {     
      throw e;
     }
   }
@@ -228,7 +198,6 @@ export default function App() {
             <div>tgOk: {String(tgOk)}</div>
             <div>API_BASE: /api</div>
             <div>todayLoaded: {String(Boolean(today))}</div>
-            <div>todayFetchState: {todayFetchState}</div>
           <div>err: {err ?? "—"}</div>
           </div>
         )}
