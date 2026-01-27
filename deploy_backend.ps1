@@ -36,30 +36,30 @@ $tarPath = Join-Path $env:TEMP $tarName
 $remoteTar = "/tmp/$tarName"
 
 if (!(Test-Path (Join-Path $ApiDir "app\main.py"))) {
-    throw "backend main.py not found: $ApiDir\app\main.py"
+  throw "backend main.py not found: $ApiDir\app\main.py"
 }
 
 function Exec-Checked([string]$Label, [scriptblock]$Fn) {
-    Write-Host "`n== $Label ==" -ForegroundColor Cyan
-    & $Fn
-    if ($LASTEXITCODE -ne 0) { throw "$Label failed (exit $LASTEXITCODE)" }
+  Write-Host "`n== $Label ==" -ForegroundColor Cyan
+  & $Fn
+  if ($LASTEXITCODE -ne 0) { throw "$Label failed (exit $LASTEXITCODE)" }
 }
 
 function Invoke-HealthCheck {
-    Write-Host "`n== Health check: $HealthUrl ==" -ForegroundColor Cyan
-    $ok = $false
-    for ($i = 1; $i -le $HealthRetries; $i++) {
-        try {
-            $r = Invoke-WebRequest -Uri $HealthUrl -Method GET -TimeoutSec 5 -UseBasicParsing
-            if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 300) { $ok = $true; break }
-        }
-        catch {
-            # ignore, retry
-        }
-        Start-Sleep -Seconds $HealthDelaySec
+  Write-Host "`n== Health check: $HealthUrl ==" -ForegroundColor Cyan
+  $ok = $false
+  for ($i = 1; $i -le $HealthRetries; $i++) {
+    try {
+      $r = Invoke-WebRequest -Uri $HealthUrl -Method GET -TimeoutSec 5 -UseBasicParsing
+      if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 300) { $ok = $true; break }
     }
-    if (-not $ok) { throw "Health check FAILED after $HealthRetries tries: $HealthUrl" }
-    Write-Host "Health OK" -ForegroundColor Green
+    catch {
+      # ignore, retry
+    }
+    Start-Sleep -Seconds $HealthDelaySec
+  }
+  if (-not $ok) { throw "Health check FAILED after $HealthRetries tries: $HealthUrl" }
+  Write-Host "Health OK" -ForegroundColor Green
 }
 
 Write-Host "RepoRoot : $RepoRoot"
@@ -72,30 +72,30 @@ Write-Host "Health   : $HealthUrl"
 # 0) PACK backend (exclude .venv, __pycache__, *.pyc, *.db)
 # =========================
 Exec-Checked "Pack backend (tar.gz)" {
-    if (Test-Path $tarPath) { Remove-Item $tarPath -Force }
-    Push-Location $ApiDir
-    tar -czf $tarPath `
-        --exclude ".venv" `
-        --exclude "__pycache__" `
-        --exclude "*.pyc" `
-        --exclude "*.db" `
-        .
-    Pop-Location
-    if (!(Test-Path $tarPath)) { throw "tar not created: $tarPath" }
+  if (Test-Path $tarPath) { Remove-Item $tarPath -Force }
+  Push-Location $ApiDir
+  tar -czf $tarPath `
+    --exclude ".venv" `
+    --exclude "__pycache__" `
+    --exclude "*.pyc" `
+    --exclude "*.db" `
+    .
+  Pop-Location
+  if (!(Test-Path $tarPath)) { throw "tar not created: $tarPath" }
 }
 
 # =========================
 # 1) UPLOAD
 # =========================
 Exec-Checked "Upload to server" {
-    $scpArgs = @(
-        "-i", $SshKey,
-        "-P", $Port,
-        "-o", "BatchMode=yes",
-        $tarPath,
-        ("{0}@{1}:{2}" -f $ServerUser, $ServerHost, $remoteTar)
-    )
-    & scp @scpArgs
+  $scpArgs = @(
+    "-i", $SshKey,
+    "-P", $Port,
+    "-o", "BatchMode=yes",
+    $tarPath,
+    ("{0}@{1}:{2}" -f $ServerUser, $ServerHost, $remoteTar)
+  )
+  & scp @scpArgs
 }
 
 # =========================
@@ -105,8 +105,8 @@ Exec-Checked "Upload to server" {
 Exec-Checked "Deploy on server (backup + replace + restart + verify + rollback)" {
 
     
-    # ВАЖНО: single-quoted here-string => PowerShell НЕ трогает $() / || / && внутри bash
-    $remoteScript = @'
+  # ВАЖНО: single-quoted here-string => PowerShell НЕ трогает $() / || / && внутри bash
+  $remoteScript = @'
 set -e
 
 ROOT="__REMOTE_API_ROOT__"
@@ -210,28 +210,28 @@ cleanup_tmp
 echo "OK: backend deployed to $ROOT"
 '@
 
-    # Подстановка плейсхолдеров (безопасно, без PowerShell-интерполяции bash-кода)
-    $remoteScript = $remoteScript.Replace("__REMOTE_API_ROOT__", $RemoteApiRoot)
-    $remoteScript = $remoteScript.Replace("__REMOTE_TAR__", $remoteTar)
-    $remoteScript = $remoteScript.Replace("__STAMP__", $stamp)
-    $remoteScript = $remoteScript.Replace("__REMOTE_BACKUP_DIR__", $RemoteBackupDir)
-    $remoteScript = $remoteScript.Replace("__REMOTE_DB_PATH__", $RemoteDbPath)
-    $remoteScript = $remoteScript.Replace("__SYSTEMD_SERVICE__", $SystemdService)
+  # Подстановка плейсхолдеров (безопасно, без PowerShell-интерполяции bash-кода)
+  $remoteScript = $remoteScript.Replace("__REMOTE_API_ROOT__", $RemoteApiRoot)
+  $remoteScript = $remoteScript.Replace("__REMOTE_TAR__", $remoteTar)
+  $remoteScript = $remoteScript.Replace("__STAMP__", $stamp)
+  $remoteScript = $remoteScript.Replace("__REMOTE_BACKUP_DIR__", $RemoteBackupDir)
+  $remoteScript = $remoteScript.Replace("__REMOTE_DB_PATH__", $RemoteDbPath)
+  $remoteScript = $remoteScript.Replace("__SYSTEMD_SERVICE__", $SystemdService)
 
 
-    # CRLF -> LF
-    $remoteScriptLf = $remoteScript -replace "`r`n", "`n"
+  # CRLF -> LF
+  $remoteScriptLf = $remoteScript -replace "`r`n", "`n"
 
-    $sshArgs = @(
-        "-i", $SshKey,
-        "-p", $Port,
-        "-o", "BatchMode=yes",
-        "-T",
-        ("{0}@{1}" -f $ServerUser, $ServerHost),
-        "bash -s"
-    )
+  $sshArgs = @(
+    "-i", $SshKey,
+    "-p", $Port,
+    "-o", "BatchMode=yes",
+    "-T",
+    ("{0}@{1}" -f $ServerUser, $ServerHost),
+    "bash -s"
+  )
 
-    $remoteScriptLf | & ssh @sshArgs
+  $remoteScriptLf | & ssh @sshArgs
 }
 
 # =========================
