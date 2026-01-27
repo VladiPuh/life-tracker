@@ -17,3 +17,16 @@ _TREE_*.txt
 _TEMPLATES_INPUT.txt
 _AUTO_ASSIGN_INPUT.txt
 tree_D_Life-Tracker.txt
+# --- LifeTracker hygiene ---
+apps/webapp/node_modules/
+apps/webapp/dist/
+apps/webapp/.wrangler/
+**/__pycache__/
+**/*.pyc
+
+# local archives / snapshots (do not commit)
+*.tar.gz
+TREE_REPO_*.txt
+
+# legacy duplicate backend root (must not exist)
+app/
