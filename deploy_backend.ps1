@@ -16,7 +16,7 @@ $SystemdService = "lifetracker-api"                      # systemd unit name
 
 # Public health URL (PROD routing)
 # У тебя API_BASE=/api, поэтому по-умолчанию:
-$HealthUrl = "https://lifetracker.site/api/health"
+$HealthUrl = "https://api.lifetracker.site/api/health"
 
 # Health check behavior
 $HealthRetries = 15
