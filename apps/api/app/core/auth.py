@@ -1,28 +1,17 @@
 # apps/api/app/core/auth.py
 
 from fastapi import Depends, HTTPException, Header
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import verify_telegram_init_data
 from app.db import get_db
 from app.models import User
 from app.settings import settings
-
-
-async def get_or_create_user_by_telegram(db: AsyncSession, tg_id: int, tg_user: dict) -> User:
-    q = await db.execute(select(User).where(User.telegram_id == tg_id))
-    user = q.scalar_one_or_none()
-    if user:
-        return user
-
-    # username может отсутствовать
-    username = tg_user.get("username") or tg_user.get("first_name") or "tg"
-    user = User(telegram_id=tg_id, username=username)
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
-    return user
+from app.repositories.users_repo import (
+    get_user_by_telegram_id,
+    create_user,
+    get_or_create_user_by_telegram,
+)
 
 
 async def get_current_user(
@@ -34,13 +23,9 @@ async def get_current_user(
     # DEV: один фиксированный пользователь
     if mode == "DEV":
         tid = settings.dev_user_telegram_id
-        q = await db.execute(select(User).where(User.telegram_id == tid))
-        user = q.scalar_one_or_none()
+        user = await get_user_by_telegram_id(db, tid)
         if not user:
-            user = User(telegram_id=tid, username="dev")
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
+            user = await create_user(db, tid, "dev")
         return user
 
     # PROD: Telegram initData
