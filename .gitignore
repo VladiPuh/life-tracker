@@ -13,3 +13,7 @@ _SERVER_SNAPSHOT/
 
 __pycache__/
 *.pyc
+_TREE_*.txt
+_TEMPLATES_INPUT.txt
+_AUTO_ASSIGN_INPUT.txt
+tree_D_Life-Tracker.txt
