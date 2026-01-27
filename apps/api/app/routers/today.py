@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+﻿from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date
 
@@ -17,3 +17,4 @@ async def today(
 ):
     today_d = date.today()
     return await build_today_view(db, user.id, today_d)
+
