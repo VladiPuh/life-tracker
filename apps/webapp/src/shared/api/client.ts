@@ -1,9 +1,17 @@
 import { getInitData } from "../tg/initData";
 
-const API_BASE = "/api";
 const DEV = import.meta.env.DEV;
 
-async function request<T>(method: "GET" | "POST" | "PATCH", path: string, body?: any): Promise<T> {
+// Можно переопределить через .env (например VITE_API_BASE=http://127.0.0.1:8000)
+const API_BASE =
+  (import.meta.env.VITE_API_BASE as string | undefined) ??
+  (DEV ? "http://127.0.0.1:8000" : "https://api.lifetracker.site/api");
+
+async function request<T>(
+  method: "GET" | "POST" | "PATCH",
+  path: string,
+  body?: any
+): Promise<T> {
   const initData = getInitData();
 
   if (DEV && method === "GET") {
