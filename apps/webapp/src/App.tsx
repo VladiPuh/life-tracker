@@ -1,5 +1,5 @@
 ﻿import { getInitData } from "./shared/tg/initData";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   hasTelegramWebApp,
   initTelegram,
@@ -14,7 +14,6 @@ import { TemplatesScreen } from "./features/templates/TemplatesScreen";
 import { useTemplatesState } from "./state/templates";
 import { AddScreen } from "./features/add/AddScreen";
 import { useTodayState } from "./state/today";
-import { useDetailState } from "./state/detail";
 import { useAddState } from "./state/add";
 
 import { TodayPage } from "./pages/TodayPage";
@@ -76,9 +75,7 @@ function BottomNav(props: {
   return (
     <div
       style={{
-        position: "sticky",
-        bottom: 0,
-        marginTop: 14,
+        flexShrink: 0,
         paddingTop: 10,
         paddingBottom: 10,
         background: "rgba(255,255,255,0.92)",
@@ -98,6 +95,8 @@ function BottomNav(props: {
   );
 }
 
+declare const __BUILD_ID__: string;
+
 export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -105,7 +104,7 @@ export default function App() {
   // Заглушки для будущих экранов (честно, без “перекидывания в Today”)
   const [placeholder, setPlaceholder] = useState<PlaceholderKind | null>(null);
 
-  const { today, showAll, loadToday, setFlag, resetShowAll, toggleShowAll } = useTodayState();
+  const { showAll, loadToday, resetShowAll } = useTodayState();
 
   const tgPresent = hasTelegramWebApp();
   const initData = getInitData();
@@ -114,7 +113,7 @@ export default function App() {
 
   const { screen, go, goToday } = useNav();
 
-  const { templates, loadTemplates, addTemplate } = useTemplatesState();
+  const { templates, addTemplate } = useTemplatesState();
   const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
     useAddState();
 
@@ -192,12 +191,6 @@ export default function App() {
     });
   }, [tgOk, screen, goToday, resetShowAll, placeholder]);
 
-  // Add wizard state (MVP)
-  const selected = useMemo(() => {
-    if (!today || selectedId == null) return null;
-    return today.all.find((x) => x.challenge_id === selectedId) ?? null;
-  }, [today, selectedId]);
-
   // active tab
   const activeTab: TabId =
     placeholder === "INSIGHTS"
@@ -213,7 +206,24 @@ export default function App() {
       : "today";
 
   return (
-    <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
+    <div
+      style={{
+        maxWidth: 520,
+        margin: "0 auto",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "system-ui, Arial",
+      }}
+    >
+    <div
+      style={{
+        flex: 1,
+        overflowY: "auto",
+        padding: 16,
+        WebkitOverflowScrolling: "touch",
+      }}
+    >    
       {err && (
         <div style={{ marginTop: 12, padding: 10, border: "1px solid #f99", borderRadius: 8 }}>
           Ошибка: {err}
@@ -289,6 +299,7 @@ export default function App() {
           }}
         />
       )}
+      </div>
 
       <BottomNav
         active={activeTab}
@@ -314,6 +325,22 @@ export default function App() {
           if (tab === "templates") return go("TEMPLATES");
         }}
       />
+      <div
+        style={{
+          marginTop: 14,
+          paddingBottom: 6,
+          fontSize: 10,
+          lineHeight: "10px",
+          opacity: 0.28,
+          textAlign: "center",
+          userSelect: "none",
+          pointerEvents: "none",
+        }}
+      >
+        build: {__BUILD_ID__}
+      </div>
+            
+      <div style={{ height: "env(safe-area-inset-bottom)" }} />
     </div>
   );
 }

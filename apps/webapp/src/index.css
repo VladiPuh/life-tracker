@@ -22,12 +22,21 @@ a:hover {
   color: #535bf2;
 }
 
-body {
+html, body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#root {
+  height: 100%;
+}
+
+body {
   min-width: 320px;
-  min-height: 100vh;
+  background: #fff;
+  overflow: hidden; /* ❗ body больше не скроллится */
 }
 
 h1 {
