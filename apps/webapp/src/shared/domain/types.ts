@@ -46,4 +46,13 @@ export type ChallengeFull = {
   is_active: boolean;
 };
 
-export type Screen = "TODAY" | "TEMPLATES" | "ADD" | "DETAIL";
+export type Screen =
+  | "TODAY"
+  | "ADD"
+  | "DETAIL"
+  | "HISTORY"
+  | "TEMPLATES"
+  | "PROFILE"
+  | "CHALLENGES"
+;
+

@@ -19,10 +19,13 @@ export function useTodayState() {
     setToday(data);
   }, []);
 
-  const setFlag = useCallback(async (challenge_id: number, flag: Flag) => {
-    await LifeTrackerApi.setDailyFlag(challenge_id, flag);
-    await loadToday();
-  }, [loadToday]);
+  const setFlag = useCallback(
+    async (challenge_id: number, flag: Flag, comment?: string | null) => {
+      await LifeTrackerApi.setDailyFlag(challenge_id, flag, comment ?? null);
+      await loadToday();
+    },
+    [loadToday]
+  );
 
   const resetShowAll = useCallback(() => setShowAll(false), []);
   const toggleShowAll = useCallback(() => setShowAll((v) => !v), []);

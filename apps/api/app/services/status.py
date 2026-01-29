@@ -2,30 +2,32 @@
 
 from __future__ import annotations
 
-def compute_status_view(log) -> str:
-    """
-    UI/status view derived from DailyLog flags.
-    KEEP BEHAVIOR IDENTICAL to the previous main.py implementation.
-    """
+def compute_status_view(log):
     if log is None:
-        return "WAITING"
-    if getattr(log, "fail", False):
+        return "WAITING"  # нет факта — ожидание (канон)
+
+    if log.flag_fail:
         return "FAIL"
-    if getattr(log, "skip", False):
+    if log.flag_skip:
         return "SKIP"
-    if getattr(log, "bonus", False):
+    if log.flag_bonus:
         return "BONUS"
-    if getattr(log, "min", False):
+    if log.flag_min:
         return "MIN"
     return "WAITING"
 
 
-def apply_single_flag(log, flag: str) -> None:
-    """
-    Set exactly one flag True on a DailyLog and reset others to False.
-    KEEP BEHAVIOR IDENTICAL to the previous main.py implementation.
-    """
-    log.min = (flag == "MIN")
-    log.bonus = (flag == "BONUS")
-    log.skip = (flag == "SKIP")
-    log.fail = (flag == "FAIL")
+def apply_single_flag(log, flag: str):
+    log.flag_min = False
+    log.flag_bonus = False
+    log.flag_skip = False
+    log.flag_fail = False
+
+    if flag == "MIN":
+        log.flag_min = True
+    elif flag == "BONUS":
+        log.flag_bonus = True
+    elif flag == "SKIP":
+        log.flag_skip = True
+    elif flag == "FAIL":
+        log.flag_fail = True

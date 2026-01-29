@@ -1,186 +1,93 @@
-import type {
-  TodayResponse,
-  ChallengeFull,
-  HistoryResponse,
-} from "../../shared/domain/types";
-import { StatusPill } from "../../shared/ui/StatusPill";
-import { FlagButtons } from "../../shared/ui/FlagButtons";
+import { useEffect, useState } from "react";
+import { apiGet } from "../../shared/api/client";
 
-type Flag = "MIN" | "BONUS" | "SKIP" | "FAIL";
-
-type Props = {
-  selected: TodayResponse["all"][number];
-  challengeFull: ChallengeFull | null;
-  history: HistoryResponse | null;
-
-  editTitle: string;
-  setEditTitle: (v: string) => void;
-
-  editDesc: string;
-  setEditDesc: (v: string) => void;
-
-  editMiss: "FAIL" | "MIN" | "BONUS" | "SKIP";
-  setEditMiss: (v: "FAIL" | "MIN" | "BONUS" | "SKIP") => void;
-
-  editActive: boolean;
-  setEditActive: (v: boolean) => void;
-
-  onBack: () => void;
-  onSetFlag: (flag: Flag) => void;
-
-  onSaveTitle: () => void;
-  onSaveDesc: () => void;
-  onSavePolicyAndActive: () => void;
+type ChallengeDto = {
+  id: number;
+  title: string;
+  description?: string | null;
+  miss_policy: string;
+  is_active: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
-export function DetailScreen(props: Props) {
-  const {
-    selected,
-    challengeFull,
-    history,
-    editTitle,
-    setEditTitle,
-    editDesc,
-    setEditDesc,
-    editMiss,
-    setEditMiss,
-    editActive,
-    setEditActive,
-    onBack,
-    onSetFlag,
-    onSaveTitle,
-    onSaveDesc,
-    onSavePolicyAndActive,
-  } = props;
+export default function DetailScreen(props: { challengeId: number; onBack: () => void }) {
+  const { challengeId, onBack } = props;
+
+  const [item, setItem] = useState<ChallengeDto | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setErr(null);
+      try {
+        const json = await apiGet<ChallengeDto>(`/challenges/${challengeId}`);
+        if (!cancelled) setItem(json);
+      } catch (e) {
+        if (!cancelled) {
+          setErr(e instanceof Error ? e.message : String(e));
+          setItem(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [challengeId]);
 
   return (
-    <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-      <button onClick={onBack}>← Назад</button>
+    <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
+      <button
+        onClick={onBack}
+        style={{
+          border: "1px solid rgba(0,0,0,0.12)",
+          background: "white",
+          borderRadius: 12,
+          padding: "10px 12px",
+          cursor: "pointer",
+          fontWeight: 700,
+          marginBottom: 12,
+        }}
+      >
+        ← Назад
+      </button>
 
-      <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>{selected.title}</div>
-          <StatusPill s={selected.status_view} />
+      <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>Детали челленджа</div>
+
+      {loading && <div style={{ opacity: 0.7 }}>Загрузка…</div>}
+
+      {err && (
+        <div style={{ padding: 12, borderRadius: 12, border: "1px solid rgba(255,0,0,0.25)" }}>
+          Ошибка: {err}
         </div>
+      )}
 
-        <div style={{ marginTop: 12, width: "100%" }}>
-          <div style={{ display: "grid", gap: 8 }}>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>Название</div>
+      {!loading && !err && !item && <div style={{ opacity: 0.7 }}>Не найден.</div>}
 
-            <input
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 10,
-                borderRadius: 8,
-                border: "1px solid #ccc",
-                boxSizing: "border-box",
-              }}
-            />
+      {!loading && !err && item && (
+        <div style={{ padding: 14, borderRadius: 14, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.02)" }}>
+          <div style={{ fontSize: 16, fontWeight: 900 }}>{item.title}</div>
 
-            <button style={{ alignSelf: "flex-start" }} onClick={onSaveTitle}>
-              Сохранить
-            </button>
-          </div>
-
-          <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>Если не отметил до конца дня</div>
-
-            <select
-              value={editMiss}
-              onChange={(e) => setEditMiss(e.target.value as any)}
-              style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
-            >
-              <option value="FAIL">FAIL</option>
-              <option value="SKIP">SKIP</option>
-              <option value="MIN">MIN</option>
-              <option value="BONUS">BONUS</option>
-            </select>
-
-            <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input
-                type="checkbox"
-                checked={editActive}
-                onChange={(e) => setEditActive(e.target.checked)}
-              />
-              Активен
-            </label>
-
-            <button style={{ alignSelf: "flex-start" }} onClick={onSavePolicyAndActive}>
-              Сохранить политику и активность
-            </button>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 10 }}>
-          <FlagButtons onSet={onSetFlag} />
-        </div>
-
-        <div style={{ marginTop: 12, width: "100%" }}>
-          <div style={{ display: "grid", gap: 8 }}>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>Описание</div>
-
-            <textarea
-              value={editDesc}
-              onChange={(e) => setEditDesc(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 10,
-                borderRadius: 8,
-                border: "1px solid #ccc",
-                boxSizing: "border-box",
-              }}
-              rows={4}
-              placeholder="Что именно делать"
-            />
-
-            <button style={{ alignSelf: "flex-start" }} onClick={onSaveDesc}>
-              Сохранить описание
-            </button>
-
-            <div style={{ opacity: 0.7, fontSize: 12 }}>
-              Текущее:{" "}
-              {challengeFull && challengeFull.id === selected.challenge_id
-                ? (challengeFull.description ?? "— нет описания —")
-                : "Загрузка..."}
+          {item.description && (
+            <div style={{ marginTop: 8, fontSize: 13, opacity: 0.8, lineHeight: 1.35 }}>
+              {item.description}
             </div>
+          )}
+
+          <div style={{ marginTop: 12, fontSize: 12, opacity: 0.7 }}>
+            <div>miss_policy: {item.miss_policy}</div>
+            <div>is_active: {String(item.is_active)}</div>
           </div>
         </div>
-
-        <div style={{ marginTop: 10, opacity: 0.7, fontSize: 12 }}>
-          История и редактор — следующий шаг (подключим /history и PATCH).
-        </div>
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <div style={{ fontWeight: 700, marginBottom: 6 }}>История (30 дней)</div>
-
-        {!history || history.challenge_id !== selected.challenge_id ? (
-          <div style={{ opacity: 0.7, fontSize: 12 }}>Загрузка...</div>
-        ) : history.items.length === 0 ? (
-          <div style={{ opacity: 0.7, fontSize: 12 }}>Пока нет записей</div>
-        ) : (
-          <div style={{ display: "grid", gap: 6 }}>
-            {history.items.map((it) => (
-              <div key={it.date} style={{ padding: 10, border: "1px solid #eee", borderRadius: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontSize: 13 }}>{it.date}</div>
-                  <StatusPill s={it.status_view} />
-                </div>
-
-                {(it.minutes_fact != null || it.comment) && (
-                  <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>
-                    {it.minutes_fact != null ? `Мин: ${it.minutes_fact}` : ""}
-                    {it.minutes_fact != null && it.comment ? " • " : ""}
-                    {it.comment ?? ""}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

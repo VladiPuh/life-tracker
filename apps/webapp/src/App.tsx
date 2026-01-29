@@ -1,11 +1,15 @@
-﻿
-import { getInitData } from "./shared/tg/initData";
-import { useEffect, useMemo, useState } from "react";;
-import { hasTelegramWebApp, initTelegram, logTelegramReady, bindTelegramBackButton,} from "./shared/tg/webapp";
+﻿import { getInitData } from "./shared/tg/initData";
+import { useEffect, useMemo, useState } from "react";
+import {
+  hasTelegramWebApp,
+  initTelegram,
+  logTelegramReady,
+  bindTelegramBackButton,
+} from "./shared/tg/webapp";
 import { useNav } from "./app/router/useNav";
 import { useBack } from "./app/router/useBack";
-import { TodayScreen } from "./features/today/TodayScreen";
-import { DetailScreen } from "./features/detail/DetailScreen";
+
+import DetailScreen from "./features/detail/DetailScreen";
 import { TemplatesScreen } from "./features/templates/TemplatesScreen";
 import { useTemplatesState } from "./state/templates";
 import { AddScreen } from "./features/add/AddScreen";
@@ -13,48 +17,139 @@ import { useTodayState } from "./state/today";
 import { useDetailState } from "./state/detail";
 import { useAddState } from "./state/add";
 
+import { TodayPage } from "./pages/TodayPage";
+import MyChallengesPage from "./pages/MyChallengesPage";
+import { HistoryPage } from "./pages/HistoryPage";
+
+type TabId = "insights" | "history" | "today" | "new" | "templates" | "profile";
+type PlaceholderKind = "INSIGHTS" | "PROFILE";
+
+function PlaceholderCard(props: { title: string; text: string }) {
+  return (
+    <div
+      style={{
+        padding: 12,
+        border: "1px solid rgba(0,0,0,0.08)",
+        borderRadius: 12,
+        marginTop: 12,
+      }}
+    >
+      <div style={{ fontWeight: 700, marginBottom: 6 }}>{props.title}</div>
+      <div style={{ opacity: 0.75, lineHeight: 1.35 }}>{props.text}</div>
+    </div>
+  );
+}
+
+function BottomNav(props: {
+  active: TabId;
+  onGo: (tab: TabId) => void;
+}) {
+  const Item = (p: {
+    id: TabId;
+    label: string;
+    emphasize?: boolean;
+    onClick: () => void;
+  }) => {
+    const isActive = props.active === p.id;
+
+    return (
+      <button
+        onClick={p.onClick}
+        style={{
+          flex: 1,
+          padding: "10px 6px",
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          opacity: isActive ? 1 : 0.6,
+          fontWeight: p.emphasize ? 800 : 600,
+          letterSpacing: p.emphasize ? -0.2 : 0,
+        }}
+        aria-label={p.label}
+        title={p.label}
+      >
+        {p.label}
+      </button>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        position: "sticky",
+        bottom: 0,
+        marginTop: 14,
+        paddingTop: 10,
+        paddingBottom: 10,
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(8px)",
+        borderTop: "1px solid rgba(0,0,0,0.08)",
+        display: "flex",
+        gap: 6,
+      }}
+    >
+      <Item id="insights" label="Инсайты" onClick={() => props.onGo("insights")} />
+      <Item id="history" label="История" onClick={() => props.onGo("history")} />
+      <Item id="today" label="Сегодня" emphasize onClick={() => props.onGo("today")} />
+      <Item id="new" label="Новый" emphasize onClick={() => props.onGo("new")} />
+      <Item id="templates" label="Шаблоны" onClick={() => props.onGo("templates")} />
+      <Item id="profile" label="Профиль" onClick={() => props.onGo("profile")} />
+    </div>
+  );
+}
 
 export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const {today, showAll, loadToday, setFlag, resetShowAll, toggleShowAll,} = useTodayState();
-  const {challengeFull, history, editTitle, setEditTitle, editDesc, setEditDesc, editMiss, setEditMiss, editActive, setEditActive, loadChallenge, loadHistory, saveTitle, saveDesc, savePolicyAndActive,} = useDetailState(); 
+
+  // Заглушки для будущих экранов (честно, без “перекидывания в Today”)
+  const [placeholder, setPlaceholder] = useState<PlaceholderKind | null>(null);
+
+  const { today, showAll, loadToday, setFlag, resetShowAll, toggleShowAll } = useTodayState();
+
   const tgPresent = hasTelegramWebApp();
   const initData = getInitData();
   const initLen = initData.length;
   const tgOk = tgPresent && initLen > 0;
-  const { screen, go, goToday, goTemplates, goAdd } = useNav();
-  const { templates, loadTemplates, addTemplate } = useTemplatesState();
-  const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create,} = useAddState();
 
+  const { screen, go, goToday } = useNav();
+
+  const { templates, loadTemplates, addTemplate } = useTemplatesState();
+  const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
+    useAddState();
 
   useEffect(() => {
     if (screen === "TODAY") {
       resetShowAll();
     }
-  }, [screen]);
+  }, [screen, resetShowAll]);
 
   useEffect(() => {
-  if (!tgPresent) return;
-
-  initTelegram();
-  logTelegramReady();
+    if (!tgPresent) return;
+    initTelegram();
+    logTelegramReady();
   }, [tgPresent]);
 
   useEffect(() => {
-    console.log("[DBG] screen=", screen, "showAll=", showAll);
-  }, [screen, showAll]);
+    console.log("[DBG] screen=", screen, "showAll=", showAll, "placeholder=", placeholder);
+  }, [screen, showAll, placeholder]);
 
-
+  // Back внутри приложения:
+  // - если открыт placeholder → закрыть placeholder
+  // - иначе обычный back к Today
   useBack({
-    enabled: tgOk && screen !== "TODAY",
+    enabled: tgOk && (screen !== "TODAY" || placeholder !== null),
     onBack: () => {
       resetShowAll();
+      if (placeholder) {
+        setPlaceholder(null);
+        return;
+      }
       goToday();
     },
   });
 
-    // iOS Telegram может дергать history/back без BackButton UI.
+  // iOS Telegram может дергать history/back без BackButton UI.
   // Наша цель: при любом системном back/history/restore — свернуть список.
   useEffect(() => {
     const onSystemNav = () => {
@@ -70,13 +165,23 @@ export default function App() {
       window.removeEventListener("hashchange", onSystemNav);
       window.removeEventListener("pageshow", onSystemNav);
     };
-  }, []);
+  }, [resetShowAll]);
 
+  // Telegram BackButton: показываем, если мы не в чистом Today
   useEffect(() => {
-    const shouldShow = screen === "DETAIL" || screen === "ADD" || screen === "TEMPLATES";
+    const shouldShow =
+      placeholder !== null ||
+      screen === "DETAIL" ||
+      screen === "ADD" ||
+      screen === "TEMPLATES" ||
+      screen === "HISTORY";
 
     const onTgBack = () => {
       resetShowAll();
+      if (placeholder) {
+        setPlaceholder(null);
+        return;
+      }
       goToday();
     };
 
@@ -85,130 +190,78 @@ export default function App() {
       shouldShow,
       onBack: onTgBack,
     });
-  }, [tgOk, screen, goToday]);
-
+  }, [tgOk, screen, goToday, resetShowAll, placeholder]);
 
   // Add wizard state (MVP)
   const selected = useMemo(() => {
     if (!today || selectedId == null) return null;
-    return today.all.find(x => x.challenge_id === selectedId) ?? null;
+    return today.all.find((x) => x.challenge_id === selectedId) ?? null;
   }, [today, selectedId]);
 
+  // active tab
+  const activeTab: TabId =
+    placeholder === "INSIGHTS"
+      ? "insights"
+      : placeholder === "PROFILE"
+      ? "profile"
+      : screen === "ADD"
+      ? "new"
+      : screen === "TEMPLATES"
+      ? "templates"
+      : screen === "HISTORY"
+      ? "history"
+      : "today";
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        {!tgOk && (
-          <div style={{
-            marginTop: 10,
-            padding: 10,
-            border: "1px dashed #555",
-            borderRadius: 10,
-            fontSize: 12,
-            opacity: 0.9
-          }}>
-            <div><b>DEBUG</b></div>
-            <div>tgPresent: {String(tgPresent)}</div>
-            <div>initDataLen: {initLen}</div>
-            <div>tgOk: {String(tgOk)}</div>
-            <div>API_BASE: /api</div>
-            <div>todayLoaded: {String(Boolean(today))}</div>
-          <div>err: {err ?? "—"}</div>
-          </div>
-        )}
-
-        <h2 style={{ margin: 0 }}>Life-Tracker</h2>
-        {!tgOk && (
-          <div style={{ marginTop: 10, padding: 10, border: "1px solid #f99", borderRadius: 10 }}>
-           <div style={{ fontWeight: 700 }}>Открыто не внутри Telegram WebApp</div>
-           <div style={{ opacity: 0.8, fontSize: 12, marginTop: 4 }}>
-             Telegram.WebApp: {tgPresent ? "есть" : "нет"} • initDataLen: {initLen}
-           </div>
-           <div style={{ opacity: 0.8, fontSize: 12, marginTop: 6 }}>
-             Открой Mini App на телефоне (Android/iOS) или в Telegram Desktop, который открывает встроенно.
-           </div>
-          </div>
-        )}
-
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => { resetShowAll(); goToday(); loadToday(); }}>Сегодня</button>
-          <button onClick={() => { goTemplates(); loadTemplates(); }}>Шаблоны</button>
-          <button onClick={() => goAdd()}>Добавить</button>
-        </div>
-      </div>
-
-      {today && (
-        <div style={{ marginTop: 6, opacity: 0.7, fontSize: 12 }}>
-          {today.date}
-        </div>
-      )}
-
       {err && (
         <div style={{ marginTop: 12, padding: 10, border: "1px solid #f99", borderRadius: 8 }}>
           Ошибка: {err}
         </div>
       )}
 
+      {/* PLACEHOLDERS (тихо, без CTA) */}
+      {screen === "TODAY" && placeholder === "INSIGHTS" && (
+        <PlaceholderCard
+          title="Инсайты"
+          text="Этот экран появится позже. Сейчас важнее факт и устойчивость."
+        />
+      )}
+      {screen === "TODAY" && placeholder === "PROFILE" && (
+        <PlaceholderCard
+          title="Профиль"
+          text="Этот экран появится позже. Сейчас — только действие и факт."
+        />
+      )}
+
       {/* TODAY */}
-      {screen === "TODAY" && (
-        <TodayScreen
-          today={today}
-          showAll={showAll}
-          onToggleShowAll={toggleShowAll}
-          onSetFlagFirst={(flag: "MIN" | "BONUS" | "SKIP" | "FAIL") =>
-            setFlag(today!.first_uncompleted!.challenge_id, flag)
-          }
-          onGoDetail={(challengeId: number) => {
-            setSelectedId(challengeId);
+      {screen === "TODAY" && placeholder === null && (
+        <TodayPage onGoChallenges={() => go("CHALLENGES")} />
+      )}
 
-            const found = today?.all.find((x) => x.challenge_id === challengeId) ?? null;
-            if (found) {
-              setEditTitle(found.title);
-            }
+      {/* HISTORY */}
+      {screen === "HISTORY" && <HistoryPage />}
 
-            setEditDesc("");
+      {screen === "CHALLENGES" && (
+        <MyChallengesPage
+          onOpen={(id) => {
+            setSelectedId(id);
             go("DETAIL");
-            loadHistory(challengeId).catch((e) => setErr(String(e)));
-            loadChallenge(challengeId).catch((e) => setErr(String(e)));
           }}
         />
       )}
 
       {/* DETAIL */}
-      {screen === "DETAIL" && selected && (
+      {screen === "DETAIL" && selectedId != null && (
         <DetailScreen
-          selected={selected}
-          challengeFull={challengeFull}
-          history={history}
-          editTitle={editTitle}
-          setEditTitle={setEditTitle}
-          editDesc={editDesc}
-          setEditDesc={setEditDesc}
-          editMiss={editMiss}
-          setEditMiss={setEditMiss}
-          editActive={editActive}
-          setEditActive={setEditActive}
-          onBack={() => {
-            resetShowAll();
-            goToday();
-          }}
-          onSetFlag={(flag) => setFlag(selected.challenge_id, flag)}
-          onSaveTitle={() => saveTitle(selected.challenge_id)}
-          onSaveDesc={() => saveDesc(selected.challenge_id)}
-          onSavePolicyAndActive={async () => {
-            setErr(null);
-            await savePolicyAndActive(selected.challenge_id);
-            await loadToday();
-          }}
+          challengeId={selectedId}
+          onBack={() => go("CHALLENGES")}
         />
       )}
 
       {/* TEMPLATES */}
       {screen === "TEMPLATES" && (
-        <TemplatesScreen
-          templates={templates}
-          onAdd={(templateId) => addTemplate(templateId)}
-        />
+        <TemplatesScreen templates={templates} onAdd={(templateId) => addTemplate(templateId)} />
       )}
 
       {/* ADD */}
@@ -236,7 +289,31 @@ export default function App() {
           }}
         />
       )}
+
+      <BottomNav
+        active={activeTab}
+        onGo={(tab) => {
+          // Заглушки — остаёмся на TODAY, но показываем отдельную “плашку-экран”
+          if (tab === "insights") {
+            setPlaceholder("INSIGHTS");
+            go("TODAY");
+            return;
+          }
+          if (tab === "profile") {
+            setPlaceholder("PROFILE");
+            go("TODAY");
+            return;
+          }
+
+          // Реальные экраны — сбрасываем placeholder
+          setPlaceholder(null);
+
+          if (tab === "history") return go("HISTORY");
+          if (tab === "today") return go("TODAY");
+          if (tab === "new") return go("ADD");
+          if (tab === "templates") return go("TEMPLATES");
+        }}
+      />
     </div>
   );
 }
-

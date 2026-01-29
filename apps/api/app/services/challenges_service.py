@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.models import Challenge
 from app.schemas import ChallengeCreate, ChallengePatch
@@ -62,3 +63,24 @@ async def get_user_challenge_view(
         "created_at": ch.created_at.isoformat() if ch.created_at else None,
         "updated_at": ch.updated_at.isoformat() if ch.updated_at else None,
     }
+
+async def list_user_challenges(db: AsyncSession, user_id: int) -> list[dict]:
+    q = await db.execute(
+        select(Challenge)
+        .where(Challenge.user_id == user_id)
+        .order_by(Challenge.id.desc())
+    )
+    items = q.scalars().all()
+
+    return [
+        {
+            "id": ch.id,
+            "title": ch.title,
+            "description": ch.description,
+            "miss_policy": ch.miss_policy,
+            "is_active": ch.is_active,
+            "created_at": ch.created_at.isoformat() if ch.created_at else None,
+            "updated_at": ch.updated_at.isoformat() if ch.updated_at else None,
+        }
+        for ch in items
+    ]

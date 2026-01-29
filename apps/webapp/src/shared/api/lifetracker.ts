@@ -27,8 +27,18 @@ export const LifeTrackerApi = {
   },
 
   // Daily log
-  setDailyFlag(challenge_id: number, flag: "MIN" | "BONUS" | "SKIP" | "FAIL"): Promise<{ ok: true }> {
-    return apiPost("/daily-log/upsert", { challenge_id, flag }) as Promise<{ ok: true }>;
+  setDailyFlag(
+    challenge_id: number,
+    flag: "MIN" | "BONUS" | "SKIP" | "FAIL",
+    comment?: string | null,
+    minutes_fact?: number | null
+  ): Promise<{ ok: true }> {
+    return apiPost("/daily-log/upsert", {
+      challenge_id,
+      flag,
+      comment: comment ?? null,
+      minutes_fact: minutes_fact ?? null,
+    }) as Promise<{ ok: true }>;
   },
 
   // Templates

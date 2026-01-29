@@ -9,6 +9,7 @@ from app.services.challenges_service import (
     create_user_challenge,
     patch_user_challenge,
     get_user_challenge_view,
+    list_user_challenges,
 )
 
 router = APIRouter()
@@ -35,6 +36,14 @@ async def patch_challenge(
     if not ok:
         raise HTTPException(404, "Challenge not found")
     return {"ok": True}
+
+
+@router.get("/challenges")
+async def list_challenges(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    return await list_user_challenges(db, user.id)
 
 
 @router.get("/challenges/{challenge_id}")
