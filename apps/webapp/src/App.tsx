@@ -4,23 +4,18 @@ import {
   logTelegramReady,
   bindTelegramBackButton,
 } from "./shared/tg/webapp";
+
+import { ScreenRouter } from "./app/router/ScreenRouter";
+import type { PlaceholderKind } from "./app/router/ScreenRouter";
 import { useNav } from "./app/router/useNav";
 import { AppShell } from "./app/shell/AppShell";
 import { BottomNav } from "./app/shell/BottomNav";
-import DetailScreen from "./features/detail/DetailScreen";
-import { TemplatesScreen } from "./features/templates/TemplatesScreen";
 import { useTemplatesState } from "./state/templates";
-import { AddScreen } from "./features/add/AddScreen";
 import { useTodayState } from "./state/today";
 import { useAddState } from "./state/add";
-import { PlaceholderCard } from "./shared/ui/PlaceholderCard";
 import { useTelegramBootstrap } from "./shared/tg/useTelegramBootstrap";
 import type { TabId } from "./app/shell/BottomNav";
-import { TodayPage } from "./pages/TodayPage";
-import MyChallengesPage from "./pages/MyChallengesPage";
-import { HistoryPage } from "./pages/HistoryPage";
 
-type PlaceholderKind = "INSIGHTS" | "PROFILE";
 
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
@@ -133,61 +128,43 @@ export default function App() {
       }
       >
       {/* тут остается ровно то, что было внутри scroll area */}
-      {screen === "TODAY" ? (
-        placeholder === "INSIGHTS" ? (
-          <PlaceholderCard title="Инсайты" text="Скоро" />
-        ) : placeholder === "PROFILE" ? (
-          <PlaceholderCard title="Профиль" text="Скоро" />
-        ) : (
-          <TodayPage onGoChallenges={() => { setPlaceholder(null); go("CHALLENGES"); }} />
-        )
-      ) : screen === "HISTORY" ? (
-        <HistoryPage />
-      ) : screen === "CHALLENGES" ? (
-        <MyChallengesPage
-          onOpen={(id) => {
-            setSelectedId(id);
-            go("DETAIL");
-          }}
-        />
-
-      ) : screen === "ADD" ? (
-        <AddScreen
-          newTitle={newTitle}
-          setNewTitle={setNewTitle}
-          newDesc={newDesc}
-          setNewDesc={setNewDesc}
-          newMissPolicy={newMissPolicy}
-          setNewMissPolicy={setNewMissPolicy}
-          onBack={() => goBack()}
-          onCreate={async () => {
+      <ScreenRouter
+        screen={screen}
+        placeholder={placeholder}
+        onGoChallenges={() => {
+          setPlaceholder(null);
+          go("CHALLENGES");
+        }}
+        templates={templates}
+        onAddTemplate={async (templateId) => {
+          try {
+            await addTemplate(templateId);
+            goAdd();
+          } catch (e: any) {}
+        }}
+        addProps={{
+          newTitle,
+          setNewTitle,
+          newDesc,
+          setNewDesc,
+          newMissPolicy,
+          setNewMissPolicy,
+          onBack: () => goBack(),
+          onCreate: async () => {
             try {
               await create();
               goToday();
             } catch (e: any) {}
-          }}
-        />
+          },
+        }}
+        selectedId={selectedId}
+        onOpenChallenge={(id) => {
+          setSelectedId(id);
+          go("DETAIL");
+        }}
+        onBackFromDetail={() => goBack()}
+      />
 
-      ) : screen === "TEMPLATES" ? (
-        <TemplatesScreen
-          templates={templates}
-          onAdd={async (templateId) => {
-            try {
-              await addTemplate(templateId);
-              goAdd();
-            } catch (e: any) {}
-          }}
-        />
-
-      ) : screen === "DETAIL" ? (
-        selectedId !== null ? (
-          <DetailScreen challengeId={selectedId} onBack={() => goBack()} />
-        ) : (
-          <PlaceholderCard title="Челлендж" text="Не выбран" />
-        )
-      ) : (
-        <TodayPage onGoChallenges={() => { setPlaceholder(null); go("CHALLENGES"); }} />
-      )}
     </AppShell>
   )
 }
