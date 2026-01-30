@@ -24,7 +24,7 @@ export default function App() {
   const { tgPresent, tgOk } = useTelegramBootstrap();
   const [ selectedId, setSelectedId] = useState<number | null>(null);
   const [ placeholder, setPlaceholder] = useState<PlaceholderKind | null>(null);
-  const { showAll, resetShowAll } = useTodayState();
+  const { resetShowAll } = useTodayState();
   const { screen, canGoBack, go, goBack, goToday, goTemplates, goAdd } = useNav();
   const { templates, addTemplate } = useTemplatesState();
   const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
@@ -41,10 +41,6 @@ export default function App() {
     initTelegram();
     logTelegramReady();
   }, [tgPresent]);
-
-  useEffect(() => {
-    console.log("[DBG] screen=", screen, "showAll=", showAll, "placeholder=", placeholder);
-  }, [screen, showAll, placeholder]);
 
   // Telegram BackButton: показываем, если мы не в чистом Today
   useEffect(() => {
@@ -164,7 +160,6 @@ export default function App() {
         }}
         onBackFromDetail={() => goBack()}
       />
-
     </AppShell>
   )
 }
