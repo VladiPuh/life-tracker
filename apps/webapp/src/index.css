@@ -3,9 +3,10 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Telegram theme-friendly defaults */
+  color-scheme: light;
+  color: var(--tg-theme-text-color, #111);
+  background-color: var(--tg-theme-bg-color, #fff);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -36,7 +37,9 @@ html, body {
 body {
   min-width: 320px;
   background: #fff;
-  overflow: hidden; /* ❗ body больше не скроллится */
+  overflow: hidden;
+  color: var(--tg-theme-text-color, #111);
+  background: var(--tg-theme-bg-color, #fff);
 }
 
 h1 {
@@ -61,17 +64,4 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }
