@@ -26,7 +26,7 @@ export default function App() {
   const [ selectedId, setSelectedId] = useState<number | null>(null);
   const [ placeholder, setPlaceholder] = useState<PlaceholderKind | null>(null);
   const { resetShowAll } = useTodayState();
-  const { screen, canGoBack, go, goBack, goToday, goTemplates, goAdd } = useNav();
+  const { screen, go, goBack, goToday, goTemplates, goAdd } = useNav();
   const { templates, addTemplate } = useTemplatesState();
   const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
     useAddState();
@@ -43,21 +43,7 @@ export default function App() {
       logTelegramReady();
     }, [tgPresent]);
 
-    const shouldShowBack = placeholder !== null || canGoBack;
-
-    useBack({
-      enabled: tgOk,
-      shouldShow: shouldShowBack,
-      onBack: () => {
-        resetShowAll();
-        if (placeholder) {
-          setPlaceholder(null);
-          return;
-        }
-        goBack();
-      },
-    });
-    ;
+    useBack(tgOk);
 
     // active tab
     const activeTab: TabId =
@@ -144,8 +130,8 @@ export default function App() {
           onCreate: async () => {
             try {
               await create();
-              goToday();}
-              catch (e: any) {}
+              goToday();
+            } catch (e: any) {}
           },
         }}
         selectedId={selectedId}
@@ -156,5 +142,5 @@ export default function App() {
         onBackFromDetail={() => goBack()}
       />
     </AppShell>
-  )
+  );
 }
