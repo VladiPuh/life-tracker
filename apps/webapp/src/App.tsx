@@ -207,6 +207,22 @@ export default function App() {
       : screen === "HISTORY"
       ? "history"
       : "today";
+  const pageTitle =
+    placeholder === "INSIGHTS"
+      ? "Инсайты"
+      : placeholder === "PROFILE"
+      ? "Профиль"
+      : screen === "HISTORY"
+      ? "История"
+      : screen === "TEMPLATES"
+      ? "Шаблоны"
+      : screen === "ADD"
+      ? "Новый"
+      : screen === "CHALLENGES"
+      ? "Челленджи"
+      : screen === "DETAIL"
+      ? "Челлендж"
+      : "Сегодня";
 
   return (
     <div
@@ -219,13 +235,44 @@ export default function App() {
         fontFamily: "system-ui, Arial",
       }}
     >
+          {/* TopBar (fixed, non-scroll). Green zone title lives here */}
+    <div
+      style={{
+        flexShrink: 0,
+        paddingTop: "var(--safe-top)",
+        height: "calc(var(--safe-top) + var(--topbar-h))",
+        display: "flex",
+        alignItems: "flex-end",
+        paddingLeft: "var(--app-pad)",
+        paddingRight: "var(--app-pad)",
+        paddingBottom: 8,
+        boxSizing: "border-box",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 16,
+          fontWeight: 800,
+          letterSpacing: -0.2,
+          color: "var(--lt-text)",
+          lineHeight: 1.2,
+        }}
+      >
+        {pageTitle}
+      </div>
+    </div>
+
     <div
       style={{
         flex: 1,
         overflowY: "auto",
         paddingLeft: "var(--app-pad)",
         paddingRight: "var(--app-pad)",
-        paddingTop: "calc(var(--app-pad) + var(--safe-top))",
+        paddingTop: "calc(var(--app-pad) + var(--topbar-gap))",
         /* reserve space for BottomNav + iOS home indicator */
         paddingBottom: "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom))",
         WebkitOverflowScrolling: "touch",

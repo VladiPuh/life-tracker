@@ -1,11 +1,12 @@
 :root {
   color-scheme: dark;
 
-  /* === AppShell geometry invariants (single source of truth) === */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --app-pad: 16px;
-  --nav-h: 64px; /* ориентир для нижней навигации */
+  --nav-h: 64px;
+  --topbar-h: 52px;
+  --topbar-gap: 12px;
 
   --lt-bg: #0f0f10;
   --lt-card: #1c1c1e;
