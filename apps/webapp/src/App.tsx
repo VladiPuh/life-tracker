@@ -7,7 +7,6 @@ import {
   bindTelegramBackButton,
 } from "./shared/tg/webapp";
 import { useNav } from "./app/router/useNav";
-import { useBack } from "./app/router/useBack";
 
 import DetailScreen from "./features/detail/DetailScreen";
 import { TemplatesScreen } from "./features/templates/TemplatesScreen";
@@ -114,7 +113,7 @@ export default function App() {
   const initLen = initData.length;
   const tgOk = tgPresent && initLen > 0;
 
-  const { screen, go, goToday } = useNav();
+  const { screen, canGoBack, go, goBack, goToday } = useNav();
 
   const { templates, addTemplate } = useTemplatesState();
   const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
@@ -135,21 +134,6 @@ export default function App() {
   useEffect(() => {
     console.log("[DBG] screen=", screen, "showAll=", showAll, "placeholder=", placeholder);
   }, [screen, showAll, placeholder]);
-
-  // Back внутри приложения:
-  // - если открыт placeholder → закрыть placeholder
-  // - иначе обычный back к Today
-  useBack({
-    enabled: tgOk && (screen !== "TODAY" || placeholder !== null),
-    onBack: () => {
-      resetShowAll();
-      if (placeholder) {
-        setPlaceholder(null);
-        return;
-      }
-      goToday();
-    },
-  });
 
   // iOS Telegram может дергать history/back без BackButton UI.
   // Наша цель: при любом системном back/history/restore — свернуть список.
@@ -172,7 +156,7 @@ export default function App() {
   // Telegram BackButton: показываем, если мы не в чистом Today
   useEffect(() => {
     const shouldShow =
-      placeholder !== null ||
+      placeholder !== null || canGoBack;
       screen === "DETAIL" ||
       screen === "ADD" ||
       screen === "TEMPLATES" ||
@@ -184,7 +168,7 @@ export default function App() {
         setPlaceholder(null);
         return;
       }
-      goToday();
+      goBack();
     };
 
     return bindTelegramBackButton({
@@ -192,7 +176,7 @@ export default function App() {
       shouldShow,
       onBack: onTgBack,
     });
-  }, [tgOk, screen, goToday, resetShowAll, placeholder]);
+  }, [tgOk, placeholder, canGoBack, goBack, resetShowAll]);
 
   // active tab
   const activeTab: TabId =
