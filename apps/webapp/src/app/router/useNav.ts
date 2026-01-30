@@ -18,9 +18,10 @@ export function useNav() {
     setScreen(next);
   }, []);
 
-  const goToday = useCallback(() => {
+  const goToday = () => {
+    window.history.replaceState({ screen: "TODAY" }, "");
     setScreen("TODAY");
-  }, []);
+  };
 
   const goTemplates = useCallback(() => go("TEMPLATES"), [go]);
   const goAdd = useCallback(() => go("ADD"), [go]);
@@ -32,6 +33,7 @@ export function useNav() {
       window.history.back();
       return;
     }
+    window.history.replaceState({ screen: "TODAY" }, "");
     setScreen("TODAY");
   }, []);
 
