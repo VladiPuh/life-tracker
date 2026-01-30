@@ -28,7 +28,7 @@ function PlaceholderCard(props: { title: string; text: string }) {
     <div
       style={{
         padding: 12,
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--lt-border)",
         borderRadius: 12,
         marginTop: 12,
       }}
@@ -78,9 +78,10 @@ function BottomNav(props: {
         flexShrink: 0,
         paddingTop: 10,
         paddingBottom: 10,
-        background: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(8px)",
-        borderTop: "1px solid rgba(0,0,0,0.08)",
+        background: "var(--lt-card)",
+        backdropFilter: "blur(10px)",
+        borderTop: "1px solid var(--lt-border)",
+        color: "var(--lt-text)",
         display: "flex",
         gap: 6,
       }}
@@ -220,7 +221,10 @@ export default function App() {
       style={{
         flex: 1,
         overflowY: "auto",
-        padding: 16,
+        paddingLeft: 16,
+        paddingRight: 16,
+        paddingBottom: 16,
+        paddingTop: "calc(16px + env(safe-area-inset-top))",
         WebkitOverflowScrolling: "touch",
       }}
     >    
@@ -338,7 +342,7 @@ export default function App() {
         }}
       >
         build: {__BUILD_ID__}
-      </div>
+        </div>
             
       <div style={{ height: "env(safe-area-inset-bottom)" }} />
     </div>
