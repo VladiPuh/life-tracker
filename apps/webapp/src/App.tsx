@@ -2,8 +2,9 @@
 import {
   initTelegram,
   logTelegramReady,
-  bindTelegramBackButton,
 } from "./shared/tg/webapp";
+import { useBack } from "./app/router/useBack";
+
 
 import { ScreenRouter } from "./app/router/ScreenRouter";
 import type { PlaceholderKind } from "./app/router/ScreenRouter";
@@ -30,68 +31,63 @@ export default function App() {
   const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
     useAddState();
 
-  useEffect(() => {
-    if (screen === "TODAY") {
-      resetShowAll();
-    }
-  }, [screen, resetShowAll]);
-
-  useEffect(() => {
-    if (!tgPresent) return;
-    initTelegram();
-    logTelegramReady();
-  }, [tgPresent]);
-
-  // Telegram BackButton: показываем, если мы не в чистом Today
-  useEffect(() => {
-    const shouldShow =
-      placeholder !== null || canGoBack;
-
-    const onTgBack = () => {
-      resetShowAll();
-      if (placeholder) {
-        setPlaceholder(null);
-        return;
+    useEffect(() => {
+      if (screen === "TODAY") {
+        resetShowAll();
       }
-      goBack();
-    };
+    }, [screen, resetShowAll]);
 
-    return bindTelegramBackButton({
+    useEffect(() => {
+      if (!tgPresent) return;
+      initTelegram();
+      logTelegramReady();
+    }, [tgPresent]);
+
+    const shouldShowBack = placeholder !== null || canGoBack;
+
+    useBack({
       enabled: tgOk,
-      shouldShow,
-      onBack: onTgBack,
+      shouldShow: shouldShowBack,
+      onBack: () => {
+        resetShowAll();
+        if (placeholder) {
+          setPlaceholder(null);
+          return;
+        }
+        goBack();
+      },
     });
-  }, [tgOk, placeholder, canGoBack, goBack, resetShowAll]);
+    ;
 
-  // active tab
-  const activeTab: TabId =
-    placeholder === "INSIGHTS"
-      ? "insights"
-      : placeholder === "PROFILE"
-      ? "profile"
-      : screen === "ADD"
-      ? "new"
-      : screen === "TEMPLATES"
-      ? "templates"
-      : screen === "HISTORY"
-      ? "history"
-      : "today";
-  const pageTitle =
-    placeholder === "INSIGHTS"
-      ? "Инсайты"
-      : placeholder === "PROFILE"
-      ? "Профиль"
-      : screen === "HISTORY"
-      ? "История"
-      : screen === "TEMPLATES"
-      ? "Шаблоны"
-      : screen === "ADD"
-      ? "Новый"
-      : screen === "CHALLENGES"
-      ? "Челленджи"
-      : screen === "DETAIL"
-      ? "Челлендж"
-      : "Сегодня";
+    // active tab
+    const activeTab: TabId =
+      placeholder === "INSIGHTS"
+        ? "insights"
+        : placeholder === "PROFILE"
+        ? "profile"
+        : screen === "ADD"
+        ? "new"
+        : screen === "TEMPLATES"
+        ? "templates"
+        : screen === "HISTORY"
+        ? "history"
+        : "today";
+        const pageTitle =
+          placeholder === "INSIGHTS"
+            ? "Инсайты"
+            : placeholder === "PROFILE"
+            ? "Профиль"
+            : screen === "HISTORY"
+            ? "История"
+            : screen === "TEMPLATES"
+            ? "Шаблоны"
+            : screen === "ADD"
+            ? "Новый"
+            : screen === "CHALLENGES"
+            ? "Челленджи"
+            : screen === "DETAIL"
+            ? "Челлендж"
+            : "Сегодня";
 
   return (
     <AppShell
@@ -123,7 +119,6 @@ export default function App() {
         />
       }
       >
-      {/* тут остается ровно то, что было внутри scroll area */}
       <ScreenRouter
         screen={screen}
         placeholder={placeholder}
@@ -149,8 +144,8 @@ export default function App() {
           onCreate: async () => {
             try {
               await create();
-              goToday();
-            } catch (e: any) {}
+              goToday();}
+              catch (e: any) {}
           },
         }}
         selectedId={selectedId}

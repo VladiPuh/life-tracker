@@ -1,22 +1,27 @@
 import { useEffect } from "react";
 
 export function useBack(opts: {
-  enabled: boolean;
-  onBack: () => void;
+  enabled: boolean;      // tgOk
+  shouldShow: boolean;   // вычисляем в App
+  onBack: () => void;    // обычно nav.goBack() + локальные сбросы
 }) {
-  const { enabled, onBack } = opts;
+  const { enabled, shouldShow, onBack } = opts;
 
   useEffect(() => {
-    if (!enabled) return;
-
     const tg = (window as any).Telegram?.WebApp;
     const back = tg?.BackButton;
-    if (!back) return;
+    if (!enabled || !back) return;
+
+    // show/hide — обязанность владельца BackButton
+    try {
+      if (shouldShow) back.show();
+      else back.hide();
+    } catch {}
 
     back.onClick(onBack);
 
     return () => {
       try { back.offClick(onBack); } catch {}
     };
-  }, [enabled, onBack]);
+  }, [enabled, shouldShow, onBack]);
 }
