@@ -110,11 +110,11 @@ export function HistoryPage() {
             setDetail(null);
           }}
           style={{
-            border: "1px solid var(--lt-border)",
-            background: "var(--lt-card2)",
+            border: "none",
+            background: "var(--lt-soft)",
             color: "var(--lt-text)",
             borderRadius: 12,
-            padding: "10px 12px",
+            padding: "8px 12px",
             cursor: "pointer",
             marginBottom: 12,
 
@@ -122,7 +122,7 @@ export function HistoryPage() {
             alignItems: "center",
             gap: 8,
 
-            fontWeight: 700,
+            fontWeight: 600,
           }}
         >
           ← Назад

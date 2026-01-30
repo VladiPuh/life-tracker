@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useTodayState } from "../state/today";
+import type { ReactNode } from "react";
+
 
 
 function Card(props: {
   title?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
 }) {
   const isClickable = Boolean(props.onClick);
@@ -40,7 +42,7 @@ function Card(props: {
 
 function StatusButton(props: {
   title: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   onClick?: () => void;
 }) {
