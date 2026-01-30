@@ -20,9 +20,9 @@ function Card(props: {
       }}
       style={{
         padding: 14,
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--lt-border)",
         borderRadius: 14,
-        background: "rgba(0,0,0,0.02)",
+        background: "var(--lt-card)",
         marginBottom: 12,
 
         cursor: isClickable ? "pointer" : "default",
@@ -35,33 +35,6 @@ function Card(props: {
 
       {props.children}
     </section>
-  );
-}
-
-function IconButton(props: {
-  title: string;
-  children: React.ReactNode;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      title={props.title}
-      aria-label={props.title}
-      onClick={props.onClick}
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        border: "1px solid rgba(0,0,0,0.10)",
-        background: "white",
-        cursor: "pointer",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {props.children}
-    </button>
   );
 }
 
@@ -79,8 +52,9 @@ function StatusButton(props: {
       style={{
         padding: "14px 16px",
         borderRadius: 14,
-        border: "1px solid rgba(0,0,0,0.12)",
-        background: "white",
+        border: "1px solid var(--lt-border)",
+        background: "var(--lt-card2)",
+        color: "var(--lt-text)",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
@@ -155,15 +129,11 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
       ? "Причина паузы (обязательно)"
       : pending === "BONUS"
       ? "Комментарий (что было сверх?)"
-      : pending === "FAIL"
-      ? "Комментарий (что помешало?)"
       : "Комментарий";
 
   const notePlaceholder =
     pending === "SKIP"
       ? "Например: сделал меньше, устал, болит плечо, мало времени…"
-      : pending === "FAIL"
-      ? "Коротко: что пошло не так? (по желанию)"
       : "Коротко, по желанию…";
 
   const noteRequired = pending === "SKIP";
@@ -174,14 +144,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   const hasNoDoChallenges = false;
 
   return (
-    <div
-      style={{
-        maxWidth: 520,
-        margin: "0 auto",
-        padding: 16,
-        fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial",
-      }}
-    >
+    <div>
 
       {/* Фокус дня + фиксация — единый контейнер */}
       <Card title="Фокус дня">
@@ -196,7 +159,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
                     padding: "4px 8px",
                     borderRadius: 999,
                     border: "1px solid rgba(0,0,0,0.12)",
-                    background: "rgba(0,0,0,0.02)",
+                    background: "var(--lt-card)",
                     opacity: 0.85,
                   }}
                   title="Текущий статус на сегодня"
@@ -214,7 +177,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
               padding: 10,
               borderRadius: 12,
               border: "1px solid rgba(0,0,0,0.12)",
-              background: "rgba(0,0,0,0.02)",
+              background: "var(--lt-card)",
               fontSize: 12,
               opacity: 0.8,
             }}
@@ -256,16 +219,6 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
                 setSavedPulse(false);
               }}
             />
-            <StatusButton
-              title="Провалено (фиксируем факт без самобичевания)"
-              icon="⚑"
-              label="Провал"
-              onClick={() => {
-                if (saving || !current || pending) return;
-                setPending("FAIL");
-                setSavedPulse(false);
-              }}
-            />
           </div>
         ) : (
           <div style={{ marginTop: 10, fontSize: 13, opacity: 0.75 }}>
@@ -291,7 +244,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
                   resize: "none",
                   padding: 10,
                   borderRadius: 12,
-                  border: "1px solid rgba(0,0,0,0.12)",
+                  border: "1px solid var(--lt-border)",
                   outline: "none",
                   fontFamily: "inherit",
                   fontSize: 13,

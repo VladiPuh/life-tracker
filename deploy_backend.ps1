@@ -199,6 +199,16 @@ fi
 echo "== (5) Restart service =="
 systemctl daemon-reload || true
 systemctl restart "__SYSTEMD_SERVICE__"
+echo "== Nginx hygiene: clean sites-enabled =="
+
+mkdir -p /etc/nginx/disabled
+
+find /etc/nginx/sites-enabled -maxdepth 1 -type f \
+  -exec mv -f {} /etc/nginx/disabled/ \; 2>/dev/null || true
+
+nginx -t
+systemctl reload nginx
+
 sleep 1
 systemctl --no-pager --full status "__SYSTEMD_SERVICE__" || true
 

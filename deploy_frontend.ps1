@@ -80,7 +80,7 @@ if ($LASTEXITCODE -ne 0) { throw "SCP failed (exit $LASTEXITCODE)" }
 Write-Host "`n== Deploy on server (with backup) ==" -ForegroundColor Cyan
 
 $remoteScript = @"
-set -e
+set -euo pipefail
 
 ROOT="$RemoteRoot"
 STAMP="$stamp"
@@ -110,6 +110,13 @@ rm -rf "`$ROOT"/*
 cp -a "`$TMP"/. "`$ROOT"/
 
 rm -rf "`$TMP" "`$TAR"
+echo "== Nginx hygiene: ensure sites-enabled has no regular files =="
+mkdir -p /etc/nginx/disabled
+# переносим любые обычные файлы из sites-enabled (бэкапы/disabled и т.п.)
+find /etc/nginx/sites-enabled -maxdepth 1 -type f -print -exec mv -f {} /etc/nginx/disabled/ \; 2>/dev/null || true
+
+nginx -t
+systemctl reload nginx
 echo "OK: frontend deployed to `$ROOT"
 "@
 

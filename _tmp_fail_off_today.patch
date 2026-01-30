@@ -1,0 +1,50 @@
+﻿diff --git a/apps/webapp/src/state/today.ts b/apps/webapp/src/state/today.ts
+index 1111111..2222222 100644
+--- a/apps/webapp/src/state/today.ts
++++ b/apps/webapp/src/state/today.ts
+@@ -1,10 +1,10 @@
+ import { useCallback, useMemo, useState } from "react";
+ import type { TodayResponse } from "../shared/domain/types";
+ import { LifeTrackerApi } from "../shared/api/lifetracker";
+
+-type Flag = "MIN" | "BONUS" | "SKIP" | "FAIL";
++type Flag = "MIN" | "BONUS" | "SKIP";
+
+ export function useTodayState() {
+   const [today, setToday] = useState<TodayResponse | null>(null);
+   const [showAll, setShowAll] = useState(false);
+
+diff --git a/apps/webapp/src/pages/TodayPage.tsx b/apps/webapp/src/pages/TodayPage.tsx
+index 3333333..4444444 100644
+--- a/apps/webapp/src/pages/TodayPage.tsx
++++ b/apps/webapp/src/pages/TodayPage.tsx
+@@ -1,6 +1,6 @@
+ import { useEffect, useState } from "react";
+ import { useTodayState } from "../state/today";
+ 
+@@
+ export function TodayPage(props: { onGoChallenges: () => void }) {
+   type Flag = "MIN" | "BONUS" | "SKIP";
+   const [pending, setPending] = useState<Flag | null>(null);
+@@
+   // Поддержим твой UI текстами, без вычислений
+   const challengeTitle = current?.title ?? "На сегодня всё";
+   const currentStatus = current?.status_view ?? null;
++  const currentStatusSafe = currentStatus === "FAIL" ? null : currentStatus;
+
+@@
+             <div style={{ fontSize: 16, fontWeight: 800 }}>{challengeTitle}</div>
+-            {currentStatus && (
++            {currentStatusSafe && (
+               <div style={{ marginTop: 6 }}>
+                 <span
+@@
+                   title="Текущий статус на сегодня"
+                 >
+-                  Сегодня: {currentStatus}
++                  Сегодня: {currentStatusSafe}
+                 </span>
+               </div>
+             )}
+           </div>
+         </div>

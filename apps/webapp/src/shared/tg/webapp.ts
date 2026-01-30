@@ -27,6 +27,12 @@ export function initTelegram(): void {
   try {
     WebApp.expand(); // на всякий случай (панель/viewport)
   } catch {}
+  try {
+    WebApp.setBackgroundColor("#0f0f10");
+  } catch {}
+  try {
+    WebApp.setHeaderColor("#0f0f10");
+  } catch {}
 }
 
 export function logTelegramReady(tag = "[TG] ready"): void {
