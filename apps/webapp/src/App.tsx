@@ -75,10 +75,21 @@ export default function App() {
             ? "Челлендж"
             : "Сегодня";
 
+    const showBackBar = screen !== "TODAY" || placeholder !== null;
+
+    const onBackBar = () => {
+      if (placeholder !== null) {
+        setPlaceholder(null);
+        return;
+      }
+      goBack();
+    };
+
   return (
     <AppShell
       title={pageTitle}
       buildLabel={BUILD_LABEL}
+      backBar={{ show: showBackBar, onBack: onBackBar }}
       bottomNav={
         <BottomNav
           active={activeTab}
