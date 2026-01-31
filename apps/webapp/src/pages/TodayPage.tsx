@@ -320,7 +320,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
                   lineHeight: "16px",
                 }}
               >
-                ↻
+                ⟳
               </button>
 
               <button
@@ -344,7 +344,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
                   lineHeight: "16px",
                 }}
               >
-                🎲
+                →
               </button>
             </div>
           </div>
