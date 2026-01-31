@@ -81,7 +81,26 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const { today, loadToday, setFlag } = useTodayState();
-  const current = today?.first_uncompleted ?? null;
+  const [focusOverrideId, setFocusOverrideId] = useState<number | null>(null);
+  const [pickOpen, setPickOpen] = useState(false);
+  const baseCurrent = today?.first_uncompleted ?? null;
+
+  const waiting = (today?.all ?? []).filter((x) => x.status_view === "WAITING");
+
+  const current =
+    focusOverrideId != null
+      ? (today?.all ?? []).find((x) => x.challenge_id === focusOverrideId) ?? baseCurrent
+      : baseCurrent;
+
+  useEffect(() => {
+    // Если override стал невалидным (челлендж уже отмечен сегодня / пропал) — сбрасываем
+    if (!today) return;
+    if (focusOverrideId == null) return;
+
+    const it = today.all.find((x) => x.challenge_id === focusOverrideId);
+    if (!it || it.status_view !== "WAITING") setFocusOverrideId(null);
+  }, [today, focusOverrideId]);
+
   useEffect(() => {
     void loadToday();
   }, [loadToday]);
@@ -145,8 +164,103 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   // TODO: условие появления блока НЕ ДЕЛАТЬ (когда есть challenge типа “avoid/не делать”)
   const hasNoDoChallenges = false;
 
+    const onNextFocus = () => {
+    if (!waiting.length) return;
+
+    const curId = current?.challenge_id ?? null;
+    const idx = curId != null ? waiting.findIndex((x) => x.challenge_id === curId) : -1;
+    const next = waiting[(idx + 1 + waiting.length) % waiting.length];
+
+    setFocusOverrideId(next.challenge_id);
+    closeForm(); // на всякий случай закрываем форму статуса
+  };
+
+  const onOpenPick = () => {
+    if (!waiting.length) return;
+    setPickOpen(true);
+  };
+
   return (
     <div>
+            {pickOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setPickOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 999,
+            background: "rgba(0,0,0,0.55)",
+            padding: 16,
+            display: "flex",
+            alignItems: "flex-end",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              borderRadius: 18,
+              border: "1px solid var(--lt-border)",
+              background: "var(--lt-card)",
+              padding: 14,
+              maxHeight: "70vh",
+              overflow: "auto",
+            }}
+          >
+            <div style={{ fontWeight: 800, marginBottom: 10 }}>Выбери фокус</div>
+
+            {waiting
+              .filter((x) => x.challenge_id !== current?.challenge_id)
+              .map((x) => (
+                <button
+                  key={x.challenge_id}
+                  onClick={() => {
+                    setFocusOverrideId(x.challenge_id);
+                    setPickOpen(false);
+                    closeForm();
+                  }}
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "12px 12px",
+                    borderRadius: 14,
+                    border: "1px solid var(--lt-border)",
+                    background: "var(--lt-card2)",
+                    color: "var(--lt-text)",
+                    cursor: "pointer",
+                    marginBottom: 10,
+                  }}
+                >
+                  {x.title}
+                </button>
+              ))}
+
+            {!waiting.length && (
+              <div style={{ opacity: 0.75, fontSize: 13 }}>
+                Нет доступных челленджей для фокуса (все уже отмечены сегодня).
+              </div>
+            )}
+
+            <button
+              onClick={() => setPickOpen(false)}
+              style={{
+                width: "100%",
+                marginTop: 6,
+                padding: "12px 12px",
+                borderRadius: 14,
+                border: "1px solid var(--lt-border)",
+                background: "transparent",
+                color: "var(--lt-text)",
+                cursor: "pointer",
+              }}
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Фокус дня + фиксация — единый контейнер */}
       <Card title="Фокус дня">
@@ -170,6 +284,50 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
                 </span>
               </div>
             )}
+            <div style={{ display: "flex", gap: 8 }}>
+            <button
+              title="Заменить"
+              aria-label="Заменить"
+              onClick={onOpenPick}
+              disabled={!waiting.length}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 12,
+                border: "1px solid var(--lt-border)",
+                background: "var(--lt-card2)",
+                color: "var(--lt-text)",
+                cursor: waiting.length ? "pointer" : "default",
+                opacity: waiting.length ? 1 : 0.5,
+                display: "grid",
+                placeItems: "center",
+                userSelect: "none",
+              }}
+            >
+              ↻
+            </button>
+            <button
+              title="Следующий"
+              aria-label="Следующий"
+              onClick={onNextFocus}
+              disabled={!waiting.length}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 12,
+                border: "1px solid var(--lt-border)",
+                background: "var(--lt-card2)",
+                color: "var(--lt-text)",
+                cursor: waiting.length ? "pointer" : "default",
+                opacity: waiting.length ? 1 : 0.5,
+                display: "grid",
+                placeItems: "center",
+                userSelect: "none",
+              }}
+            >
+              🎲
+            </button>
+          </div>
           </div>
         </div>
         {err && (
