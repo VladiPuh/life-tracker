@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import { useTodayState } from "../state/today";
-import { TodayCard } from "./today/TodayCard";
-import { FocusSection } from "./today/FocusSection";
-
+import { useTodayState } from "../../state/today";
+import { TodayCard } from "./TodayCard";
+import { FocusSection } from "./FocusSection";
+import { useTodayDerived } from "./useTodayDerived";
 
 export function TodayPage(props: { onGoChallenges: () => void }) {
   type Flag = "MIN" | "BONUS" | "SKIP";
@@ -16,22 +16,29 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   const [pickOpen, setPickOpen] = useState(false);
   const focusCardRef = useRef<HTMLDivElement | null>(null);
   const [pickTop, setPickTop] = useState<number>(120);
-  const baseCurrent = today?.first_uncompleted ?? null;
-
-  const waiting = (today?.all ?? []).filter((x) => x.status_view === "WAITING");
-
-  const current =
-    focusOverrideId != null
-      ? (today?.all ?? []).find((x) => x.challenge_id === focusOverrideId) ?? baseCurrent
-      : baseCurrent;
+  const {
+    waiting,
+    current,
+    challengeTitle,
+    currentStatus,
+    noteLabel,
+    notePlaceholder,
+    canSave,
+    maxLen,
+  } = useTodayDerived({
+    today: today ?? null,
+    focusOverrideId,
+    pending,
+    note,
+  });
 
   useEffect(() => {
     // Если override стал невалидным (челлендж уже отмечен сегодня / пропал) — сбрасываем
     if (!today) return;
     if (focusOverrideId == null) return;
 
-    const it = today.all.find((x) => x.challenge_id === focusOverrideId);
-    if (!it || it.status_view !== "WAITING") setFocusOverrideId(null);
+    const it = today.all.find((x: { challenge_id: number; status_view: string }) => x.challenge_id === focusOverrideId);
+      if (!it || it.status_view !== "WAITING") setFocusOverrideId(null);
   }, [today, focusOverrideId]);
 
   useEffect(() => {
@@ -42,11 +49,6 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
     const t = window.setTimeout(() => setSavedPulse(false), 1200);
     return () => window.clearTimeout(t);
   }, [savedPulse]);
-
-
-  // Поддержим твой UI текстами, без вычислений
-  const challengeTitle = current?.title ?? "На сегодня всё";
-  const currentStatus = current?.status_view ?? null;
 
   const closeForm = () => {
     setPending(null);
@@ -78,21 +80,6 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
     }
   };
 
-  const noteLabel =
-    pending === "SKIP"
-      ? "Причина паузы (обязательно)"
-      : pending === "BONUS"
-      ? "Комментарий (что было сверх?)"
-      : "Комментарий";
-
-  const notePlaceholder =
-    pending === "SKIP"
-      ? "Например: сделал меньше, устал, болит плечо, мало времени…"
-      : "Коротко, по желанию…";
-
-  const noteRequired = pending === "SKIP";
-  const canSave = current != null && pending != null && (!noteRequired || note.trim().length > 0);
-  const maxLen = pending === "SKIP" ? 200 : 140;
   const requestPending = (flag: Flag) => {
     if (saving || !current || pending) return;
     setPending(flag);
@@ -106,7 +93,8 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
     if (!waiting.length) return;
 
     const curId = current?.challenge_id ?? null;
-    const idx = curId != null ? waiting.findIndex((x) => x.challenge_id === curId) : -1;
+    const idx =
+      curId != null ? waiting.findIndex((x: { challenge_id: number }) => x.challenge_id === curId) : -1;
     const next = waiting[(idx + 1 + waiting.length) % waiting.length];
 
     setFocusOverrideId(next.challenge_id);
@@ -136,7 +124,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
         onClosePick={() => setPickOpen(false)}
         waiting={waiting}
         current={current}
-        onPickChallenge={(id) => {
+        onPickChallenge={(id: number) => {
           setFocusOverrideId(id);
           setPickOpen(false);
           closeForm();
