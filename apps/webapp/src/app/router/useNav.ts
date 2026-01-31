@@ -26,16 +26,21 @@ export function useNav() {
   const goTemplates = useCallback(() => go("TEMPLATES"), [go]);
   const goAdd = useCallback(() => go("ADD"), [go]);
 
-  // Back внутри приложения: если есть history entry — откатываемся,
-  // иначе просто возвращаемся на TODAY.
-  const goBack = useCallback(() => {
-    if (window.history.state?.screen) {
-      window.history.back();
+  const goBack = () => {
+    if (window.history.length <= 1) {
+      goToday();
       return;
     }
-    window.history.replaceState({ screen: "TODAY" }, "");
-    setScreen("TODAY");
-  }, []);
+
+    const st = window.history.state as any;
+
+    if (!st || !st.screen) {
+      goToday();
+      return;
+    }
+
+    window.history.back();
+  };
 
   // Системный Back (history pop)
   useEffect(() => {
