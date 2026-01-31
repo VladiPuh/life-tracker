@@ -27,15 +27,24 @@ export function useNav() {
   const goAdd = useCallback(() => go("ADD"), [go]);
 
   const goBack = () => {
-    // Вложенные экраны: back по стеку (pushState)
+    const st = window.history.state as any;
+
+    // Special case: HISTORY has an inner "day detail" view implemented via pushState
+    if (screen === "HISTORY" && st && st.screen === "HISTORY_DAY") {
+      window.history.back();
+      return;
+    }
+
+    // Nested screens: back by browser history
     if (NESTED.includes(screen)) {
       window.history.back();
       return;
     }
 
-    // Табы/обычные экраны (replaceState): всегда на Today
+    // Tabs / non-nested screens: always go to Today
     goToday();
   };
+
 
   // Системный Back (history pop)
   useEffect(() => {

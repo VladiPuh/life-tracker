@@ -40,6 +40,26 @@ export function HistoryPage() {
   const [daysData, setDaysData] = useState<HistoryDayDto[] | null>(null);
   const [detail, setDetail] = useState<HistoryDayDetailDto | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+    // When user goes back from HISTORY_DAY -> LIST, we must reflect it in local state
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const st = (e.state ?? null) as any;
+
+      if (st && st.screen === "HISTORY_DAY") {
+        const day = typeof st.day === "string" ? st.day : null;
+        setSelectedDay(day);
+        return;
+      }
+
+      // Any other state (HISTORY/TODAY/...) means we are not inside a day
+      setSelectedDay(null);
+      setDetail(null);
+    };
+
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
 
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,7 +92,10 @@ export function HistoryPage() {
 
   // load detail when selected
   useEffect(() => {
-    if (!selectedDay) return;
+    if (!selectedDay) {
+      setDetail(null);
+      return;
+    }
     let cancelled = false;
 
     async function loadDetail() {
@@ -177,11 +200,15 @@ export function HistoryPage() {
           {days.map((x) => (
             <div
               key={x.date}
-              onClick={() => setSelectedDay(x.date)}
-              role="button"
-              tabIndex={0}
+              onClick={() => {
+              window.history.pushState({ screen: "HISTORY_DAY", day: x.date }, "");
+              setSelectedDay(x.date);
+              }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") setSelectedDay(x.date);
+                if (e.key === "Enter" || e.key === " ") {
+                  window.history.pushState({ screen: "HISTORY_DAY", day: x.date }, "");
+                  setSelectedDay(x.date);
+                }
               }}
               style={{
                 padding: 14,
