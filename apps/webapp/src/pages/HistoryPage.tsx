@@ -104,30 +104,6 @@ export function HistoryPage() {
   if (selectedDay && detail) {
     return (
       <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial" }}>
-        <button
-          onClick={() => {
-            setSelectedDay(null);
-            setDetail(null);
-          }}
-          style={{
-            border: "none",
-            background: "var(--lt-soft)",
-            color: "var(--lt-text)",
-            borderRadius: 12,
-            padding: "8px 12px",
-            cursor: "pointer",
-            marginBottom: 12,
-
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-
-            fontWeight: 600,
-          }}
-        >
-          ← Назад
-        </button>
-
         <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>
           {formatDateRu(detail.date)}
         </div>

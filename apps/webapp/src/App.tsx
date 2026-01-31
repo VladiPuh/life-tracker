@@ -4,8 +4,6 @@ import {
   logTelegramReady,
 } from "./shared/tg/webapp";
 import { useBack } from "./app/router/useBack";
-
-
 import { ScreenRouter } from "./app/router/ScreenRouter";
 import type { PlaceholderKind } from "./app/router/ScreenRouter";
 import { useNav } from "./app/router/useNav";
@@ -16,7 +14,6 @@ import { useTodayState } from "./state/today";
 import { useAddState } from "./state/add";
 import { useTelegramBootstrap } from "./shared/tg/useTelegramBootstrap";
 import type { TabId } from "./app/shell/BottomNav";
-
 
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
@@ -74,9 +71,7 @@ export default function App() {
             : screen === "DETAIL"
             ? "Челлендж"
             : "Сегодня";
-
     const showBackBar = screen !== "TODAY" || placeholder !== null;
-
     const onBackBar = () => {
       if (placeholder !== null) {
         setPlaceholder(null);
@@ -95,18 +90,15 @@ export default function App() {
           active={activeTab}
           onGo={(tab: TabId) => {
             if (tab !== "insights" && tab !== "profile") setPlaceholder(null);
-
             if (tab === "today") return goToday();
             if (tab === "history") return go("HISTORY");
             if (tab === "new") return goAdd();
             if (tab === "templates") return goTemplates();
-
             if (tab === "insights") {
               goToday();
               setPlaceholder("INSIGHTS");
               return;
             }
-
             if (tab === "profile") {
               goToday();
               setPlaceholder("PROFILE");
@@ -137,7 +129,6 @@ export default function App() {
           setNewDesc,
           newMissPolicy,
           setNewMissPolicy,
-          onBack: () => goBack(),
           onCreate: async () => {
             try {
               await create();

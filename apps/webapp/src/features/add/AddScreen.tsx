@@ -9,9 +9,7 @@ type Props = {
 
   newMissPolicy: MissPolicy;
   setNewMissPolicy: (v: MissPolicy) => void;
-
-  onBack: () => void;
-  onCreate: () => void;
+  onCreate: () => void | Promise<void>;
 };
 
 export function AddScreen(props: Props) {
@@ -22,15 +20,12 @@ export function AddScreen(props: Props) {
     setNewDesc,
     newMissPolicy,
     setNewMissPolicy,
-    onBack,
     onCreate,
   } = props;
 
   return (
     <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-      <button onClick={onBack}>← Назад</button>
-
-      <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 12 }}>
+      <div style={{ padding: 12, border: "1px solid var(--lt-border)", borderRadius: 12, background: "var(--lt-card)" }}>
         <div style={{ fontSize: 18, fontWeight: 700 }}>Добавить челендж</div>
         <div style={{ opacity: 0.7, fontSize: 12, marginTop: 4 }}>
           MVP: делаем короткий мастер (название + политика пропуска).
@@ -42,7 +37,14 @@ export function AddScreen(props: Props) {
             <input
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: 10,
+                borderRadius: 10,
+                border: "1px solid var(--lt-border)",
+                background: "var(--lt-bg)",
+                color: "var(--lt-text)",
+              }}
               placeholder="Напр. Reading"
             />
           </label>
@@ -52,7 +54,14 @@ export function AddScreen(props: Props) {
             <textarea
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
-              style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: 10,
+                borderRadius: 10,
+                border: "1px solid var(--lt-border)",
+                background: "var(--lt-bg)",
+                color: "var(--lt-text)",
+              }}
               placeholder="Что именно делать"
               rows={3}
             />
@@ -63,7 +72,14 @@ export function AddScreen(props: Props) {
             <select
               value={newMissPolicy}
               onChange={(e) => setNewMissPolicy(e.target.value as MissPolicy)}
-              style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
+              style={{
+                width: "100%",
+                padding: 10,
+                borderRadius: 10,
+                border: "1px solid var(--lt-border)",
+                background: "var(--lt-bg)",
+                color: "var(--lt-text)",
+              }}
             >
               <option value="FAIL">FAIL</option>
               <option value="SKIP">SKIP</option>
