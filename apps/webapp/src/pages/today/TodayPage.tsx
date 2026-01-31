@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useTodayState } from "../../state/today";
-import { TodayCard } from "./TodayCard";
-import { FocusSection } from "./FocusSection";
-import { useTodayDerived } from "./useTodayDerived";
+import { TodayCard } from "./";
+import { FocusSection } from "./";
+import { useTodayDerived } from "./";
 
 export function TodayPage(props: { onGoChallenges: () => void }) {
   type Flag = "MIN" | "BONUS" | "SKIP";
