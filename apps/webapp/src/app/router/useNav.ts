@@ -27,19 +27,14 @@ export function useNav() {
   const goAdd = useCallback(() => go("ADD"), [go]);
 
   const goBack = () => {
-    if (window.history.length <= 1) {
-      goToday();
+    // Вложенные экраны: back по стеку (pushState)
+    if (NESTED.includes(screen)) {
+      window.history.back();
       return;
     }
 
-    const st = window.history.state as any;
-
-    if (!st || !st.screen) {
-      goToday();
-      return;
-    }
-
-    window.history.back();
+    // Табы/обычные экраны (replaceState): всегда на Today
+    goToday();
   };
 
   // Системный Back (history pop)
