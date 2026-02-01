@@ -4,8 +4,7 @@ from __future__ import annotations
 
 def compute_status_view(log):
     if log is None:
-        return "WAITING"  # нет факта — ожидание (канон)
-
+        return None
     if log.flag_fail:
         return "FAIL"
     if log.flag_skip:
@@ -14,8 +13,7 @@ def compute_status_view(log):
         return "BONUS"
     if log.flag_min:
         return "MIN"
-    return "WAITING"
-
+    return None
 
 def apply_single_flag(log, flag: str):
     log.flag_min = False

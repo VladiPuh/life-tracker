@@ -1,6 +1,7 @@
 # apps/api/app/services/auto_assign.py
 
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from app.db import SessionLocal
 from app.models import DailyLog
@@ -21,7 +22,7 @@ async def auto_assign_missed():
     - если за сегодня нет записи в daily_log
     - создаём запись по miss_policy (по умолчанию FAIL)
     """
-    today_d = date.today()
+    today_d = datetime.now(ZoneInfo("Europe/Vilnius")).date()
 
     async with SessionLocal() as db:
         users = await get_all_users(db)
@@ -34,14 +35,24 @@ async def auto_assign_missed():
                     db, user.id, ch.id, today_d
                 )
                 if existing:
+                    # авто-assign никогда не трогает ручной факт
+                    if (existing.origin or "MANUAL").upper() == "MANUAL":
+                        continue
+                    # если вдруг есть AUTO-запись — тоже не трогаем в этой версии
                     continue
 
                 policy = (ch.miss_policy or "FAIL").upper()
+                # политика автопроставления: только MIN/FAIL
+                if policy not in ("MIN", "FAIL"):
+                    policy = "FAIL"
+
                 log = DailyLog(
                     user_id=user.id,
                     challenge_id=ch.id,
                     date=today_d,
+                    origin="AUTO",
                 )
+
                 try:
                     apply_single_flag(log, policy)
                 except Exception:

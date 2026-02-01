@@ -21,7 +21,7 @@ async def build_today_view(db: AsyncSession, user_id: int, day: date) -> dict:
         status_view = compute_status_view(log)
         item = TodayItem(challenge_id=ch.id, title=ch.title, status_view=status_view)
         items.append(item)
-        if first_waiting is None and status_view == "WAITING":
+        if first_waiting is None and status_view is None:
             first_waiting = item
 
     return {

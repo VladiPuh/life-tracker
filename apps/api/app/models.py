@@ -16,9 +16,11 @@ class Challenge(Base):
 
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
+    # Тип челленджа: DO | NO_DO
+    type = Column(String, nullable=False, default="DO")
 
     # Политика автопроставления при "не отмечено"
-    # FAIL | MIN | BONUS | SKIP
+    # FAIL | MIN   (BONUS/SKIP запрещены как политика)
     miss_policy = Column(String, nullable=False, default="FAIL")
 
     is_active = Column(Boolean, nullable=False, default=True)
@@ -44,6 +46,8 @@ class DailyLog(Base):
     challenge_id = Column(Integer, ForeignKey("challenges.id"), nullable=False, index=True)
 
     date = Column(Date, nullable=False, index=True)
+    # Происхождение факта: MANUAL | AUTO
+    origin = Column(String, nullable=False, default="MANUAL")
 
     flag_min = Column(Boolean, nullable=False, default=False)
     flag_bonus = Column(Boolean, nullable=False, default=False)
@@ -64,7 +68,7 @@ class ChallengeTemplate(Base):
     description = Column(Text, nullable=True)
 
     # Политика автопроставления при "не отмечено"
-    # FAIL | MIN | BONUS | SKIP
+    # FAIL | MIN
     miss_policy = Column(String, nullable=False, default="FAIL")
 
     # Поля из твоего Excel (все nullable — MVP)
