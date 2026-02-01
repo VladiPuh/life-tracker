@@ -9,13 +9,13 @@ import { ScreenRouter } from "./app/router/ScreenRouter";
 import { useNav } from "./app/router/useNav";
 import { AppShell } from "./app/shell/AppShell";
 import { BottomNav } from "./app/shell/BottomNav";
-import { useTemplatesState } from "./state/templates";
 import { useTodayState } from "./state/today";
-import { useAddState } from "./state/add";
 import { useTelegramBootstrap } from "./shared/tg/useTelegramBootstrap";
 import type { TabId } from "./app/shell/BottomNav";
 import { getActiveTab, getPageTitle, shouldShowBackBar } from "./app/appViewModel";
 import { usePlaceholder } from "./app/state/usePlaceholder";
+import { useRouterBindings } from "./app/router/useRouterBindings";
+
 
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
@@ -25,10 +25,18 @@ export default function App() {
   const [ selectedId, setSelectedId] = useState<number | null>(null);
   const { resetShowAll } = useTodayState();
   const { screen, go, goBack, goToday, goTemplates, goAdd } = useNav();
-  const { templates, addTemplate } = useTemplatesState();
   const { placeholder, openPlaceholder, closePlaceholder } = usePlaceholder();
-  const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
-    useAddState();
+  const { bindings: routerBindings } = useRouterBindings({
+    screen,
+    placeholder,
+    go,
+    goBack,
+    goAdd,
+    goToday,
+    selectedId,
+    setSelectedId,
+    closePlaceholder,
+  });
 
     useEffect(() => {
       if (screen === "TODAY") {
@@ -84,41 +92,7 @@ export default function App() {
         />
       }
       >
-      <ScreenRouter
-        screen={screen}
-        placeholder={placeholder}
-        onGoChallenges={() => {
-          closePlaceholder();
-          go("CHALLENGES");
-        }}
-        templates={templates}
-        onAddTemplate={async (templateId) => {
-          try {
-            await addTemplate(templateId);
-            goAdd();
-          } catch (e: any) {}
-        }}
-        addProps={{
-          newTitle,
-          setNewTitle,
-          newDesc,
-          setNewDesc,
-          newMissPolicy,
-          setNewMissPolicy,
-          onCreate: async () => {
-            try {
-              await create();
-              goToday();
-            } catch (e: any) {}
-          },
-        }}
-        selectedId={selectedId}
-        onOpenChallenge={(id) => {
-          setSelectedId(id);
-          go("DETAIL");
-        }}
-        onBackFromDetail={() => goBack()}
-      />
+      <ScreenRouter {...routerBindings} />
     </AppShell>
   );
 }
