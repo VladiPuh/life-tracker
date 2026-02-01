@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+const norm = (s: unknown) => String(s ?? "").trim().toUpperCase();
+
 export type TodayItem = {
   challenge_id: number;
   title: string;
@@ -20,7 +22,7 @@ export function useTodayDerived(args: {
   note: string;
 }) {
   const waiting = useMemo(() => {
-    return (args.today?.all ?? []).filter((x) => x.status_view === "WAITING");
+    return (args.today?.all ?? []).filter((x) => norm(x.status_view) === "WAITING");
   }, [args.today]);
 
   const baseCurrent = args.today?.first_uncompleted ?? waiting[0] ?? null;
