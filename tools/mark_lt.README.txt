@@ -1,0 +1,23 @@
+В VS Code → правый клик по файлу → Copy Relative Path
+
+
+2. Запустить скрипт, указав:
+   - список файлов (относительные пути)
+   - если несколько файлов, то в конце везде ставим ,^ КРОМЕ ПОСЛЕДНЕГО
+
+------------------------------------------------------------------------(один файл): --------------------------------------------------------
+powershell
+
+cd D:\Life-Tracker
+powershell -ExecutionPolicy Bypass -File "tools\mark_lt.ps1" -Tag "AUTO" -Files "apps/webapp/src/pages/today/TodayPage.tsx"
+
+---------------------------------------------------------------------(несколько файлов):-----------------------------------------------------
+powershell
+
+cd D:\Life-Tracker
+
+powershell -ExecutionPolicy Bypass -File "tools\mark_lt.ps1" ^
+-Tag "AUTO" ^
+-Files ^
+"apps/webapp/src/pages/today/TodayPage.tsx", ^
+"apps/webapp/src/pages/today/useTodayDerived.ts"

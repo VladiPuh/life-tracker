@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-type TodayItem = {
+export type TodayItem = {
   challenge_id: number;
   title: string;
   status_view: string;

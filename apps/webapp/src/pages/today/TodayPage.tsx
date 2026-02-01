@@ -3,6 +3,7 @@ import { useTodayState } from "../../state/today";
 import { TodayCard } from "./";
 import { FocusSection } from "./";
 import { useTodayDerived } from "./";
+import type { TodayItem } from "./useTodayDerived";
 
 export function TodayPage(props: { onGoChallenges: () => void }) {
   type Flag = "MIN" | "BONUS" | "SKIP";
@@ -37,7 +38,9 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
     if (!today) return;
     if (focusOverrideId == null) return;
 
-    const it = today.all.find((x: { challenge_id: number; status_view: string }) => x.challenge_id === focusOverrideId);
+    const it = today.all.find(
+      (x: TodayItem) => x.challenge_id === focusOverrideId
+    );
       if (!it || it.status_view !== "WAITING") setFocusOverrideId(null);
   }, [today, focusOverrideId]);
 
@@ -94,9 +97,11 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
 
     const curId = current?.challenge_id ?? null;
     const idx =
-      curId != null ? waiting.findIndex((x: { challenge_id: number }) => x.challenge_id === curId) : -1;
-    const next = waiting[(idx + 1 + waiting.length) % waiting.length];
+      curId != null
+        ? waiting.findIndex((x: TodayItem) => x.challenge_id === curId)
+        : -1;
 
+    const next = waiting[(idx + 1 + waiting.length) % waiting.length];
     setFocusOverrideId(next.challenge_id);
     closeForm(); // на всякий случай закрываем форму статуса
   };

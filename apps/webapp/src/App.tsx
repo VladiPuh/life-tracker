@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+﻿// LT-SOURCE: AUTO 2026-02-01 03:02
+import { useEffect, useState } from "react";
 import {
   initTelegram,
   logTelegramReady,
