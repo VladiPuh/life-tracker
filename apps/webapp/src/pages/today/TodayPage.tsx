@@ -123,6 +123,10 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
 
   return (
     <div>
+      <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 8 }}>
+        dbg: today={today ? today.all.length : "null"} waiting={waiting.length} current={current ? current.title : "null"} first_uncompleted={today?.first_uncompleted ? today.first_uncompleted.title : "null"}
+      </div>
+
       <FocusSection
         pickOpen={pickOpen}
         pickTop={pickTop}
