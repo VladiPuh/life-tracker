@@ -19,17 +19,19 @@ export function useTodayDerived(args: {
   pending: Flag | null;
   note: string;
 }) {
-  const baseCurrent = args.today?.first_uncompleted ?? null;
-
   const waiting = useMemo(() => {
     return (args.today?.all ?? []).filter((x) => x.status_view === "WAITING");
   }, [args.today]);
 
+  const baseCurrent = args.today?.first_uncompleted ?? waiting[0] ?? null;
+
   const current = useMemo(() => {
     if (args.focusOverrideId == null) return baseCurrent;
-    const found = (args.today?.all ?? []).find((x) => x.challenge_id === args.focusOverrideId) ?? null;
+    const found =
+      (args.today?.all ?? []).find((x) => x.challenge_id === args.focusOverrideId) ?? null;
     return found ?? baseCurrent;
   }, [args.today, args.focusOverrideId, baseCurrent]);
+
 
   const challengeTitle = current?.title ?? "На сегодня всё";
   const currentStatus = current?.status_view ?? null;
