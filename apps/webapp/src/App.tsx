@@ -16,6 +16,7 @@ import { useAddState } from "./state/add";
 import { useTelegramBootstrap } from "./shared/tg/useTelegramBootstrap";
 import type { TabId } from "./app/shell/BottomNav";
 import { getActiveTab, getPageTitle, shouldShowBackBar } from "./app/appViewModel";
+import { usePlaceholder } from "./app/state/usePlaceholder";
 
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
@@ -23,10 +24,10 @@ const BUILD_LABEL = __BUILD_ID__;
 export default function App() {
   const { tgPresent, tgOk } = useTelegramBootstrap();
   const [ selectedId, setSelectedId] = useState<number | null>(null);
-  const [ placeholder, setPlaceholder] = useState<PlaceholderKind | null>(null);
   const { resetShowAll } = useTodayState();
   const { screen, go, goBack, goToday, goTemplates, goAdd } = useNav();
   const { templates, addTemplate } = useTemplatesState();
+  const { placeholder, openPlaceholder, closePlaceholder } = usePlaceholder();
   const { newTitle, setNewTitle, newDesc, setNewDesc, newMissPolicy, setNewMissPolicy, create } =
     useAddState();
 
@@ -50,7 +51,7 @@ export default function App() {
     const showBackBar = shouldShowBackBar({ screen, placeholder });
     const onBackBar = () => {
       if (placeholder !== null) {
-        setPlaceholder(null);
+        closePlaceholder();
         return;
       }
       goBack();
@@ -65,19 +66,19 @@ export default function App() {
         <BottomNav
           active={activeTab}
           onGo={(tab: TabId) => {
-            if (tab !== "insights" && tab !== "profile") setPlaceholder(null);
+            if (tab !== "insights" && tab !== "profile") closePlaceholder();
             if (tab === "today") return goToday();
             if (tab === "history") return go("HISTORY");
             if (tab === "new") return goAdd();
             if (tab === "templates") return goTemplates();
             if (tab === "insights") {
               goToday();
-              setPlaceholder("INSIGHTS");
+              openPlaceholder("INSIGHTS");
               return;
             }
             if (tab === "profile") {
               goToday();
-              setPlaceholder("PROFILE");
+              openPlaceholder("PROFILE");
               return;
             }
           }}
@@ -88,7 +89,7 @@ export default function App() {
         screen={screen}
         placeholder={placeholder}
         onGoChallenges={() => {
-          setPlaceholder(null);
+          closePlaceholder();
           go("CHALLENGES");
         }}
         templates={templates}
