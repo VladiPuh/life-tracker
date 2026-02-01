@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useTodayState } from "../../state/today";
 import { TodayCard } from "./";
 import { FocusSection } from "./";
-import { useTodayDerived } from "./";
-import type { TodayItem } from "./useTodayDerived";
+import { useTodayDerived } from "./useTodayDerived";
+import type { TodayItem } from "../../shared/domain/types";
 
 export function TodayPage(props: { onGoChallenges: () => void }) {
   type Flag = "MIN" | "BONUS" | "SKIP";
@@ -41,7 +41,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
     const it = today.all.find(
       (x: TodayItem) => x.challenge_id === focusOverrideId
     );
-      if (!it || it.status_view !== "WAITING") setFocusOverrideId(null);
+      if (!it || it.status_view != null) return;
   }, [today, focusOverrideId]);
 
   useEffect(() => {

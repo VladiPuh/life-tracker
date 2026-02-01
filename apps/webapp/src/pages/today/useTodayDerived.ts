@@ -1,30 +1,17 @@
 import { useMemo } from "react";
-
-const norm = (s: unknown) => String(s ?? "").trim().toUpperCase();
-
-export type TodayItem = {
-  challenge_id: number;
-  title: string;
-  status_view: string;
-};
-
-type TodayPayload = {
-  first_uncompleted: TodayItem | null;
-  all: TodayItem[];
-} | null;
+import type { TodayItem } from "../../shared/domain/types";
 
 type Flag = "MIN" | "BONUS" | "SKIP";
 
 export function useTodayDerived(args: {
-  today: TodayPayload;
+  today: { first_uncompleted: TodayItem | null; all: TodayItem[] } | null;
   focusOverrideId: number | null;
   pending: Flag | null;
   note: string;
 }) {
   const waiting = useMemo(() => {
     const all = args.today?.all ?? [];
-    const w = all.filter((x) => norm(x.status_view) === "WAITING");
-    return w.length ? w : all;
+    return all.filter((x: TodayItem) => x.status_view == null);
   }, [args.today]);
 
   const baseCurrent = args.today?.first_uncompleted ?? waiting[0] ?? null;

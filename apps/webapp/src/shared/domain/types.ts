@@ -1,4 +1,4 @@
-export type StatusView = "WAITING" | "MIN" | "BONUS" | "SKIP" | "FAIL";
+export type StatusView = "MIN" | "BONUS" | "SKIP" | "FAIL" | null;
 
 export type TodayItem = {
   challenge_id: number;

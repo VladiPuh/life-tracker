@@ -2,7 +2,7 @@ import type { StatusView } from "../domain/types";
 
 export function StatusPill({ s }: { s: StatusView }) {
   const label =
-    s === "WAITING" ? "В ожидании" :
+    s == null ? "В ожидании" :
     s === "MIN" ? "MIN" :
     s === "BONUS" ? "BONUS" :
     s === "SKIP" ? "SKIP" : "FAIL";

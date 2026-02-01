@@ -1,17 +1,17 @@
 import type { RefObject } from "react";
 import { TodayCard } from "./TodayCard";
+import type { TodayItem } from "../../shared/domain/types";
 
-type WaitingItem = {
-  challenge_id: number;
-  title: string;
-  status_view: string;
+type Props = {
+  pickOpen: boolean;
+  pickTop: number;
+  onClosePick: () => void;
+
+  waiting: TodayItem[];
+  current: TodayItem | null;
+
+  onPickChallenge: (id: number) => void;
 };
-
-type CurrentItem = {
-  challenge_id: number;
-  title: string;
-  status_view: string;
-} | null;
 
 function StatusButton(props: {
   title: string;
@@ -46,15 +46,7 @@ function StatusButton(props: {
   );
 }
 
-export function FocusSection(props: {
-  // picker modal
-  pickOpen: boolean;
-  pickTop: number;
-  onClosePick: () => void;
-  waiting: WaitingItem[];
-  current: CurrentItem;
-  onPickChallenge: (id: number) => void;
-
+type FocusSectionProps = Props & {
   // focus header
   focusCardRef: RefObject<HTMLDivElement | null>;
   challengeTitle: string;
@@ -82,7 +74,10 @@ export function FocusSection(props: {
   closeForm: () => void;
 
   savedPulse: boolean;
-}) {
+};
+
+export function FocusSection(props: FocusSectionProps) {
+
   const waitingCount = props.waiting.length;
 
   return (
