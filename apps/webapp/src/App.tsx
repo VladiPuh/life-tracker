@@ -6,7 +6,6 @@ import {
 } from "./shared/tg/webapp";
 import { useBack } from "./app/router/useBack";
 import { ScreenRouter } from "./app/router/ScreenRouter";
-import type { PlaceholderKind } from "./app/router/ScreenRouter";
 import { useNav } from "./app/router/useNav";
 import { AppShell } from "./app/shell/AppShell";
 import { BottomNav } from "./app/shell/BottomNav";
