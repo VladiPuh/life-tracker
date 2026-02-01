@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import date
 from typing import Optional, Literal
 
-MissPolicy = Literal["FAIL", "MIN", "BONUS", "SKIP"]
+MissPolicy = Literal["FAIL", "MIN"]
 
 class ChallengeCreate(BaseModel):
     title: str
