@@ -1,4 +1,4 @@
-﻿// LT-SOURCE: AUTO 2026-02-01 03:02
+﻿// LT-SOURCE: AUTO 2026-02-01 03:17
 import { useEffect, useState } from "react";
 import {
   initTelegram,
@@ -15,6 +15,7 @@ import { useTodayState } from "./state/today";
 import { useAddState } from "./state/add";
 import { useTelegramBootstrap } from "./shared/tg/useTelegramBootstrap";
 import type { TabId } from "./app/shell/BottomNav";
+import { getActiveTab, getPageTitle, shouldShowBackBar } from "./app/appViewModel";
 
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
@@ -44,35 +45,9 @@ export default function App() {
     useBack(tgOk);
 
     // active tab
-    const activeTab: TabId =
-      placeholder === "INSIGHTS"
-        ? "insights"
-        : placeholder === "PROFILE"
-        ? "profile"
-        : screen === "ADD"
-        ? "new"
-        : screen === "TEMPLATES"
-        ? "templates"
-        : screen === "HISTORY"
-        ? "history"
-        : "today";
-        const pageTitle =
-          placeholder === "INSIGHTS"
-            ? "Инсайты"
-            : placeholder === "PROFILE"
-            ? "Профиль"
-            : screen === "HISTORY"
-            ? "История"
-            : screen === "TEMPLATES"
-            ? "Шаблоны"
-            : screen === "ADD"
-            ? "Новый"
-            : screen === "CHALLENGES"
-            ? "Челленджи"
-            : screen === "DETAIL"
-            ? "Челлендж"
-            : "Сегодня";
-    const showBackBar = screen !== "TODAY" || placeholder !== null;
+    const activeTab = getActiveTab({ screen, placeholder });
+    const pageTitle = getPageTitle({ screen, placeholder });
+    const showBackBar = shouldShowBackBar({ screen, placeholder });
     const onBackBar = () => {
       if (placeholder !== null) {
         setPlaceholder(null);
