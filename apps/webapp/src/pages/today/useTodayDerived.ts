@@ -22,7 +22,9 @@ export function useTodayDerived(args: {
   note: string;
 }) {
   const waiting = useMemo(() => {
-    return (args.today?.all ?? []).filter((x) => norm(x.status_view) === "WAITING");
+    const all = args.today?.all ?? [];
+    const w = all.filter((x) => norm(x.status_view) === "WAITING");
+    return w.length ? w : all;
   }, [args.today]);
 
   const baseCurrent = args.today?.first_uncompleted ?? waiting[0] ?? null;
