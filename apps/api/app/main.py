@@ -101,7 +101,16 @@ async def on_startup():
 
     # 3) Планировщик (один экземпляр)
     if not getattr(app.state, "scheduler", None):
-        scheduler = AsyncIOScheduler(timezone="Europe/Vilnius")
-        scheduler.add_job(auto_assign_missed, "cron", hour=23, minute=59)
+        scheduler = AsyncIOScheduler(timezone="UTC")
+        scheduler.add_job(
+            auto_assign_missed,
+            trigger="interval",
+            minutes=1,
+            id="auto_assign_missed",
+            replace_existing=True,
+            coalesce=True,
+            max_instances=1,
+        )
         scheduler.start()
         app.state.scheduler = scheduler
+

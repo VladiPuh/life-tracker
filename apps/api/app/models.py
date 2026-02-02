@@ -8,6 +8,8 @@ class User(Base):
     telegram_id = Column(Integer, unique=True, nullable=False, index=True)
     username = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    timezone = Column(String, nullable=False, default="Europe/Vilnius")
+    last_closed_date = Column(Date, nullable=True)
 
 class Challenge(Base):
     __tablename__ = "challenges"
@@ -59,6 +61,8 @@ class DailyLog(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    edited_at = Column(DateTime)
+    edited_origin = Column(String)
 
 class ChallengeTemplate(Base):
     __tablename__ = "challenge_templates"

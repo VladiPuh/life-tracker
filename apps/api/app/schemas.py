@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, model_validator
 from datetime import date
 from typing import Optional, Literal
 
@@ -21,6 +21,13 @@ class DailyFlagSet(BaseModel):
     flag: Literal["MIN", "BONUS", "SKIP", "FAIL"]
     minutes_fact: Optional[int] = None
     comment: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _require_comment_for_fail_skip(self):
+        if self.flag in ("FAIL", "SKIP"):
+            if self.comment is None or self.comment.strip() == "":
+                raise ValueError("comment is required for FAIL/SKIP")
+        return self
 
 class TodayItem(BaseModel):
     challenge_id: int

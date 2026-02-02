@@ -16,6 +16,5 @@ async def today(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    today_d = datetime.now(ZoneInfo("Europe/Vilnius")).date()
-    return await build_today_view(db, user.id, today_d)
-
+    today_d = datetime.now(ZoneInfo(user.timezone)).date()
+    return await build_today_view(db, user, today_d)
