@@ -30,3 +30,8 @@ TREE_REPO_*.txt
 
 # legacy duplicate backend root (must not exist)
 app/
+
+# local-only docs (do not commit)
+CANON/
+_CHAT_CONTEXT/
+
