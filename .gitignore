@@ -1,37 +1,71 @@
-﻿__pycache__/
-*.pyc
+﻿# =========================
+# Life-Tracker .gitignore
+# (project hygiene + canon rules)
+# =========================
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# --- Env / secrets ---
 .env
+.env.*
+!.env.example
+
+# --- Python ---
 .venv/
-node_modules/
-dist/
-*.db
-
-_SERVER_SNAPSHOT/
-
-
-_SERVER_SNAPSHOT/
-
+venv/
 __pycache__/
 *.pyc
-_TREE_*.txt
-_TEMPLATES_INPUT.txt
-_AUTO_ASSIGN_INPUT.txt
-tree_D_Life-Tracker.txt
-# --- LifeTracker hygiene ---
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Node / Vite ---
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Webapp specific
 apps/webapp/node_modules/
 apps/webapp/dist/
 apps/webapp/.wrangler/
-**/__pycache__/
-**/*.pyc
+apps/webapp/.vite/
 
-# local archives / snapshots (do not commit)
+# --- Databases / local state ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Logs / runtime junk ---
+logs/
+*.log
+
+# --- Local archives / snapshots (do not commit) ---
 *.tar.gz
+*.zip
+_SERVER_SNAPSHOT/
+_TREE_*.txt
 TREE_REPO_*.txt
+tree_D_Life-Tracker.txt
+_TEMPLATES_INPUT.txt
+_AUTO_ASSIGN_INPUT.txt
 
-# legacy duplicate backend root (must not exist)
-app/
-
-# local-only docs (do not commit)
+# --- Local-only docs (canon: do not commit) ---
 CANON/
 _CHAT_CONTEXT/
 
+# --- Legacy duplicate backend root (must not exist) ---
+# IMPORTANT: leading slash means "ONLY repo root".
+# This prevents accidental ignoring of apps/webapp/src/app
+/app/
