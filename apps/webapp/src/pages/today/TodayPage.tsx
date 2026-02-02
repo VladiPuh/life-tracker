@@ -123,11 +123,6 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
 
   return (
     <div>
-      
-    <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 8 }}>
-      dbg2: today={today ? today.all.length : "null"} waiting={waiting.length} statuses={(today?.all ?? []).map(x => x.status_view).join("|")}
-    </div>
-
       <FocusSection
         pickOpen={pickOpen}
         pickTop={pickTop}
