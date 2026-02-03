@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { HistoryDayDetailDto } from "./dto";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HistoryChallengeRow } from "./HistoryChallengeRow";
 import { HistoryChallengeEdit } from "./HistoryChallengeEdit";
 
@@ -15,6 +15,13 @@ export function HistoryDayView(props: {
   const { shellStyle, dateLabel, detail, err, statusLabel } = props;
     
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 1400);
+    return () => window.clearTimeout(t);
+  }, [toast]);
 
   return (
     <div style={shellStyle}>
@@ -49,7 +56,10 @@ export function HistoryDayView(props: {
                     it={it}
                     dateLabel={dateLabel}
                     onCancel={() => setEditingId(null)}
-                    onSave={() => setEditingId(null)}
+                    onSave={() => {
+                        setEditingId(null);
+                        setToast(`Изменения сохранены (${dateLabel})`);
+                        }}
                 />
                 );
             }
@@ -63,6 +73,25 @@ export function HistoryDayView(props: {
                 />
             );
             })}
+        </div>
+      )}
+            {toast && (
+        <div
+          style={{
+            position: "fixed",
+            left: 16,
+            right: 16,
+            bottom: 16,
+            padding: "10px 12px",
+            borderRadius: 12,
+            border: "1px solid rgba(0,0,0,0.14)",
+            background: "rgba(255,255,255,0.92)",
+            fontSize: 12,
+            opacity: 0.95,
+            zIndex: 50,
+          }}
+        >
+          {toast}
         </div>
       )}
     </div>
