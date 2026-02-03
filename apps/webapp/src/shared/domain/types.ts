@@ -3,7 +3,7 @@ export type StatusView = "MIN" | "BONUS" | "SKIP" | "FAIL" | null;
 export type TodayItem = {
   challenge_id: number;
   title: string;
-  status_view: StatusView;
+  status_view: StatusView | null;
 };
 
 export type TodayResponse = {
