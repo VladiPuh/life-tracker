@@ -69,3 +69,6 @@ _CHAT_CONTEXT/
 # IMPORTANT: leading slash means "ONLY repo root".
 # This prevents accidental ignoring of apps/webapp/src/app
 /app/
+
+# --- Local reports (do not commit) ---
+code-review-report.html
