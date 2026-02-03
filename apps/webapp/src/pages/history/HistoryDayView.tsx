@@ -1,17 +1,5 @@
 import type { CSSProperties } from "react";
-
-type HistoryDayDetailItemDto = {
-  challenge_id: number;
-  title: string;
-  status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
-  minutes_fact: number | null;
-  comment: string | null;
-};
-
-type HistoryDayDetailDto = {
-  date: string;
-  items: HistoryDayDetailItemDto[];
-};
+import type { HistoryDayDetailDto } from "./dto";
 
 export function HistoryDayView(props: {
   shellStyle: CSSProperties;

@@ -1,14 +1,5 @@
 import type { CSSProperties } from "react";
-
-type DayVm = {
-  date: string;
-  dateLabel: string;
-  total: number;
-  min: number;
-  bonus: number;
-  skip: number;
-  fail: number;
-};
+import type { DayVm } from "./dto";
 
 export function HistoryDaysList(props: {
   shellStyle: CSSProperties;

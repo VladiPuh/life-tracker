@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { apiGet } from "../../shared/api/client";
 import { HistoryDaysList } from "./HistoryDaysList";
 import { HistoryDayView } from "./HistoryDayView";
+import { formatDateRu } from "./formatDateRu";
+import { statusLabel } from "./statusLabel";
 
 type HistoryDayDto = {
   date: string; // YYYY-MM-DD
@@ -24,25 +26,6 @@ type HistoryDayDetailDto = {
   date: string; // YYYY-MM-DD
   items: HistoryDayDetailItemDto[];
 };
-
-function formatDateRu(isoDate: string): string {
-  const [y, m, d] = isoDate.split("-").map((x) => parseInt(x, 10));
-  const dt = new Date(y, (m ?? 1) - 1, d ?? 1);
-  return dt.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
-}
-
-function statusLabel(s: unknown) {
-  if (s === "MIN") return "✅ MIN";
-  if (s === "BONUS") return "⭐ BONUS";
-  if (s === "SKIP") return "↩️ SKIP";
-  if (s === "FAIL") return "⚑ FAIL";
-
-  // Канон: других значений быть не должно.
-  // Не прячем расхождение: показываем нейтрально + сигналим в консоль.
-  // eslint-disable-next-line no-console
-  console.warn("[History] unexpected status_view:", s);
-  return "❓ UNKNOWN";
-}
 
 // We keep LIST visible, highlight the clicked day,
 // and only switch to DETAIL after:
