@@ -62,6 +62,35 @@ export function HistoryDayView(props: {
   return (
     <div style={shellStyle}>
       <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>{dateLabel}</div>
+        {toast && (
+        <div
+          style={{
+            position: "sticky",
+            top: "calc(10px + var(--safe-top, 0px))",
+            zIndex: 50,
+
+            marginTop: 8,
+            marginBottom: 10,
+
+            padding: "10px 14px",
+            borderRadius: 12,
+
+            background: "rgba(0,0,0,0.78)",
+            border: "1px solid rgba(255,255,255,0.12)",
+
+            color: "#ffffff",
+            fontSize: 13,
+            fontWeight: 600,
+            textAlign: "center",
+
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {toast}
+        </div>
+      )}
 
       {err && (
         <div
@@ -161,39 +190,9 @@ export function HistoryDayView(props: {
                 />
               </div>
             );
-
             })}
         </div>
       )}
-            {toast && (
-              <div
-                style={{
-                  position: "sticky",
-                  top: "calc(10px + var(--safe-top, 0px))",
-                  zIndex: 50,
-
-                  marginTop: 8,
-                  marginBottom: 10,
-
-                  padding: "10px 14px",
-                  borderRadius: 12,
-
-                  background: "rgba(0,0,0,0.78)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-
-                  color: "#ffffff",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  textAlign: "center",
-
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {toast}
-              </div>
-            )}
     </div>
   );
 }
