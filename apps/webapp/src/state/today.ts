@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
-import type { TodayResponse } from "../shared/domain/types";
+import type { StatusView, TodayResponse } from "../shared/domain/types";
 import { LifeTrackerApi } from "../shared/api/lifetracker";
 
-type Flag = "MIN" | "BONUS" | "SKIP" | "FAIL";
+type Flag = Exclude<StatusView, null>;
 
 export function useTodayState() {
   const [today, setToday] = useState<TodayResponse | null>(null);
