@@ -1,5 +1,9 @@
 import type { CSSProperties } from "react";
 import type { HistoryDayDetailDto } from "./dto";
+import { useState } from "react";
+import { HistoryChallengeRow } from "./HistoryChallengeRow";
+import { HistoryChallengeEdit } from "./HistoryChallengeEdit";
+
 
 export function HistoryDayView(props: {
   shellStyle: CSSProperties;
@@ -9,6 +13,8 @@ export function HistoryDayView(props: {
   statusLabel: (s: unknown) => string;
 }) {
   const { shellStyle, dateLabel, detail, err, statusLabel } = props;
+    
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   return (
     <div style={shellStyle}>
@@ -33,31 +39,30 @@ export function HistoryDayView(props: {
         <div style={{ opacity: 0.7 }}>Нет фактов за этот день.</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {detail.items.map((it) => (
-            <div
-              key={`${it.challenge_id}`}
-              style={{
-                padding: 14,
-                borderRadius: 14,
-                border: "1px solid rgba(0,0,0,0.08)",
-                background: "rgba(0,0,0,0.02)",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ fontSize: 13, fontWeight: 800 }}>{it.title}</div>
-                <div style={{ fontSize: 12, opacity: 0.8, whiteSpace: "nowrap" }}>
-                  {statusLabel(it.status_view)}
-                </div>
-              </div>
+          {detail.items.map((it) => {
+            const isEditing = editingId === it.challenge_id;
 
-              {(it.minutes_fact != null || (it.comment ?? "").trim().length > 0) && (
-                <div style={{ marginTop: 10, fontSize: 12, opacity: 0.8, lineHeight: 1.35 }}>
-                  {it.minutes_fact != null && <div>Минут: {it.minutes_fact}</div>}
-                  {(it.comment ?? "").trim().length > 0 && <div>Комментарий: {it.comment}</div>}
-                </div>
-              )}
-            </div>
-          ))}
+            if (isEditing) {
+                return (
+                <HistoryChallengeEdit
+                    key={`${it.challenge_id}`}
+                    it={it}
+                    dateLabel={dateLabel}
+                    onCancel={() => setEditingId(null)}
+                    onSave={() => setEditingId(null)}
+                />
+                );
+            }
+
+            return (
+                <HistoryChallengeRow
+                key={`${it.challenge_id}`}
+                it={it}
+                statusLabel={statusLabel}
+                onEdit={() => setEditingId(it.challenge_id)}
+                />
+            );
+            })}
         </div>
       )}
     </div>
