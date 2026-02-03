@@ -168,11 +168,12 @@ export function HistoryDayView(props: {
             {toast && (
               <div
                 style={{
-                  position: "fixed",
-                  left: 12,
-                  right: 12,
+                  position: "sticky",
                   top: "calc(10px + var(--safe-top, 0px))",
-                  zIndex: 2000,
+                  zIndex: 50,
+
+                  marginTop: 8,
+                  marginBottom: 10,
 
                   padding: "10px 14px",
                   borderRadius: 12,
@@ -188,8 +189,6 @@ export function HistoryDayView(props: {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-
-                  pointerEvents: "none",
                 }}
               >
                 {toast}
