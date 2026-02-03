@@ -1,5 +1,5 @@
 ﻿// LT-SOURCE: AUTO 2026-02-01 03:21
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   initTelegram,
   logTelegramReady,
@@ -22,6 +22,7 @@ const BUILD_LABEL = __BUILD_ID__;
 
 export default function App() {
   const { tgPresent, tgOk } = useTelegramBootstrap();
+  const didTgInit = useRef(false);
   const [ selectedId, setSelectedId] = useState<number | null>(null);
   const { resetShowAll } = useTodayState();
   const { screen, go, goBack, goToday, goTemplates, goAdd } = useNav();
@@ -46,6 +47,9 @@ export default function App() {
 
     useEffect(() => {
       if (!tgPresent) return;
+      if (didTgInit.current) return;
+      didTgInit.current = true;
+
       initTelegram();
       logTelegramReady();
     }, [tgPresent]);
