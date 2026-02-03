@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 type Props = {
   title: string;
@@ -14,6 +14,33 @@ type Props = {
 };
 
 export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Props) {
+  const [isInputActive, setIsInputActive] = useState(false);
+
+  useEffect(() => {
+    const isFormEl = (el: Element | null) => {
+      const node = el as HTMLElement | null;
+      if (!node) return false;
+      const tag = node.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return true;
+      if (node.isContentEditable) return true;
+      return false;
+    };
+
+    const sync = () => setIsInputActive(isFormEl(document.activeElement));
+
+    const onFocusIn = () => sync();
+    const onFocusOut = () => requestAnimationFrame(sync);
+
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+
+    sync();
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -64,9 +91,11 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
           paddingLeft: "var(--app-pad)",
           paddingRight: "var(--app-pad)",
           paddingTop: "calc(var(--app-pad) + var(--topbar-gap))",
-          paddingBottom: backBar?.show
-            ? "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom) + 52px)" // 44 кнопка + 8 gap
-            : "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom))",
+                    paddingBottom: isInputActive
+            ? "calc(var(--app-pad) + var(--safe-bottom))"
+            : backBar?.show
+              ? "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom) + 52px)" // 44 кнопка + 8 gap
+              : "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom))",
           WebkitOverflowScrolling: "touch",
         }}
       >
@@ -74,7 +103,7 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
       </div>
 
       {/* BackBar (outside scroll, above BottomNav) */}
-      {backBar?.show ? (
+      {backBar?.show && !isInputActive ? (
         <div
           style={{
             flexShrink: 0,
@@ -127,10 +156,11 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
           </button>
         </div>
       ) : null}
-
-      <div style={{ position: "relative", zIndex: 10 }}>
-        {bottomNav}
-      </div>
+      {!isInputActive ? (
+        <div style={{ position: "relative", zIndex: 10 }}>
+          {bottomNav}
+        </div>
+      ) : null}
     </div>
   );
 }

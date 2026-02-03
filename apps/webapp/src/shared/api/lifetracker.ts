@@ -34,15 +34,16 @@ export const LifeTrackerApi = {
     minutes_fact?: number | null
   ): Promise<{ ok: true }> {
     return apiPost("/daily-log/upsert", {
-      challenge_id,
-      flag,
-      comment: comment ?? null,
-      minutes_fact: minutes_fact ?? null,
-    }) as Promise<{ ok: true }>;
+    challenge_id,
+    flag,
+    comment: comment ?? null,
+    minutes_fact: minutes_fact ?? null,
+  }) as Promise<{ ok: true }>;
   },
 
   // Templates
   getTemplates(): Promise<TemplateItem[]> {
+
     return apiGet<TemplateItem[]>("/templates");
   },
 
@@ -54,7 +55,7 @@ export const LifeTrackerApi = {
   createChallenge(payload: {
     title: string;
     description: string | null;
-    miss_policy: "FAIL" | "MIN" | "BONUS" | "SKIP";
+    miss_policy: "FAIL" | "MIN";
   }): Promise<{ id: number }> {
     return apiPost("/challenges", payload) as Promise<{ id: number }>;
   },

@@ -1,4 +1,4 @@
-type MissPolicy = "FAIL" | "MIN" | "BONUS" | "SKIP";
+type MissPolicy = "FAIL" | "MIN";
 
 type Props = {
   newTitle: string;

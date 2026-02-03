@@ -187,6 +187,18 @@ export function HistoryPage() {
         detail={detail}
         err={err}
         statusLabel={statusLabel}
+        onPatchItem={(challenge_id, patch) => {
+          setDetail((prev) => {
+            if (!prev) return prev;
+            if (prev.date !== detail.date) return prev;
+            return {
+              ...prev,
+              items: prev.items.map((x) =>
+                x.challenge_id === challenge_id ? { ...x, ...patch } : x
+              ),
+            };
+          });
+        }}
       />
     );
   }

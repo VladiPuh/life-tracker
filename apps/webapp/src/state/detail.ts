@@ -8,15 +8,16 @@ export function useDetailState() {
 
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
-  const [editMiss, setEditMiss] = useState<"FAIL" | "MIN" | "BONUS" | "SKIP">("FAIL");
+  const [editMiss, setEditMiss] = useState<"FAIL" | "MIN">("FAIL");
   const [editActive, setEditActive] = useState(true);
 
   const loadChallenge = useCallback(async (challengeId: number) => {
     const data = await LifeTrackerApi.getChallenge(challengeId);
     setChallengeFull(data);
-    setEditMiss(data.miss_policy);
+    setEditMiss(data.miss_policy === "MIN" ? "MIN" : "FAIL");
     setEditActive(data.is_active);
     setEditDesc(data.description ?? "");
+    setEditTitle(data.title ?? "");
   }, []);
 
   const loadHistory = useCallback(async (challengeId: number) => {

@@ -16,7 +16,7 @@ export type TemplateItem = {
   id: number;
   title: string;
   description?: string | null;
-  miss_policy: "FAIL" | "MIN" | "BONUS" | "SKIP";
+  miss_policy: "FAIL" | "MIN";
 };
 
 export type HistoryItem = {
@@ -34,7 +34,7 @@ export type HistoryResponse = {
 export type ChallengePatch = {
   title?: string | null;
   description?: string | null;
-  miss_policy?: "FAIL" | "MIN" | "BONUS" | "SKIP";
+  miss_policy?: "FAIL" | "MIN";
   is_active?: boolean;
 };
 
@@ -42,7 +42,7 @@ export type ChallengeFull = {
   id: number;
   title: string;
   description: string | null;
-  miss_policy: "FAIL" | "MIN" | "BONUS" | "SKIP";
+  miss_policy: "FAIL" | "MIN";
   is_active: boolean;
 };
 

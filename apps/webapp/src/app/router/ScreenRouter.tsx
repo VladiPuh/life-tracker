@@ -14,8 +14,8 @@ type AddProps = {
   setNewTitle: (v: string) => void;
   newDesc: string;
   setNewDesc: (v: string) => void;
-  newMissPolicy: "FAIL" | "MIN" | "BONUS" | "SKIP";
-  setNewMissPolicy: (v: "FAIL" | "MIN" | "BONUS" | "SKIP") => void;
+  newMissPolicy: "FAIL" | "MIN";
+  setNewMissPolicy: (v: "FAIL" | "MIN") => void;
   onCreate: () => void | Promise<void>;
 };
 

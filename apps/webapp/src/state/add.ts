@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { LifeTrackerApi } from "../shared/api/lifetracker";
 
-type MissPolicy = "FAIL" | "MIN" | "BONUS" | "SKIP";
+type MissPolicy = "FAIL" | "MIN";
 
 export function useAddState() {
   const [newTitle, setNewTitle] = useState("");

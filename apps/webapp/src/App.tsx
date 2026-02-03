@@ -61,6 +61,13 @@ export default function App() {
     const pageTitle = getPageTitle({ screen, placeholder });
     const showBackBar = shouldShowBackBar({ screen, placeholder });
     const onBackBar = () => {
+      // Screen-level override (e.g., History edit cancel)
+      const ov = (window as any).__LT_BACK_OVERRIDE__ as undefined | (() => boolean | void);
+      if (typeof ov === "function") {
+        const handled = ov();
+        if (handled === true) return;
+      }
+
       if (placeholder !== null) {
         closePlaceholder();
         return;

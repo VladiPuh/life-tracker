@@ -82,7 +82,7 @@ export function useRouterBindings(params: {
       newDesc,
       setNewDesc,
       newMissPolicy,
-      setNewMissPolicy,
+      setNewMissPolicy: (v: "FAIL" | "MIN") => setNewMissPolicy(v),
       onCreate,
     },
 
