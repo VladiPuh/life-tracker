@@ -19,6 +19,8 @@ export function HistoryChallengeEdit(props: {
 
   const { it, dateLabel, onCancel, onSave, errorText } = props;
   const { draft, setDraft, dirty, reset } = useHistoryEditDraft(it);
+  const commentRequired = draft.status_view === "FAIL" || draft.status_view === "SKIP";
+  const commentOk = !!(draft.comment && draft.comment.trim().length > 0);
 
   const [saving, setSaving] = useState(false);
 
@@ -146,7 +148,12 @@ export function HistoryChallengeEdit(props: {
           }}
         />
 
-        <div style={{ fontSize: 12, opacity: 0.8 }}>Комментарий</div>
+        <div style={{ fontSize: 12, opacity: 0.8 }}>Комментарий{" "}
+          {commentRequired ? (
+            <span style={{ opacity: 0.75, fontSize: 12, marginLeft: 6 }}>Обязательно</span>
+          ) : null}
+        </div>
+        
         <textarea
           disabled={saving}
           value={draft.comment ?? ""}
@@ -218,7 +225,7 @@ export function HistoryChallengeEdit(props: {
 
         <button
           onClick={handleSave}
-          disabled={saving || !dirty}
+          disabled={saving || !dirty || (commentRequired && !commentOk)}
           style={{
             flex: 1,
             padding: "10px 14px",
@@ -228,8 +235,8 @@ export function HistoryChallengeEdit(props: {
             color: "#ffffff",
             fontSize: 13,
             fontWeight: 600,
-            opacity: saving || !dirty ? 0.55 : 1,
-            cursor: saving || !dirty ? "default" : "pointer",
+            opacity: saving || !dirty || (commentRequired && !commentOk) ? 0.55 : 1,
+            cursor: saving || !dirty || (commentRequired && !commentOk) ? "default" : "pointer",
           }}
         >
           {saving ? "Сохранение..." : "Сохранить"}

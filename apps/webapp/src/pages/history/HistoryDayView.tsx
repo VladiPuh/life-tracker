@@ -166,20 +166,35 @@ export function HistoryDayView(props: {
         </div>
       )}
             {toast && (
-        <div
-          style={{
-            marginTop: 12,
-            padding: "10px 12px",
-            borderRadius: 12,
-            border: "1px solid rgba(0,0,0,0.14)",
-            background: "rgba(255,255,255,0.92)",
-            fontSize: 12,
-            opacity: 0.95,
-          }}
-        >
-          {toast}
-        </div>
-      )}
+              <div
+                style={{
+                  position: "fixed",
+                  left: 12,
+                  right: 12,
+                  top: "calc(10px + var(--safe-top, 0px))",
+                  zIndex: 2000,
+
+                  padding: "10px 14px",
+                  borderRadius: 12,
+
+                  background: "rgba(0,0,0,0.78)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+
+                  color: "#ffffff",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textAlign: "center",
+
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+
+                  pointerEvents: "none",
+                }}
+              >
+                {toast}
+              </div>
+            )}
     </div>
   );
 }
