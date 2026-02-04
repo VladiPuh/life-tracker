@@ -5,6 +5,7 @@ import { HistoryEditActions } from "./components/HistoryEditActions";
 import { HistoryEditHeader } from "./components/HistoryEditHeader";
 import { HistoryStatusPicker } from "./components/HistoryStatusPicker";
 import { HistoryMinutesInput } from "./components/HistoryMinutesInput";
+import { HistoryCommentInput } from "./components/HistoryCommentInput";
 
 type Draft = {
   status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
@@ -93,34 +94,11 @@ export function HistoryChallengeEdit(props: {
           onChange={(v) => setDraft({ ...draft, minutes_fact: v })}
         />
 
-        <div style={{ fontSize: 12, opacity: 0.8 }}>Комментарий{" "}
-          {commentRequired ? (
-            <span style={{ opacity: 0.75, fontSize: 12, marginLeft: 6 }}>Обязательно</span>
-          ) : null}
-        </div>
-        
-        <textarea
+        <HistoryCommentInput
           disabled={saving}
-          value={draft.comment ?? ""}
-          placeholder="пусто = без комментария"
-          onChange={(e) => {
-            const v = e.target.value;
-            setDraft({ ...draft, comment: v.trim().length ? v : null });
-          }}
-          rows={2}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 10,
-            padding: "9px 11px",
-            fontSize: 12,
-            background: "rgba(255,255,255,0.06)",
-            color: "#eaeaea",
-            outline: "none",
-            resize: "none",
-            opacity: saving ? 0.7 : 1,
-          }}
+          value={draft.comment}
+          commentRequired={commentRequired}
+          onChange={(v) => setDraft({ ...draft, comment: v })}
         />
       </div>
 
