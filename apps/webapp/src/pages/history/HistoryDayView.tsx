@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { HistoryDayDetailDto } from "./dto";
 import { useEffect, useState } from "react";
-import { HistoryChallengeRow } from "./HistoryChallengeRow";
+import { HistoryItemCard } from "./components/HistoryItemCard";
 import { HistoryChallengeEdit } from "./HistoryChallengeEdit";
 import { LifeTrackerApi } from "../../shared/api/lifetracker";
 import { HistoryEmptyState } from "./components/HistoryEmptyState";
@@ -171,24 +171,16 @@ export function HistoryDayView(props: {
             }
 
             return (
-              <div
+              <HistoryItemCard
                 key={`${it.challenge_id}`}
-                style={{
-                  borderRadius: 14,
-                  padding: 12,
-                  background: idx % 2 === 0 ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.14)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                it={it}
+                idx={idx}
+                statusLabel={statusLabel}
+                onEdit={() => {
+                  setSaveError(null);
+                  setEditingId(it.challenge_id);
                 }}
-              >
-                <HistoryChallengeRow
-                  it={it}
-                  statusLabel={statusLabel}
-                  onEdit={() => {
-                    setSaveError(null);
-                    setEditingId(it.challenge_id);
-                  }}
-                />
-              </div>
+              />
             );
             })}
         </div>
