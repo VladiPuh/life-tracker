@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { HistoryDayDetailItemDto } from "./dto";
 import { useHistoryEditDraft } from "./useHistoryEditDraft";
+import { HistoryEditActions } from "./components/HistoryEditActions";
 
 type Draft = {
   status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
@@ -194,54 +195,14 @@ export function HistoryChallengeEdit(props: {
         </div>
       )}
 
-      <div
-        style={{
-          marginTop: 10,
-          marginBottom: 12,
-          padding: 10,
-
-          borderRadius: 14,
-          background: "rgba(0,0,0,0.20)",
-          border: "1px solid rgba(255,255,255,0.10)",
-
-          display: "flex",
-          gap: 10,
-        }}
-      >
-        <button
-          onClick={handleCancel}
-          style={{
-            flex: 1,
-            padding: "10px 14px",
-            borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.14)",
-            background: "rgba(255,255,255,0.06)",
-            color: "#eaeaea",
-            fontSize: 13,
-          }}
-        >
-          Отмена
-        </button>
-
-        <button
-          onClick={handleSave}
-          disabled={saving || !dirty || (commentRequired && !commentOk)}
-          style={{
-            flex: 1,
-            padding: "10px 14px",
-            borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.18)",
-            background: "rgba(255,255,255,0.12)",
-            color: "#ffffff",
-            fontSize: 13,
-            fontWeight: 600,
-            opacity: saving || !dirty || (commentRequired && !commentOk) ? 0.55 : 1,
-            cursor: saving || !dirty || (commentRequired && !commentOk) ? "default" : "pointer",
-          }}
-        >
-          {saving ? "Сохранение..." : "Сохранить"}
-        </button>
-      </div>
+      <HistoryEditActions
+        saving={saving}
+        dirty={dirty}
+        commentRequired={commentRequired}
+        commentOk={commentOk}
+        onCancel={handleCancel}
+        onSave={handleSave}
+      />
     </div>
   );
 }
