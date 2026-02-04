@@ -5,6 +5,7 @@ import { HistoryItemCard } from "./components/HistoryItemCard";
 import { HistoryChallengeEdit } from "./HistoryChallengeEdit";
 import { LifeTrackerApi } from "../../shared/api/lifetracker";
 import { HistoryEmptyState } from "./components/HistoryEmptyState";
+import { HistoryDayHeader } from "./components/HistoryDayHeader";
 
 export function HistoryDayView(props: {
   shellStyle: CSSProperties;
@@ -61,7 +62,7 @@ export function HistoryDayView(props: {
 
   return (
     <div style={shellStyle}>
-      <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>{dateLabel}</div>
+      <HistoryDayHeader dateLabel={dateLabel} />
         {toast && (
         <div
           style={{
