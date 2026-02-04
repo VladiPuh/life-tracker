@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { HistoryChallengeRow } from "./HistoryChallengeRow";
 import { HistoryChallengeEdit } from "./HistoryChallengeEdit";
 import { LifeTrackerApi } from "../../shared/api/lifetracker";
-
+import { HistoryEmptyState } from "./components/HistoryEmptyState";
 
 export function HistoryDayView(props: {
   shellStyle: CSSProperties;
@@ -108,7 +108,7 @@ export function HistoryDayView(props: {
       )}
 
       {detail.items.length === 0 ? (
-        <div style={{ opacity: 0.7 }}>Нет фактов за этот день.</div>
+        <HistoryEmptyState />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {detail.items.map((it, idx) => {
