@@ -16,7 +16,7 @@ async def upsert_daily(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    ok = await upsert_daily_log(db, user.id, payload)
+    ok = await upsert_daily_log(db, user, payload)
     if not ok:
         raise HTTPException(404, "Challenge not found")
     return {"ok": True}

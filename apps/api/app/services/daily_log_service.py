@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import DailyLog
@@ -13,10 +14,12 @@ from app.repositories.daily_log_crud_repo import (
 
 async def upsert_daily_log(
     db: AsyncSession,
-    user_id: int,
+    user,
     payload: DailyFlagSet,
 ) -> bool:
-    d = payload.date or date.today()
+    user_today = datetime.now(ZoneInfo(user.timezone)).date()
+    d = payload.date or user_today
+    user_id = user.id
 
     ch = await get_user_challenge(db, payload.challenge_id, user_id)
     if not ch:
