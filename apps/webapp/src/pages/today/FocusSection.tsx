@@ -1,6 +1,8 @@
 import type { RefObject } from "react";
 import { TodayCard } from "./TodayCard";
 import type { TodayItem } from "../../shared/domain/types";
+import { StatusButton } from "./components/StatusButton";
+import { FocusPickDialog } from "./components/FocusPickDialog";
 
 type Props = {
   pickOpen: boolean;
@@ -12,39 +14,6 @@ type Props = {
 
   onPickChallenge: (id: number) => void;
 };
-
-function StatusButton(props: {
-  title: string;
-  icon: string;
-  label: string;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      title={props.title}
-      aria-label={props.title}
-      onClick={props.onClick}
-      style={{
-        padding: "14px 16px",
-        borderRadius: 14,
-        border: "1px solid var(--lt-border)",
-        background: "var(--lt-card2)",
-        color: "var(--lt-text)",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minWidth: 88,
-        height: 74,
-        gap: 4,
-      }}
-    >
-      <div style={{ fontSize: 26, lineHeight: 1 }}>{props.icon}</div>
-      <div style={{ fontSize: 12, opacity: 0.75 }}>{props.label}</div>
-    </button>
-  );
-}
 
 type FocusSectionProps = Props & {
   // focus header
@@ -82,75 +51,14 @@ export function FocusSection(props: FocusSectionProps) {
 
   return (
     <>
-      {props.pickOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={props.onClosePick}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 999,
-            background: "rgba(0,0,0,0.55)",
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: "fixed",
-              left: 16,
-              right: 16,
-              top: props.pickTop,
-              borderRadius: 18,
-              border: "1px solid var(--lt-border)",
-              background: "var(--lt-card)",
-              padding: 14,
-              maxHeight: `calc(100vh - ${props.pickTop}px - 120px)`,
-              overflow: "auto",
-            }}
-          >
-            <div style={{ fontWeight: 800, marginBottom: 10 }}>Выбери фокус</div>
-
-            {props.waiting
-              .filter((x) => x.challenge_id !== props.current?.challenge_id)
-              .map((x) => (
-                <button
-                  key={x.challenge_id}
-                  onClick={() => props.onPickChallenge(x.challenge_id)}
-                  style={{
-                    width: "100%",
-                    textAlign: "left",
-                    padding: "10px 10px",
-                    borderRadius: 14,
-                    border: "1px solid var(--lt-border)",
-                    background: "var(--lt-card2)",
-                    color: "var(--lt-text)",
-                    cursor: "pointer",
-                    marginBottom: 8,
-                  }}
-                >
-                  {x.title}
-                </button>
-              ))}
-
-            <button
-              onClick={props.onClosePick}
-              style={{
-                width: "100%",
-                marginTop: 6,
-                padding: "12px 12px",
-                borderRadius: 14,
-                border: "1px solid var(--lt-border)",
-                background: "transparent",
-                color: "var(--lt-text)",
-                cursor: "pointer",
-              }}
-            >
-              Закрыть
-            </button>
-          </div>
-        </div>
-      )}
+      <FocusPickDialog
+        pickOpen={props.pickOpen}
+        pickTop={props.pickTop}
+        onClosePick={props.onClosePick}
+        waiting={props.waiting}
+        current={props.current}
+        onPickChallenge={props.onPickChallenge}
+      />
 
       {/* Фокус дня + фиксация — единый контейнер */}
       <div ref={props.focusCardRef}>
