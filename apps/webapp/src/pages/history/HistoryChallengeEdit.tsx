@@ -4,6 +4,7 @@ import { useHistoryEditDraft } from "./useHistoryEditDraft";
 import { HistoryEditActions } from "./components/HistoryEditActions";
 import { HistoryEditHeader } from "./components/HistoryEditHeader";
 import { HistoryStatusPicker } from "./components/HistoryStatusPicker";
+import { HistoryMinutesInput } from "./components/HistoryMinutesInput";
 
 type Draft = {
   status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
@@ -86,31 +87,10 @@ export function HistoryChallengeEdit(props: {
           onChange={(s) => setDraft({ ...draft, status_view: s })}
         />
 
-        <div style={{ fontSize: 12, opacity: 0.8 }}>Минуты</div>
-        <input
+        <HistoryMinutesInput
           disabled={saving}
-          value={draft.minutes_fact ?? ""}
-          inputMode="numeric"
-          placeholder="пусто = нет факта"
-          onChange={(e) => {
-            const v = e.target.value.trim();
-            if (v === "") return setDraft({ ...draft, minutes_fact: null });
-            const n = Number(v);
-            if (!Number.isFinite(n)) return;
-            setDraft({ ...draft, minutes_fact: Math.max(0, Math.floor(n)) });
-          }}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 10,
-            padding: "9px 11px",
-            fontSize: 12,
-            background: "rgba(255,255,255,0.06)",
-            color: "#eaeaea",
-            outline: "none",
-            opacity: saving ? 0.7 : 1,
-          }}
+          value={draft.minutes_fact}
+          onChange={(v) => setDraft({ ...draft, minutes_fact: v })}
         />
 
         <div style={{ fontSize: 12, opacity: 0.8 }}>Комментарий{" "}
