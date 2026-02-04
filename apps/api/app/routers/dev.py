@@ -13,7 +13,7 @@ from app.services.daily_log_service import upsert_daily_log
 class TzTestPayload(BaseModel):
     user_id: int = 2
     challenge_id: int = 5
-    status_view: str = "MIN"
+    flag: str = "MIN"
     minutes_fact: int | None = 3
     comment: str | None = "tz test"
 
@@ -34,7 +34,7 @@ async def tz_test_upsert(payload: TzTestPayload):
         svc_payload = type("P", (), {
             "date": None,
             "challenge_id": payload.challenge_id,
-            "status_view": payload.status_view,
+            "flag": payload.flag,
             "minutes_fact": payload.minutes_fact,
             "comment": payload.comment,
         })()
