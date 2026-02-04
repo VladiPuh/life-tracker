@@ -3,6 +3,7 @@ import type { HistoryDayDetailItemDto } from "./dto";
 import { useHistoryEditDraft } from "./useHistoryEditDraft";
 import { HistoryEditActions } from "./components/HistoryEditActions";
 import { HistoryEditHeader } from "./components/HistoryEditHeader";
+import { HistoryStatusPicker } from "./components/HistoryStatusPicker";
 
 type Draft = {
   status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
@@ -79,44 +80,11 @@ export function HistoryChallengeEdit(props: {
       <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ fontSize: 12, opacity: 0.8 }}>Статус</div>
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {(["MIN", "BONUS", "SKIP", "FAIL"] as const).map((s) => {
-            const active = draft.status_view === s;
-            return (
-              <button
-                key={s}
-                type="button"
-                disabled={saving}
-                onClick={() => setDraft({ ...draft, status_view: s })}
-                style={{
-                  border: active
-                    ? "1px solid rgba(255,255,255,0.26)"
-                    : "1px solid rgba(255,255,255,0.10)",
-
-                  background: active
-                    ? "rgba(255,255,255,0.18)"
-                    : "rgba(255,255,255,0.05)",
-
-                  color: active ? "#ffffff" : "rgba(255,255,255,0.80)",
-
-                  borderRadius: 999,
-                  padding: "10px 12px",
-                  minWidth: 64,
-                  fontSize: 12,
-                  fontWeight: active ? 800 : 600,
-
-                  transform: active ? "scale(1.03)" : "scale(1)",
-                  transition: "transform 120ms ease, background 120ms ease, border-color 120ms ease",
-
-                  cursor: saving ? "default" : "pointer",
-                  opacity: saving ? 0.7 : 1,
-                }}
-              >
-                {s}
-              </button>
-            );
-          })}
-        </div>
+        <HistoryStatusPicker
+          value={draft.status_view}
+          disabled={saving}
+          onChange={(s) => setDraft({ ...draft, status_view: s })}
+        />
 
         <div style={{ fontSize: 12, opacity: 0.8 }}>Минуты</div>
         <input
