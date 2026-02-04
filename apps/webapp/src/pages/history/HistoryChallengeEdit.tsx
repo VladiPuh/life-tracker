@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { HistoryDayDetailItemDto } from "./dto";
 import { useHistoryEditDraft } from "./useHistoryEditDraft";
 import { HistoryEditActions } from "./components/HistoryEditActions";
+import { HistoryEditHeader } from "./components/HistoryEditHeader";
 
 type Draft = {
   status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
@@ -73,12 +74,7 @@ export function HistoryChallengeEdit(props: {
         pointerEvents: saving ? "none" : "auto", // ✅ жёсткая блокировка всего блока
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 800 }}>{it.title}</div>
-        <div style={{ fontSize: 12, opacity: 0.75, whiteSpace: "nowrap" }}>
-          Редактирование: {dateLabel}
-        </div>
-      </div>
+      <HistoryEditHeader title={it.title} dateLabel={dateLabel} />
 
       <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ fontSize: 12, opacity: 0.8 }}>Статус</div>
