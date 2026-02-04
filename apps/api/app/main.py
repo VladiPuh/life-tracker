@@ -13,7 +13,6 @@ from .settings import settings
 from app.services.auto_assign import auto_assign_missed
 
 from app.routers.health import router as health_router
-from app.routers.dev import router as dev_router
 from app.routers.templates import router as templates_router
 from app.routers.today import router as today_router
 from app.routers.daily_log import router as daily_log_router
@@ -25,7 +24,6 @@ log = logging.getLogger("lifetracker.auth")
 
 app = FastAPI(title=settings.app_name)
 app.include_router(health_router)
-app.include_router(dev_router)
 app.include_router(templates_router)
 app.include_router(today_router)
 app.include_router(daily_log_router)
