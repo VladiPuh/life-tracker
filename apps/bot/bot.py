@@ -22,28 +22,48 @@ if not ADMIN_TELEGRAM_ID:
     raise RuntimeError("ADMIN_TELEGRAM_ID is not set or invalid")
 
 
+def _badge(ok: bool) -> str:
+    return "✅" if ok else "❌"
+
 def _format_diag(payload: dict) -> str:
     status = payload.get("status", "UNKNOWN")
     ts = payload.get("timestamp_utc", "?")
 
-    db = payload.get("database", {})
-    time = payload.get("time", {})
-    sch = payload.get("scheduler", {})
-    auth = payload.get("auth", {})
+    db = payload.get("database", {}) or {}
+    timeb = payload.get("time", {}) or {}
+    sch = payload.get("scheduler", {}) or {}
+    pub = payload.get("public", {}) or {}
+    build = payload.get("build", {}) or {}
+
+    db_ok = bool(db.get("connected"))
+    sch_ok = bool(sch.get("running"))
+    pub_ok = bool(pub.get("ok"))
+
+    latency = pub.get("latency_ms")
+    latency_s = f"{latency}ms" if isinstance(latency, int) else "—"
+
+    build_s = build.get("app_build") or "unknown"
 
     lines = []
     lines.append(f"🩺 Life-Tracker DIAG — {status}")
     lines.append(f"🕒 {ts}")
+    lines.append(f"🏷️ build: {build_s}")
     lines.append("")
-    lines.append(f"🗄️ DB: {'OK' if db.get('connected') else 'FAIL'}")
+    lines.append(f"🗄️ DB: {_badge(db_ok)}")
     if db.get("error"):
         lines.append(f"   error: {db.get('error')}")
-    lines.append(f"⏱️ today({time.get('admin_timezone','?')}): {time.get('admin_today','?')}")
-    lines.append(f"🧩 scheduler: {'RUNNING' if sch.get('running') else 'STOPPED'}")
+    lines.append(f"⏱️ today({timeb.get('admin_timezone','?')}): {timeb.get('admin_today','?')}")
+    lines.append(f"🧩 scheduler: {_badge(sch_ok)}")
     jobs = sch.get("jobs") or []
     if jobs:
-        lines.append("   jobs: " + ", ".join(map(str, jobs)))
-    lines.append(f"🔐 tg_init_data: {auth.get('telegram_init_data','?')}")
+        # keep short
+        jobs_s = ", ".join(map(str, jobs[:6]))
+        if len(jobs) > 6:
+            jobs_s += f" (+{len(jobs)-6})"
+        lines.append(f"   jobs: {jobs_s}")
+    lines.append(f"🌐 public health: {_badge(pub_ok)}  {latency_s}")
+    if pub.get("error"):
+        lines.append(f"   error: {pub.get('error')}")
     return "\n".join(lines)
 
 
