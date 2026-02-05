@@ -197,7 +197,8 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
 
           opacity: backBar?.show ? bottomOpacity : 0,
           pointerEvents: backBar?.show ? bottomPE : "none",
-          transition: "max-height 180ms ease, transform 180ms ease, opacity 120ms ease",
+          transition: "transform 180ms ease, opacity 120ms ease",
+          willChange: "transform",
           transform: bottomTransform,
         }}
       >
@@ -256,7 +257,8 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
 
           opacity: bottomOpacity,
           pointerEvents: bottomPE,
-          transition: "max-height 180ms ease, transform 180ms ease, opacity 120ms ease",
+          transition: "transform 180ms ease, opacity 120ms ease",
+          willChange: "transform",
           transform: bottomTransform,
         }}
       >
