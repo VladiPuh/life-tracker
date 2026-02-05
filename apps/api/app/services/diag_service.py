@@ -1,4 +1,6 @@
-# apps/api/app/services/diag_service.py
+import time
+import httpx
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -77,12 +79,29 @@ async def build_diag_payload(
         scheduler_running = False
         job_ids = []
 
-    if not backend_alive or not db_connected:
-        overall = "FAIL"
-    elif not scheduler_running:
-        overall = "DEGRADED"
-    else:
-        overall = "OK"
+        # --- public api health ---
+    public_api_url = "https://api.lifetracker.site/api/health"
+    public_ok = False
+    public_latency_ms: int | None = None
+    public_error: str | None = None
+
+    try:
+        start = time.perf_counter()
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.get(public_api_url)
+        public_latency_ms = int((time.perf_counter() - start) * 1000)
+        public_ok = r.status_code == 200
+        if not public_ok:
+            public_error = f"HTTP {r.status_code}"
+    except Exception as e:
+        public_error = f"{type(e).__name__}: {e}"
+
+        if not backend_alive or not db_connected:
+            overall = "FAIL"
+        elif not scheduler_running or not public_ok:
+            overall = "DEGRADED"
+        else:
+            overall = "OK"
 
     payload = {
         "status": overall,
@@ -95,6 +114,12 @@ async def build_diag_payload(
             "admin_today": admin_today,
         },
         "scheduler": {"running": scheduler_running, "jobs": job_ids},
+        "public": {
+            "api_health_url": public_api_url,
+            "ok": public_ok,
+            "latency_ms": public_latency_ms,
+            "error": public_error,
+        },
         "auth": {"telegram_init_data": tg_state},
     }
 
