@@ -103,6 +103,7 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
   const showBottomUI = useMemo(() => {
     return !isInputActive && !isPostBlurHold;
   }, [isInputActive, isPostBlurHold]);
+  const disableBottomUIAnim = isInputActive;
 
   // IMPORTANT: When keyboard is open, do NOT reserve space for BottomNav/BackBar.
   // On iOS Telegram WebView this reserved padding frequently becomes a "phantom" opaque block
@@ -197,8 +198,8 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
 
           opacity: backBar?.show ? bottomOpacity : 0,
           pointerEvents: backBar?.show ? bottomPE : "none",
-          transition: "transform 180ms ease, opacity 120ms ease",
-          willChange: "transform",
+          transition: disableBottomUIAnim ? "none" : "transform 180ms ease, opacity 120ms ease",
+          willChange: disableBottomUIAnim ? "auto" : "transform",
           transform: bottomTransform,
         }}
       >
@@ -257,8 +258,8 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
 
           opacity: bottomOpacity,
           pointerEvents: bottomPE,
-          transition: "transform 180ms ease, opacity 120ms ease",
-          willChange: "transform",
+          transition: disableBottomUIAnim ? "none" : "transform 180ms ease, opacity 120ms ease",
+          willChange: disableBottomUIAnim ? "auto" : "transform",
           transform: bottomTransform,
         }}
       >
