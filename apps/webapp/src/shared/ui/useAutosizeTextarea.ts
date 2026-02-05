@@ -17,7 +17,7 @@ export function useAutosizeTextarea(
     if (!el) return;
 
     // Reset height so shrink works correctly
-    el.style.height = "0px";
+    el.style.height = "auto";
 
     const next = Math.min(el.scrollHeight, maxHeight);
     el.style.height = `${Math.max(next, minHeight)}px`;
