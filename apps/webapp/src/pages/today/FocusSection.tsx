@@ -160,18 +160,21 @@ export function FocusSection(props: FocusSectionProps) {
                 title="Минимальный шаг выполнен"
                 icon="✅"
                 label="Есть"
+                selected={props.pending === "MIN"}
                 onClick={() => props.requestPending("MIN")}
               />
               <StatusButton
                 title="Сделал больше обычного"
                 icon="⭐"
                 label="Сверх"
+                selected={props.pending === "BONUS"}
                 onClick={() => props.requestPending("BONUS")}
               />
               <StatusButton
                 title="Сегодня пауза (с причиной)"
                 icon="↩️"
                 label="Пауза"
+                selected={props.pending === "SKIP"}
                 onClick={() => props.requestPending("SKIP")}
               />
             </div>
@@ -230,7 +233,8 @@ export function FocusSection(props: FocusSectionProps) {
                     padding: "10px 12px",
                     borderRadius: 12,
                     border: "1px solid rgba(0,0,0,0.12)",
-                    background: props.canSave ? "white" : "rgba(0,0,0,0.04)",
+                    background: props.canSave ? "var(--lt-card2)" : "rgba(0,0,0,0.04)",
+                    color: "var(--lt-text)",
                     cursor: props.canSave && !props.saving ? "pointer" : "not-allowed",
                     fontWeight: 700,
                   }}

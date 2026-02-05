@@ -2,17 +2,19 @@ export function StatusButton(props: {
   title: string;
   icon: string;
   label: string;
+  selected?: boolean;
   onClick?: () => void;
 }) {
   return (
     <button
+      type="button"
       title={props.title}
       aria-label={props.title}
       onClick={props.onClick}
       style={{
         padding: "14px 16px",
         borderRadius: 14,
-        border: "1px solid var(--lt-border)",
+        border: props.selected ? "2px solid rgba(255,255,255,0.95)" : "1px solid var(--lt-border)",
         background: "var(--lt-card2)",
         color: "var(--lt-text)",
         cursor: "pointer",
@@ -23,6 +25,7 @@ export function StatusButton(props: {
         minWidth: 88,
         height: 74,
         gap: 4,
+        outline: "none",
       }}
     >
       <div style={{ fontSize: 26, lineHeight: 1 }}>{props.icon}</div>
