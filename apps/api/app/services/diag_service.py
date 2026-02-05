@@ -1,8 +1,8 @@
-import time
-import httpx
-
 from __future__ import annotations
 
+import asyncio
+import time
+import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -37,10 +37,13 @@ async def build_diag_payload(
         .replace("+00:00", "Z")
     )
 
+    # --- backend ---
     backend_alive = True
 
+    # --- auth context ---
     tg_state = "ABSENT" if telegram_init_data_header is None else "PRESENT"
 
+    # --- database ---
     db_connected = False
     db_error: str | None = None
     admin_timezone = "Europe/Vilnius"
@@ -62,12 +65,14 @@ async def build_diag_payload(
     except Exception as e:
         db_error = f"{type(e).__name__}: {e}"
 
+    # --- time ---
     try:
         admin_today = datetime.now(ZoneInfo(admin_timezone)).date().isoformat()
     except Exception:
         admin_timezone = "Europe/Vilnius"
         admin_today = datetime.now(ZoneInfo(admin_timezone)).date().isoformat()
 
+    # --- scheduler ---
     scheduler_running = False
     job_ids: list[str] = []
     try:
@@ -79,29 +84,35 @@ async def build_diag_payload(
         scheduler_running = False
         job_ids = []
 
-        # --- public api health ---
+    # --- public api health (stdlib only) ---
     public_api_url = "https://api.lifetracker.site/api/health"
     public_ok = False
     public_latency_ms: int | None = None
     public_error: str | None = None
 
+    def _probe(url: str) -> int:
+        req = urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return int(getattr(resp, "status", 0) or 0)
+
     try:
         start = time.perf_counter()
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            r = await client.get(public_api_url)
+        status_code = await asyncio.to_thread(_probe, public_api_url)
         public_latency_ms = int((time.perf_counter() - start) * 1000)
-        public_ok = r.status_code == 200
+
+        public_ok = status_code == 200
         if not public_ok:
-            public_error = f"HTTP {r.status_code}"
+            public_error = f"HTTP {status_code}"
     except Exception as e:
         public_error = f"{type(e).__name__}: {e}"
 
-        if not backend_alive or not db_connected:
-            overall = "FAIL"
-        elif not scheduler_running or not public_ok:
-            overall = "DEGRADED"
-        else:
-            overall = "OK"
+    # --- overall status ---
+    if not backend_alive or not db_connected:
+        overall = "FAIL"
+    elif not scheduler_running or not public_ok:
+        overall = "DEGRADED"
+    else:
+        overall = "OK"
 
     payload = {
         "status": overall,
