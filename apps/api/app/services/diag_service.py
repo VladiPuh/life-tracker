@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 import time
 import urllib.request
+import os
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -114,6 +116,18 @@ async def build_diag_payload(
     else:
         overall = "OK"
 
+    # --- build/version ---
+    build = os.getenv("APP_BUILD")
+    if not build:
+        try:
+            build = (
+                subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=os.getcwd())
+                .decode("utf-8")
+                .strip()
+            )
+        except Exception:
+            build = "unknown"
+
     payload = {
         "status": overall,
         "timestamp_utc": timestamp_utc,
@@ -131,6 +145,9 @@ async def build_diag_payload(
             "latency_ms": public_latency_ms,
             "error": public_error,
         },
+        "build": {
+            "app_build": build,
+        },        
         "auth": {"telegram_init_data": tg_state},
     }
 
