@@ -184,34 +184,41 @@ export function FocusSection(props: FocusSectionProps) {
               <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 6 }}>{props.noteLabel}</div>
 
               <div style={{ maxWidth: 420 }}>
-                <textarea
-                  value={props.note}
-                  onChange={(e) => props.setNote(e.target.value.slice(0, props.maxLen))}
-                  rows={3}
-                  maxLength={props.maxLen}
-                  placeholder={props.notePlaceholder}
-                  style={{
-                    width: "100%",
-                    resize: "none",
-                    padding: 10,
-                    borderRadius: 12,
-                    border: "1px solid var(--lt-border)",
-                    outline: "none",
-                    fontFamily: "inherit",
-                    fontSize: 13,
-                    boxSizing: "border-box",
-                  }}
-                />
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginTop: 4,
-                    fontSize: 11,
-                    opacity: 0.6,
-                  }}
-                >
-                  {props.note.length}/{props.maxLen}
+                <div style={{ position: "relative" }}>
+                  <textarea
+                    value={props.note}
+                    onChange={(e) => props.setNote(e.target.value.slice(0, props.maxLen))}
+                    rows={3}
+                    maxLength={props.maxLen}
+                    placeholder={props.notePlaceholder}
+                    style={{
+                      width: "100%",
+                      resize: "none",
+                      padding: 10,
+                      paddingRight: 48,
+                      paddingBottom: 28,
+                      borderRadius: 12,
+                      border: "1px solid var(--lt-border)",
+                      outline: "none",
+                      fontFamily: "inherit",
+                      fontSize: 13,
+                      boxSizing: "border-box",
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: 10,
+                      bottom: 8,
+                      fontSize: 11,
+                      opacity: 0.6,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                  >
+                    {props.note.length}/{props.maxLen}
+                  </div>
                 </div>
               </div>
 
