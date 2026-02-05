@@ -1,3 +1,6 @@
+import { useRef } from "react";
+import { useAutosizeTextarea } from "@/shared/ui/useAutosizeTextarea";
+
 export function HistoryCommentInput(props: {
   disabled: boolean;
   value: string | null;
@@ -5,6 +8,12 @@ export function HistoryCommentInput(props: {
   onChange: (v: string | null) => void;
 }) {
   const { disabled, value, commentRequired, onChange } = props;
+
+
+  const taRef = useRef<HTMLTextAreaElement>(null);
+  useAutosizeTextarea(taRef, value ?? "", { minHeight: 88, maxHeight: 260 });
+  const hasComment = (value ?? "").trim().length > 0;
+  const needRed = commentRequired && !hasComment;
 
   return (
     <>
@@ -25,6 +34,7 @@ export function HistoryCommentInput(props: {
       </div>
 
       <textarea
+        ref={taRef}
         disabled={disabled}
         value={value ?? ""}
         placeholder="пусто = без комментария"
@@ -36,7 +46,7 @@ export function HistoryCommentInput(props: {
         style={{
           width: "100%",
           boxSizing: "border-box",
-          border: commentRequired
+          border: needRed
             ? "1px solid rgba(212,68,68,0.45)"
             : "1px solid rgba(255,255,255,0.12)",
           borderRadius: 10,
@@ -48,7 +58,6 @@ export function HistoryCommentInput(props: {
           resize: "none",
           opacity: disabled ? 0.7 : 1,
 
-          // автоперенос "простыней" без пробелов
           whiteSpace: "pre-wrap",
           overflowWrap: "anywhere",
           wordBreak: "break-word",

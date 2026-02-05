@@ -1,10 +1,13 @@
-import type { RefObject } from "react";
+import { useRef, type RefObject } from "react";
 import { TodayCard } from "./TodayCard";
 import type { TodayItem } from "../../shared/domain/types";
 import { StatusButton } from "./components/StatusButton";
 import { FocusPickDialog } from "./components/FocusPickDialog";
 
+import { useAutosizeTextarea } from "../../shared/ui/useAutosizeTextarea";
 type Props = {
+  boot: boolean;
+
   pickOpen: boolean;
   pickTop: number;
   onClosePick: () => void;
@@ -45,6 +48,22 @@ type FocusSectionProps = Props & {
 export function FocusSection(props: FocusSectionProps) {
   const waitingCount = props.waiting.length;
   const commentRequired = props.pending === "SKIP";
+  const needRed = commentRequired && props.note.trim().length === 0;
+
+
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+  useAutosizeTextarea(noteRef, props.note ?? "", { minHeight: 88, maxHeight: 220 });
+  // ✅ BOOT: no skeletons. If we ever hit boot here, show a stable, silent placeholder.
+  if (props.boot) {
+    return (
+      <div ref={props.focusCardRef}>
+        <TodayCard title="Фокус дня">
+          <div style={{ height: 160 }} />
+        </TodayCard>
+      </div>
+    );
+  }
+
 
   return (
     <>
@@ -61,9 +80,7 @@ export function FocusSection(props: FocusSectionProps) {
         <TodayCard title="Фокус дня">
           <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 16, fontWeight: 800 }}>
-                {props.challengeTitle}
-              </div>
+              <div style={{ fontSize: 16, fontWeight: 800 }}>{props.challengeTitle}</div>
 
               {props.currentStatus && (
                 <div style={{ marginTop: 6 }}>
@@ -141,7 +158,6 @@ export function FocusSection(props: FocusSectionProps) {
                 selected={props.pending === "MIN"}
                 onClick={() => props.requestPending("MIN")}
               />
-
               <StatusButton
                 title="Сделал больше обычного"
                 icon="⭐"
@@ -149,7 +165,6 @@ export function FocusSection(props: FocusSectionProps) {
                 selected={props.pending === "BONUS"}
                 onClick={() => props.requestPending("BONUS")}
               />
-
               <StatusButton
                 title="Сегодня пауза (с причиной)"
                 icon="↩️"
@@ -159,23 +174,19 @@ export function FocusSection(props: FocusSectionProps) {
               />
             </div>
           ) : (
-            <div style={{ marginTop: 10, fontSize: 13, opacity: 0.75 }}>
-              На сегодня всё.
-            </div>
+            <div style={{ marginTop: 10, fontSize: 13, opacity: 0.75 }}>На сегодня всё.</div>
           )}
 
           {props.pending && (
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 6 }}>
-                {props.noteLabel}
-              </div>
+              <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 6 }}>{props.noteLabel}</div>
 
               <div style={{ maxWidth: 420 }}>
                 <div
                   style={{
                     padding: 10,
                     borderRadius: 12,
-                    border: commentRequired
+                    border: needRed
                       ? "1px solid rgba(212,68,68,0.45)"
                       : "1px solid rgba(255,255,255,0.08)",
                     background: "rgba(255,255,255,0.03)",
@@ -183,6 +194,7 @@ export function FocusSection(props: FocusSectionProps) {
                 >
                   <div style={{ position: "relative" }}>
                     <textarea
+                      ref={noteRef}
                       value={props.note}
                       onChange={(e) => props.setNote(e.target.value.slice(0, props.maxLen))}
                       rows={3}
@@ -194,9 +206,7 @@ export function FocusSection(props: FocusSectionProps) {
                         paddingRight: 48,
                         paddingBottom: 28,
                         borderRadius: 12,
-                        border: commentRequired
-                          ? "1px solid rgba(212,68,68,0.35)"
-                          : "1px solid var(--lt-border)",
+                        border: "1px solid var(--lt-border)",
                         outline: "none",
                         fontSize: 13,
                         boxSizing: "border-box",
@@ -220,15 +230,7 @@ export function FocusSection(props: FocusSectionProps) {
                 </div>
               </div>
 
-              {/* КНОПКИ — ближе к textarea */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  marginTop: 8,
-                  alignItems: "center",
-                }}
-              >
+              <div style={{ display: "flex", gap: 10, marginTop: 8, alignItems: "center" }}>
                 <button
                   onClick={props.saveForm}
                   disabled={!props.canSave || props.saving}
@@ -236,9 +238,7 @@ export function FocusSection(props: FocusSectionProps) {
                     padding: "10px 12px",
                     borderRadius: 12,
                     border: "1px solid var(--lt-border)",
-                    background: props.canSave
-                      ? "var(--lt-card2)"
-                      : "rgba(0,0,0,0.04)",
+                    background: props.canSave ? "var(--lt-card2)" : "rgba(0,0,0,0.04)",
                     color: "var(--lt-text)",
                     fontWeight: 700,
                   }}
@@ -272,11 +272,7 @@ export function FocusSection(props: FocusSectionProps) {
                   Закрыть
                 </button>
 
-                {props.savedPulse && (
-                  <div style={{ fontSize: 12, opacity: 0.75 }}>
-                    Зафиксировано
-                  </div>
-                )}
+                {props.savedPulse && <div style={{ fontSize: 12, opacity: 0.75 }}>Зафиксировано</div>}
               </div>
             </div>
           )}

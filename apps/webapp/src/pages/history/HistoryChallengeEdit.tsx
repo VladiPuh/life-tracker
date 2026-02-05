@@ -96,8 +96,9 @@ export function HistoryChallengeEdit(props: {
           display: "flex",
           flexDirection: "column",
           gap: 12,
-          maxHeight: "60vh",
-          overflowY: "auto",
+          // IMPORTANT: no nested scroll here.
+          // iOS Telegram WebView + keyboard + inner overflow часто создают "фантомные" блоки.
+          // Пусть скроллится весь экран (AppShell ScrollArea).
         }}
       >
         <div style={{ fontSize: 12, opacity: 0.8 }}>Статус</div>
