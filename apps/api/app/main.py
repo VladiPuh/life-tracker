@@ -18,6 +18,7 @@ from app.routers.today import router as today_router
 from app.routers.daily_log import router as daily_log_router
 from app.routers.history import router as history_router
 from app.routers.challenges import router as challenges_router
+from app.routers.diag import router as diag_router
 
 import logging
 log = logging.getLogger("lifetracker.auth")
@@ -34,8 +35,8 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
-    allow_headers=["*"],
-)
+    allow_headers=["*"],)
+app.include_router(diag_router)
 
 @app.middleware("http")
 async def _log_initdata_header(request, call_next):

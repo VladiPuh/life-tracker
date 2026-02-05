@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings
 
-
 class Settings(BaseSettings):
     app_name: str = "Life-Tracker API"
     database_url: str = "sqlite+aiosqlite:///./life_tracker.db"
@@ -13,6 +12,10 @@ class Settings(BaseSettings):
 
     # PROD (Telegram)
     telegram_bot_token: str | None = None
+        # Owner/admin (for ops)
+    admin_telegram_id: int | None = None
 
+    # /diag secret (required in PROD)
+    diag_token: str | None = None
 
 settings = Settings()
