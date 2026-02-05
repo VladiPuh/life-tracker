@@ -1,4 +1,6 @@
 // LT-SOURCE: AUTO 2026-02-01 03:03
+import { useRef, useState } from "react";
+
 export type TabId =
   | "insights"
   | "history"
@@ -11,24 +13,46 @@ export function BottomNav(props: {
   active: TabId;
   onGo: (tab: TabId) => void;
 }) {
+  const [pending, setPending] = useState<TabId | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const go = (tab: TabId) => {
+    if (props.active === tab) return;
+    if (pending) return;
+
+    setPending(tab);
+
+    // микро-задержка: 2 rAF, без таймеров
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = requestAnimationFrame(() => {
+        props.onGo(tab);
+        setPending(null);
+      });
+    });
+  };
+
   const Item = (p: {
     id: TabId;
     label: string;
     emphasize?: boolean;
-    onClick: () => void;
   }) => {
     const isActive = props.active === p.id;
+    const isPending = pending === p.id;
 
     return (
       <button
-        onClick={p.onClick}
+        onClick={() => go(p.id)}
         style={{
           flex: 1,
           padding: "10px 6px",
           border: "none",
           background: "transparent",
           cursor: "pointer",
-          opacity: isActive ? 1 : 0.6,
+
+          opacity: isActive || isPending ? 1 : 0.6,
+          transform: isPending ? "scale(0.96)" : "scale(1)",
+          transition: "opacity 120ms ease, transform 120ms ease",
+
           fontWeight: p.emphasize ? 800 : 600,
           letterSpacing: p.emphasize ? -0.2 : 0,
           color: "var(--lt-text)",
@@ -56,12 +80,12 @@ export function BottomNav(props: {
         boxSizing: "border-box",
       }}
     >
-      <Item id="insights" label="Инсайты" onClick={() => props.onGo("insights")} />
-      <Item id="history" label="История" onClick={() => props.onGo("history")} />
-      <Item id="today" label="Сегодня" emphasize onClick={() => props.onGo("today")} />
-      <Item id="new" label="Новый" emphasize onClick={() => props.onGo("new")} />
-      <Item id="templates" label="Шаблоны" onClick={() => props.onGo("templates")} />
-      <Item id="profile" label="Профиль" onClick={() => props.onGo("profile")} />
+      <Item id="insights" label="Инсайты" />
+      <Item id="history" label="История" />
+      <Item id="today" label="Сегодня" emphasize />
+      <Item id="new" label="Новый" emphasize />
+      <Item id="templates" label="Шаблоны" />
+      <Item id="profile" label="Профиль" />
     </div>
   );
 }
