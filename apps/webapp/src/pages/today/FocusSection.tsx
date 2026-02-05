@@ -273,6 +273,7 @@ export function FocusSection(props: FocusSectionProps) {
                       onChange={(e) => props.setNote(e.target.value.slice(0, props.maxLen))}
                       rows={3}
                       placeholder={props.notePlaceholder}
+                      className="autosize-ta"
                       style={{
                         width: "100%",
                         resize: "none",

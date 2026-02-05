@@ -48,11 +48,19 @@ html, body {
   width: 100%;
   height: 100%;
 
+  /* iOS/TG WebView: use dynamic viewport when available */
+  height: var(--tg-vh, 100dvh);
+  min-height: -webkit-fill-available;
+
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 #root {
   height: 100%;
+  height: var(--tg-vh, 100dvh);
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
 }
 
 body {
@@ -94,4 +102,12 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* isolate textarea paint to remove iOS TG micro-flicker on keyboard */
+.autosize-ta {
+  contain: paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }

@@ -42,6 +42,7 @@ export function HistoryCommentInput(props: {
           onChange(v.trim().length ? v : null);
         }}
         rows={2}
+        className="autosize-ta"
         style={{
           width: "100%",
           boxSizing: "border-box",
