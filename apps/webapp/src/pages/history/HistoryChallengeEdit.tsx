@@ -6,7 +6,6 @@ import { HistoryEditHeader } from "./components/HistoryEditHeader";
 import { HistoryStatusPicker } from "./components/HistoryStatusPicker";
 import { HistoryMinutesInput } from "./components/HistoryMinutesInput";
 import { HistoryCommentInput } from "./components/HistoryCommentInput";
-import { HistoryEditCard } from "./components/HistoryEditCard";
 
 type Draft = {
   status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
