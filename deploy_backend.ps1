@@ -31,6 +31,16 @@ $RemoteBackupDir = "/var/backups/lifetracker"
 $RepoRoot = Split-Path -Parent $PSCommandPath
 $ApiDir = Join-Path $RepoRoot "apps\api"
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
+
+# Build id for /api/diag (APP_BUILD). Prefer git short hash; fallback to timestamp.
+$GitShort = $null
+try { $GitShort = (git rev-parse --short HEAD 2>$null).Trim() } catch { }
+if ([string]::IsNullOrWhiteSpace($GitShort)) {
+  $AppBuild = $stamp
+} else {
+  $AppBuild = "$stamp-$GitShort"
+}
+
 $tarName = "lifetracker_backend_$stamp.tar.gz"
 $tarPath = Join-Path $env:TEMP $tarName
 $remoteTar = "/tmp/$tarName"
@@ -196,6 +206,20 @@ if [ -f "/tmp/life_tracker.db.keep.$STAMP" ]; then
   mv "/tmp/life_tracker.db.keep.$STAMP" "$ROOT/life_tracker.db"
 fi
 
+
+# Ensure APP_BUILD is present in .env (used by systemd EnvironmentFile)
+ENV_FILE="$ROOT/.env"
+if [ -f "$ENV_FILE" ]; then
+  if grep -qE '^APP_BUILD=' "$ENV_FILE"; then
+    sed -i "s/^APP_BUILD=.*/APP_BUILD=__APP_BUILD__/" "$ENV_FILE"
+  else
+    echo "" >> "$ENV_FILE"
+    echo "APP_BUILD=__APP_BUILD__" >> "$ENV_FILE"
+  fi
+else
+  echo "APP_BUILD=__APP_BUILD__" > "$ENV_FILE"
+fi
+
 echo "== (5) Restart service =="
 systemctl daemon-reload || true
 systemctl restart "__SYSTEMD_SERVICE__"
@@ -227,6 +251,7 @@ echo "OK: backend deployed to $ROOT"
   $remoteScript = $remoteScript.Replace("__REMOTE_BACKUP_DIR__", $RemoteBackupDir)
   $remoteScript = $remoteScript.Replace("__REMOTE_DB_PATH__", $RemoteDbPath)
   $remoteScript = $remoteScript.Replace("__SYSTEMD_SERVICE__", $SystemdService)
+  $remoteScript = $remoteScript.Replace("__APP_BUILD__", $AppBuild)
 
 
   # CRLF -> LF
