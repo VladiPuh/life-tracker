@@ -17,7 +17,19 @@ export function HistoryChallengeRow(props: {
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 800 }}>{it.title}</div>
+        <div
+          style={{
+            fontSize: 15,          // ⬅ было 13
+            fontWeight: 800,
+            lineHeight: 1.15,
+            letterSpacing: -0.2,
+            flex: 1,
+            minWidth: 0,
+            overflowWrap: "anywhere",
+          }}
+        >
+          {it.title}
+        </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ fontSize: 12, opacity: 0.8, whiteSpace: "nowrap" }}>
@@ -35,6 +47,7 @@ export function HistoryChallengeRow(props: {
               fontSize: 12,
               opacity: 0.85,
               cursor: "pointer",
+              whiteSpace: "nowrap",
             }}
           >
             Изменить

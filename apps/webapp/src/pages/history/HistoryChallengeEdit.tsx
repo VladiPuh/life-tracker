@@ -3,7 +3,6 @@ import type { HistoryDayDetailItemDto } from "./dto";
 import { useHistoryEditDraft } from "./useHistoryEditDraft";
 import { HistoryEditActions } from "./components/HistoryEditActions";
 import { HistoryEditHeader } from "./components/HistoryEditHeader";
-import { HistoryStatusPicker } from "./components/HistoryStatusPicker";
 import { HistoryMinutesInput } from "./components/HistoryMinutesInput";
 import { HistoryCommentInput } from "./components/HistoryCommentInput";
 
@@ -13,9 +12,17 @@ type Draft = {
   comment: string | null;
 };
 
-// === UX лимиты (канонично для History) ===
 const COMMENT_MAX = 280;
-const MINUTES_MAX_CHARS = 4; // до 9999
+const MINUTES_MAX_CHARS = 4;
+
+type Status = Draft["status_view"];
+
+const STATUS_EMOJI: Record<Status, string> = {
+  MIN: "✅",
+  BONUS: "⭐",
+  SKIP: "↩️",
+  FAIL: "❌",
+};
 
 export function HistoryChallengeEdit(props: {
   it: HistoryDayDetailItemDto;
@@ -27,8 +34,7 @@ export function HistoryChallengeEdit(props: {
   const { it, dateLabel, onCancel, onSave, errorText } = props;
   const { draft, setDraft, dirty, reset } = useHistoryEditDraft(it);
 
-  const commentRequired =
-    draft.status_view === "FAIL" || draft.status_view === "SKIP";
+  const commentRequired = draft.status_view === "FAIL" || draft.status_view === "SKIP";
   const commentOk = !!(draft.comment && draft.comment.trim().length > 0);
 
   const [saving, setSaving] = useState(false);
@@ -66,6 +72,11 @@ export function HistoryChallengeEdit(props: {
     }
   }
 
+  const setStatus = (s: Status) => {
+    if (saving) return;
+    setDraft({ ...draft, status_view: s });
+  };
+
   return (
     <div
       style={{
@@ -85,17 +96,44 @@ export function HistoryChallengeEdit(props: {
           display: "flex",
           flexDirection: "column",
           gap: 12,
-          maxHeight: "60vh", // ⬅ не даём одному челленджу заливать экран
+          maxHeight: "60vh",
           overflowY: "auto",
         }}
       >
         <div style={{ fontSize: 12, opacity: 0.8 }}>Статус</div>
 
-        <HistoryStatusPicker
-          value={draft.status_view}
-          disabled={saving}
-          onChange={(s) => setDraft({ ...draft, status_view: s })}
-        />
+        {/* Статусы: эмодзи на всю ширину, без "блоков" */}
+        <div style={{ display: "flex", gap: 10 }}>
+          {(["MIN", "BONUS", "SKIP", "FAIL"] as const).map((s) => {
+            const active = draft.status_view === s;
+            return (
+              <button
+                key={s}
+                type="button"
+                disabled={saving}
+                onClick={() => setStatus(s)}
+                aria-label={s}
+                title={s}
+                style={{
+                  flex: 1,
+                  height: 40,
+                  border: "none",
+                  background: "transparent",
+                  cursor: saving ? "default" : "pointer",
+                  opacity: active ? 1 : 0.6,
+                  transform: active ? "scale(1.08)" : "scale(1)",
+                  transition: "transform 140ms ease, opacity 140ms ease",
+                  fontSize: 20,
+                  lineHeight: "40px",
+                  textAlign: "center",
+                  userSelect: "none",
+                }}
+              >
+                {STATUS_EMOJI[s]}
+              </button>
+            );
+          })}
+        </div>
 
         <HistoryMinutesInput
           disabled={saving}
@@ -111,28 +149,33 @@ export function HistoryChallengeEdit(props: {
           }}
         />
 
-        <HistoryCommentInput
-          disabled={saving}
-          value={draft.comment}
-          commentRequired={commentRequired}
-          onChange={(v) =>
-            setDraft({
-              ...draft,
-              comment: v ? v.slice(0, COMMENT_MAX) : v,
-            })
-          }
-        />
+        {/* Комментарий + счётчик внутри */}
+        <div style={{ position: "relative" }}>
+          <HistoryCommentInput
+            disabled={saving}
+            value={draft.comment}
+            commentRequired={commentRequired}
+            onChange={(v) =>
+              setDraft({
+                ...draft,
+                comment: v ? v.slice(0, COMMENT_MAX) : v,
+              })
+            }
+          />
 
-        {/* счётчик символов */}
-        <div
-          style={{
-            fontSize: 11,
-            opacity: 0.6,
-            textAlign: "right",
-            marginTop: -6,
-          }}
-        >
-          {(draft.comment?.length ?? 0)}/{COMMENT_MAX}
+          <div
+            style={{
+              position: "absolute",
+              right: 10,
+              bottom: 10,
+              fontSize: 11,
+              opacity: 0.6,
+              pointerEvents: "none",
+              userSelect: "none",
+            }}
+          >
+            {(draft.comment?.length ?? 0)}/{COMMENT_MAX}
+          </div>
         </div>
       </div>
 
@@ -151,14 +194,17 @@ export function HistoryChallengeEdit(props: {
         </div>
       )}
 
-      <HistoryEditActions
-        saving={saving}
-        dirty={dirty}
-        commentRequired={commentRequired}
-        commentOk={commentOk}
-        onCancel={handleCancel}
-        onSave={handleSave}
-      />
+      {/* Кнопки ближе к редактированию */}
+      <div style={{ marginTop: 10 }}>
+        <HistoryEditActions
+          saving={saving}
+          dirty={dirty}
+          commentRequired={commentRequired}
+          commentOk={commentOk}
+          onCancel={handleCancel}
+          onSave={handleSave}
+        />
+      </div>
     </div>
   );
 }

@@ -1,9 +1,6 @@
 ﻿// LT-SOURCE: AUTO 2026-02-01 03:21
 import { useEffect, useRef, useState } from "react";
-import {
-  initTelegram,
-  logTelegramReady,
-} from "./shared/tg/webapp";
+import { initTelegram, logTelegramReady } from "./shared/tg/webapp";
 import { useBack } from "./app/router/useBack";
 import { ScreenRouter } from "./app/router/ScreenRouter";
 import { useNav } from "./app/router/useNav";
@@ -16,19 +13,37 @@ import { getActiveTab, getPageTitle, shouldShowBackBar } from "./app/appViewMode
 import { usePlaceholder } from "./app/state/usePlaceholder";
 import { useRouterBindings } from "./app/router/useRouterBindings";
 
-
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
 
 export default function App() {
   const { tgPresent, tgOk } = useTelegramBootstrap();
   const didTgInit = useRef(false);
-  const [ selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const { resetShowAll } = useTodayState();
   const { screen, go, goBack, goToday, goTemplates, goAdd } = useNav();
   const { placeholder, openPlaceholder, closePlaceholder } = usePlaceholder();
+
+  // === анти-моргание: "держим" предыдущий screen на 1 кадр ===
+  const [renderScreen, setRenderScreen] = useState(screen);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (screen === renderScreen) return;
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      setRenderScreen(screen);
+      rafRef.current = null;
+    });
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [screen, renderScreen]);
+
   const { bindings: routerBindings } = useRouterBindings({
-    screen,
+    screen: renderScreen,
     placeholder,
     go,
     goBack,
@@ -39,41 +54,40 @@ export default function App() {
     closePlaceholder,
   });
 
-    useEffect(() => {
-      if (screen === "TODAY") {
-        resetShowAll();
-      }
-    }, [screen, resetShowAll]);
+  useEffect(() => {
+    if (screen === "TODAY") {
+      resetShowAll();
+    }
+  }, [screen, resetShowAll]);
 
-    useEffect(() => {
-      if (!tgPresent) return;
-      if (didTgInit.current) return;
-      didTgInit.current = true;
+  useEffect(() => {
+    if (!tgPresent) return;
+    if (didTgInit.current) return;
+    didTgInit.current = true;
 
-      initTelegram();
-      logTelegramReady();
-    }, [tgPresent]);
+    initTelegram();
+    logTelegramReady();
+  }, [tgPresent]);
 
-    useBack(tgOk);
+  useBack(tgOk);
 
-    // active tab
-    const activeTab = getActiveTab({ screen, placeholder });
-    const pageTitle = getPageTitle({ screen, placeholder });
-    const showBackBar = shouldShowBackBar({ screen, placeholder });
-    const onBackBar = () => {
-      // Screen-level override (e.g., History edit cancel)
-      const ov = (window as any).__LT_BACK_OVERRIDE__ as undefined | (() => boolean | void);
-      if (typeof ov === "function") {
-        const handled = ov();
-        if (handled === true) return;
-      }
+  const activeTab = getActiveTab({ screen, placeholder });
+  const pageTitle = getPageTitle({ screen, placeholder });
+  const showBackBar = shouldShowBackBar({ screen, placeholder });
 
-      if (placeholder !== null) {
-        closePlaceholder();
-        return;
-      }
-      goBack();
-    };
+  const onBackBar = () => {
+    const ov = (window as any).__LT_BACK_OVERRIDE__ as undefined | (() => boolean | void);
+    if (typeof ov === "function") {
+      const handled = ov();
+      if (handled === true) return;
+    }
+
+    if (placeholder !== null) {
+      closePlaceholder();
+      return;
+    }
+    goBack();
+  };
 
   return (
     <AppShell
@@ -102,7 +116,7 @@ export default function App() {
           }}
         />
       }
-      >
+    >
       <ScreenRouter {...routerBindings} />
     </AppShell>
   );

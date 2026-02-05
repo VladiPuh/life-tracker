@@ -168,54 +168,54 @@ export function FocusSection(props: FocusSectionProps) {
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 6 }}>
                 {props.noteLabel}
-                {commentRequired && (
-                  <span
-                    style={{
-                      marginLeft: 6,
-                      fontWeight: 700,
-                      color: "#d44",
-                    }}
-                  >
-                    обязательно
-                  </span>
-                )}
               </div>
 
               <div style={{ maxWidth: 420 }}>
-                <div style={{ position: "relative" }}>
-                  <textarea
-                    value={props.note}
-                    onChange={(e) =>
-                      props.setNote(e.target.value.slice(0, props.maxLen))
-                    }
-                    rows={3}
-                    placeholder={props.notePlaceholder}
-                    style={{
-                      width: "100%",
-                      resize: "none",
-                      padding: 10,
-                      paddingRight: 48,
-                      paddingBottom: 28,
-                      borderRadius: 12,
-                      border: "1px solid var(--lt-border)",
-                      outline: "none",
-                      fontSize: 13,
-                      boxSizing: "border-box",
-                    }}
-                  />
+                <div
+                  style={{
+                    padding: 10,
+                    borderRadius: 12,
+                    border: commentRequired
+                      ? "1px solid rgba(212,68,68,0.45)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(255,255,255,0.03)",
+                  }}
+                >
+                  <div style={{ position: "relative" }}>
+                    <textarea
+                      value={props.note}
+                      onChange={(e) => props.setNote(e.target.value.slice(0, props.maxLen))}
+                      rows={3}
+                      placeholder={props.notePlaceholder}
+                      style={{
+                        width: "100%",
+                        resize: "none",
+                        padding: 10,
+                        paddingRight: 48,
+                        paddingBottom: 28,
+                        borderRadius: 12,
+                        border: commentRequired
+                          ? "1px solid rgba(212,68,68,0.35)"
+                          : "1px solid var(--lt-border)",
+                        outline: "none",
+                        fontSize: 13,
+                        boxSizing: "border-box",
+                        background: "rgba(255,255,255,0.02)",
+                      }}
+                    />
 
-                  {/* счётчик ВНУТРИ textarea */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      right: 10,
-                      bottom: 8,
-                      fontSize: 11,
-                      opacity: 0.6,
-                      pointerEvents: "none",
-                    }}
-                  >
-                    {props.note.length}/{props.maxLen}
+                    <div
+                      style={{
+                        position: "absolute",
+                        right: 10,
+                        bottom: 8,
+                        fontSize: 11,
+                        opacity: 0.6,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {props.note.length}/{props.maxLen}
+                    </div>
                   </div>
                 </div>
               </div>

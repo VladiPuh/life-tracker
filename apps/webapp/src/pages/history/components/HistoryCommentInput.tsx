@@ -16,7 +16,7 @@ export function HistoryCommentInput(props: {
               marginLeft: 6,
               fontSize: 12,
               fontWeight: 700,
-              color: "#d44", // аккуратный красный, без агрессии
+              color: "#d44",
             }}
           >
             обязательно
@@ -47,6 +47,12 @@ export function HistoryCommentInput(props: {
           outline: "none",
           resize: "none",
           opacity: disabled ? 0.7 : 1,
+
+          // автоперенос "простыней" без пробелов
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+          wordBreak: "break-word",
+          hyphens: "auto",
         }}
       />
     </>
