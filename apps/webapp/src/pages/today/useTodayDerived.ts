@@ -9,6 +9,8 @@ export function useTodayDerived(args: {
   pending: Flag | null;
   note: string;
 }) {
+  const boot = args.today === null;
+
   const waiting = useMemo(() => {
     const all = args.today?.all ?? [];
     return all.filter((x: TodayItem) => x.status_view == null);
@@ -23,9 +25,8 @@ export function useTodayDerived(args: {
     return found ?? baseCurrent;
   }, [args.today, args.focusOverrideId, baseCurrent]);
 
-
-  const challengeTitle = current?.title ?? "На сегодня всё";
-  const currentStatus = current?.status_view ?? null;
+  const challengeTitle = boot ? "…" : current?.title ?? "На сегодня всё";
+  const currentStatus = boot ? null : current?.status_view ?? null;
 
   const noteLabel =
     args.pending === "SKIP"
@@ -40,7 +41,9 @@ export function useTodayDerived(args: {
       : "Коротко, по желанию…";
 
   const noteRequired = args.pending === "SKIP";
+
   const canSave =
+    !boot &&
     current != null &&
     args.pending != null &&
     (!noteRequired || args.note.trim().length > 0);
@@ -48,9 +51,10 @@ export function useTodayDerived(args: {
   const maxLen = args.pending === "SKIP" ? 200 : 140;
 
   return {
+    boot,
     baseCurrent,
     waiting,
-    current,
+    current: boot ? null : current,
     challengeTitle,
     currentStatus,
     noteLabel,
