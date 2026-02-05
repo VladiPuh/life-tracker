@@ -1,6 +1,7 @@
 ﻿// LT-SOURCE: AUTO 2026-02-01 03:21
 import { useEffect, useRef, useState } from "react";
 import { initTelegram, logTelegramReady } from "./shared/tg/webapp";
+import { installTelegramViewportCssVar } from "./shared/tg/viewport";
 import { useBack } from "./app/router/useBack";
 import { ScreenRouter } from "./app/router/ScreenRouter";
 import { useNav } from "./app/router/useNav";
@@ -24,26 +25,8 @@ export default function App() {
   const { screen, go, goBack, goToday, goTemplates, goAdd } = useNav();
   const { placeholder, openPlaceholder, closePlaceholder } = usePlaceholder();
 
-  // === анти-моргание: "держим" предыдущий screen на 1 кадр ===
-  const [renderScreen, setRenderScreen] = useState(screen);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (screen === renderScreen) return;
-
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      setRenderScreen(screen);
-      rafRef.current = null;
-    });
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [screen, renderScreen]);
-
   const { bindings: routerBindings } = useRouterBindings({
-    screen: renderScreen,
+    screen,
     placeholder,
     go,
     goBack,
@@ -66,7 +49,9 @@ export default function App() {
     didTgInit.current = true;
 
     initTelegram();
+    const cleanupViewport = installTelegramViewportCssVar();
     logTelegramReady();
+    return () => cleanupViewport();
   }, [tgPresent]);
 
   useBack(tgOk);
