@@ -84,8 +84,8 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   };
 
   const requestPending = (flag: Flag) => {
-    if (saving || !current || pending) return;
-    setPending(flag);
+    if (saving || !current) return;
+    setPending(flag);        // разрешаем переключать
     setSavedPulse(false);
   };
 
