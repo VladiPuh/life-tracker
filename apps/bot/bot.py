@@ -1,5 +1,4 @@
 import os
-import json
 import httpx
 from dotenv import load_dotenv
 from telegram import Update

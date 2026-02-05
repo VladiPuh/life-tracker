@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 type Props = {
   title: string;
@@ -16,6 +16,16 @@ type Props = {
 export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Props) {
   const [isInputActive, setIsInputActive] = useState(false);
 
+  /**
+   * Telegram WebView (особенно iOS) при закрытии клавиатуры делает несколько
+   * пересчётов visualViewport. Если в этот момент вернуть BottomNav/BackBar,
+   * они могут появиться на "старой" высоте и мгновенно уехать вниз (визуальный прыжок).
+   *
+   * Решение: держим нижние элементы скрытыми, пока visualViewport не стабилизируется.
+   * Без таймеров "на глаз": только rAF + проверка стабильности высоты.
+   */
+  const [isViewportSettling, setIsViewportSettling] = useState(false);
+
   useEffect(() => {
     const isFormEl = (el: Element | null) => {
       const node = el as HTMLElement | null;
@@ -28,8 +38,16 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
 
     const sync = () => setIsInputActive(isFormEl(document.activeElement));
 
-    const onFocusIn = () => sync();
-    const onFocusOut = () => requestAnimationFrame(sync);
+    const onFocusIn = () => {
+      setIsViewportSettling(false);
+      sync();
+    };
+
+    const onFocusOut = () => {
+      // предотвращаем "один кадр" появления навигации до прихода resize от visualViewport
+      setIsViewportSettling(true);
+      requestAnimationFrame(sync);
+    };
 
     document.addEventListener("focusin", onFocusIn);
     document.addEventListener("focusout", onFocusOut);
@@ -40,6 +58,54 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
       document.removeEventListener("focusout", onFocusOut);
     };
   }, []);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    let raf = 0;
+    let lastH = vv.height;
+    let stable = 0;
+
+    const tick = () => {
+      const h = vv.height;
+      if (Math.abs(h - lastH) < 0.5) stable += 1;
+      else stable = 0;
+
+      lastH = h;
+
+      if (stable >= 2) {
+        setIsViewportSettling(false);
+        raf = 0;
+        return;
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    const onVVChange = () => {
+      setIsViewportSettling(true);
+      stable = 0;
+      lastH = vv.height;
+
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+
+    vv.addEventListener("resize", onVVChange);
+    vv.addEventListener("scroll", onVVChange);
+
+    return () => {
+      vv.removeEventListener("resize", onVVChange);
+      vv.removeEventListener("scroll", onVVChange);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  const showBottomUI = useMemo(() => {
+    // Ввод важнее навигации: скрываем при активном input/textarea.
+    // Плюс скрываем на время стабилизации viewport при закрытии клавиатуры.
+    return !isInputActive && !isViewportSettling;
+  }, [isInputActive, isViewportSettling]);
 
   return (
     <div
@@ -91,11 +157,11 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
           paddingLeft: "var(--app-pad)",
           paddingRight: "var(--app-pad)",
           paddingTop: "calc(var(--app-pad) + var(--topbar-gap))",
-                    paddingBottom: isInputActive
-            ? "calc(var(--app-pad) + var(--safe-bottom))"
-            : backBar?.show
+          paddingBottom: showBottomUI
+            ? backBar?.show
               ? "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom) + 52px)" // 44 кнопка + 8 gap
-              : "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom))",
+              : "calc(var(--app-pad) + var(--nav-h) + var(--safe-bottom))"
+            : "calc(var(--app-pad) + var(--safe-bottom))",
           WebkitOverflowScrolling: "touch",
         }}
       >
@@ -103,7 +169,7 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
       </div>
 
       {/* BackBar (outside scroll, above BottomNav) */}
-      {backBar?.show && !isInputActive ? (
+      {backBar?.show && showBottomUI ? (
         <div
           style={{
             flexShrink: 0,
@@ -120,16 +186,16 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
           {buildLabel ? (
             <div
               style={{
-                fontSize: 10,        // было 12 → стало меньше
+                fontSize: 10,
                 opacity: 0.4,
                 textAlign: "center",
-                marginBottom: 6,     // чуть выше кнопки
+                marginBottom: 6,
               }}
             >
               build: {buildLabel}
             </div>
           ) : null}
-          
+
           <button
             onClick={backBar.onBack}
             style={{
@@ -156,11 +222,8 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
           </button>
         </div>
       ) : null}
-      {!isInputActive ? (
-        <div style={{ position: "relative", zIndex: 10 }}>
-          {bottomNav}
-        </div>
-      ) : null}
+
+      {showBottomUI ? <div style={{ position: "relative", zIndex: 10 }}>{bottomNav}</div> : null}
     </div>
   );
 }
