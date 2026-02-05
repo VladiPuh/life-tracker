@@ -8,11 +8,18 @@ export function HistoryCommentInput(props: {
 
   return (
     <>
-      <div style={{ fontSize: 12, opacity: 0.8 }}>
-        Комментарий{" "}
+      <div style={{ fontSize: 12, opacity: 0.85 }}>
+        Комментарий
         {commentRequired ? (
-          <span style={{ opacity: 0.75, fontSize: 12, marginLeft: 6 }}>
-            Обязательно
+          <span
+            style={{
+              marginLeft: 6,
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#d44", // аккуратный красный, без агрессии
+            }}
+          >
+            обязательно
           </span>
         ) : null}
       </div>
@@ -29,7 +36,9 @@ export function HistoryCommentInput(props: {
         style={{
           width: "100%",
           boxSizing: "border-box",
-          border: "1px solid rgba(255,255,255,0.12)",
+          border: commentRequired
+            ? "1px solid rgba(212,68,68,0.45)"
+            : "1px solid rgba(255,255,255,0.12)",
           borderRadius: 10,
           padding: "9px 11px",
           fontSize: 12,

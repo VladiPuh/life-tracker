@@ -13,18 +13,22 @@ type Draft = {
   comment: string | null;
 };
 
+// === UX лимиты (канонично для History) ===
+const COMMENT_MAX = 280;
+const MINUTES_MAX_CHARS = 4; // до 9999
+
 export function HistoryChallengeEdit(props: {
   it: HistoryDayDetailItemDto;
   dateLabel: string;
   onCancel: () => void;
-  // ✅ теперь onSave может быть sync или async
   onSave: (draft: Draft) => void | Promise<void>;
   errorText?: string | null;
 }) {
-
   const { it, dateLabel, onCancel, onSave, errorText } = props;
   const { draft, setDraft, dirty, reset } = useHistoryEditDraft(it);
-  const commentRequired = draft.status_view === "FAIL" || draft.status_view === "SKIP";
+
+  const commentRequired =
+    draft.status_view === "FAIL" || draft.status_view === "SKIP";
   const commentOk = !!(draft.comment && draft.comment.trim().length > 0);
 
   const [saving, setSaving] = useState(false);
@@ -43,13 +47,9 @@ export function HistoryChallengeEdit(props: {
   };
 
   useEffect(() => {
-    // BackBar должен работать как "Отмена" (reset + close)
     (window as any).__LT_EDIT_CANCEL__ = () => handleCancel();
-
     return () => {
-      if ((window as any).__LT_EDIT_CANCEL__) {
-        delete (window as any).__LT_EDIT_CANCEL__;
-      }
+      delete (window as any).__LT_EDIT_CANCEL__;
     };
   }, [dirty, reset, onCancel, saving]);
 
@@ -74,12 +74,21 @@ export function HistoryChallengeEdit(props: {
         border: "1px solid rgba(255,255,255,0.08)",
         background: "rgba(255,255,255,0.03)",
         opacity: saving ? 0.85 : 1,
-        pointerEvents: saving ? "none" : "auto", // ✅ жёсткая блокировка всего блока
+        pointerEvents: saving ? "none" : "auto",
       }}
     >
       <HistoryEditHeader title={it.title} dateLabel={dateLabel} />
 
-      <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 12 }}>
+      <div
+        style={{
+          marginTop: 12,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+          maxHeight: "60vh", // ⬅ не даём одному челленджу заливать экран
+          overflowY: "auto",
+        }}
+      >
         <div style={{ fontSize: 12, opacity: 0.8 }}>Статус</div>
 
         <HistoryStatusPicker
@@ -91,15 +100,40 @@ export function HistoryChallengeEdit(props: {
         <HistoryMinutesInput
           disabled={saving}
           value={draft.minutes_fact}
-          onChange={(v) => setDraft({ ...draft, minutes_fact: v })}
+          onChange={(v) => {
+            const raw = String(v ?? "");
+            const trimmed = raw.slice(0, MINUTES_MAX_CHARS);
+            const num = trimmed === "" ? null : Number(trimmed);
+            setDraft({
+              ...draft,
+              minutes_fact: Number.isFinite(num) ? num : null,
+            });
+          }}
         />
 
         <HistoryCommentInput
           disabled={saving}
           value={draft.comment}
           commentRequired={commentRequired}
-          onChange={(v) => setDraft({ ...draft, comment: v })}
+          onChange={(v) =>
+            setDraft({
+              ...draft,
+              comment: v ? v.slice(0, COMMENT_MAX) : v,
+            })
+          }
         />
+
+        {/* счётчик символов */}
+        <div
+          style={{
+            fontSize: 11,
+            opacity: 0.6,
+            textAlign: "right",
+            marginTop: -6,
+          }}
+        >
+          {(draft.comment?.length ?? 0)}/{COMMENT_MAX}
+        </div>
       </div>
 
       {errorText && (
