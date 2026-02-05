@@ -3,8 +3,8 @@ import { TodayCard } from "./TodayCard";
 import type { TodayItem } from "../../shared/domain/types";
 import { StatusButton } from "./components/StatusButton";
 import { FocusPickDialog } from "./components/FocusPickDialog";
-
 import { useAutosizeTextarea } from "../../shared/ui/useAutosizeTextarea";
+
 type Props = {
   boot: boolean;
 
@@ -45,25 +45,99 @@ type FocusSectionProps = Props & {
   savedPulse: boolean;
 };
 
+function SkeletonBar(props: { w: number; h: number; r?: number }) {
+  const { w, h, r = 10 } = props;
+  return (
+    <div
+      style={{
+        width: w,
+        height: h,
+        borderRadius: r,
+        background:
+          "linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.06) 100%)",
+        backgroundSize: "220% 100%",
+        animation: "ltSk 1.15s ease-in-out infinite",
+      }}
+    />
+  );
+}
+
 export function FocusSection(props: FocusSectionProps) {
+  const noteRef = useRef<HTMLTextAreaElement | null>(null);
+  useAutosizeTextarea(noteRef, props.note ?? "", { minHeight: 88, maxHeight: 220 });
+
   const waitingCount = props.waiting.length;
   const commentRequired = props.pending === "SKIP";
   const needRed = commentRequired && props.note.trim().length === 0;
 
-
-  const noteRef = useRef<HTMLTextAreaElement>(null);
-  useAutosizeTextarea(noteRef, props.note ?? "", { minHeight: 88, maxHeight: 220 });
-  // ✅ BOOT: no skeletons. If we ever hit boot here, show a stable, silent placeholder.
+  // ✅ BOOT: стабильная разметка без “пустых” состояний (никаких “На сегодня всё” на долю секунды)
   if (props.boot) {
     return (
-      <div ref={props.focusCardRef}>
-        <TodayCard title="Фокус дня">
-          <div style={{ height: 160 }} />
-        </TodayCard>
-      </div>
+      <>
+        <style>
+          {`@keyframes ltSk{0%{background-position:0% 0}100%{background-position:220% 0}}`}
+        </style>
+
+        <div ref={props.focusCardRef}>
+          <TodayCard title="Фокус дня">
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <SkeletonBar w={220} h={18} r={10} />
+                <div style={{ marginTop: 8 }}>
+                  <SkeletonBar w={140} h={14} r={999} />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 999,
+                    border: "1px solid var(--lt-border)",
+                    background: "rgba(255,255,255,0.04)",
+                  }}
+                />
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 999,
+                    border: "1px solid var(--lt-border)",
+                    background: "rgba(255,255,255,0.04)",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 14, marginTop: 14 }}>
+              <SkeletonBar w={92} h={36} r={999} />
+              <SkeletonBar w={92} h={36} r={999} />
+              <SkeletonBar w={92} h={36} r={999} />
+            </div>
+
+            <div style={{ marginTop: 14, maxWidth: 420 }}>
+              <div
+                style={{
+                  padding: 10,
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.03)",
+                }}
+              >
+                <SkeletonBar w={320} h={56} r={12} />
+              </div>
+              <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                <SkeletonBar w={110} h={38} r={12} />
+                <SkeletonBar w={90} h={38} r={12} />
+                <SkeletonBar w={90} h={38} r={12} />
+              </div>
+            </div>
+          </TodayCard>
+        </div>
+      </>
     );
   }
-
 
   return (
     <>
