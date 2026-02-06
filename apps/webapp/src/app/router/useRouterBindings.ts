@@ -23,15 +23,7 @@ export function useRouterBindings(params: {
   closePlaceholder: () => void;
 }) {
   const { templates, addTemplate } = useTemplatesState();
-  const {
-    newTitle,
-    setNewTitle,
-    newDesc,
-    setNewDesc,
-    newMissPolicy,
-    setNewMissPolicy,
-    create,
-  } = useAddState();
+  const { newTitle, setNewTitle, newDesc, setNewDesc, newType, setNewType, create } = useAddState();
 
   const onGoChallenges = useCallback(() => {
     params.closePlaceholder();
@@ -81,8 +73,8 @@ export function useRouterBindings(params: {
       setNewTitle,
       newDesc,
       setNewDesc,
-      newMissPolicy,
-      setNewMissPolicy: (v: "FAIL" | "MIN") => setNewMissPolicy(v),
+      newType,
+      setNewType,
       onCreate,
     },
 

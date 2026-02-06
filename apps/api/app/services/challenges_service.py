@@ -16,6 +16,7 @@ async def create_user_challenge(
         user_id=user_id,
         title=payload.title,
         description=payload.description,
+        type=payload.type,
         miss_policy=payload.miss_policy,
     )
     await create_challenge(db, ch)

@@ -3,10 +3,12 @@ from datetime import date
 from typing import Optional, Literal
 
 MissPolicy = Literal["FAIL", "MIN"]
+ChallengeType = Literal["DO", "NO_DO"]
 
 class ChallengeCreate(BaseModel):
     title: str
     description: Optional[str] = None
+    type: ChallengeType = "DO"
     miss_policy: MissPolicy = "FAIL"
 
 class ChallengePatch(BaseModel):

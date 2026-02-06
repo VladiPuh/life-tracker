@@ -12,10 +12,13 @@ export type PlaceholderKind = "INSIGHTS" | "PROFILE";
 type AddProps = {
   newTitle: string;
   setNewTitle: (v: string) => void;
+
   newDesc: string;
   setNewDesc: (v: string) => void;
-  newMissPolicy: "FAIL" | "MIN";
-  setNewMissPolicy: (v: "FAIL" | "MIN") => void;
+
+  newType: "DO" | "NO_DO";
+  setNewType: (v: "DO" | "NO_DO") => void;
+
   onCreate: () => void | Promise<void>;
 };
 

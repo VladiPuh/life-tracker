@@ -55,6 +55,7 @@ export const LifeTrackerApi = {
   createChallenge(payload: {
     title: string;
     description: string | null;
+    type: "DO" | "NO_DO";
     miss_policy: "FAIL" | "MIN";
   }): Promise<{ id: number }> {
     return apiPost("/challenges", payload) as Promise<{ id: number }>;
