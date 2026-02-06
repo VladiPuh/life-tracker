@@ -12,7 +12,7 @@ type ChallengeDto = {
 };
 
 export default function DetailScreen(props: { challengeId: number; onBack: () => void }) {
-  const { challengeId, onBack } = props;
+  const { challengeId } = props;
 
   const [item, setItem] = useState<ChallengeDto | null>(null);
   const [err, setErr] = useState<string | null>(null);
