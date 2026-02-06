@@ -4,6 +4,24 @@ import { TodayCard } from "./";
 import { FocusSection } from "./";
 import { useTodayDerived } from "./useTodayDerived";
 import type { TodayItem } from "../../shared/domain/types";
+import { CongratsToast } from "../../shared/congrats/CongratsToast";
+
+const CONGRATS_TITLE = "День зафиксирован";
+const LS_CONGRATS_PREFIX = "lt_congrats_shown_for_";
+const CONGRATS_LINES: string[] = [
+  "Зафиксировано.",
+  "День сложился.",
+  "Сделано.",
+  "Хорошо. Продолжаем завтра.",
+  "Ты не пропускаешь себя.",
+  "Запись есть — этого достаточно.",
+  "Тихо, ровно, по делу.",
+  "Сегодня отмечено.",
+  "Есть факт. Есть история.",
+  "День закрыт.",
+  "Спокойно.",
+  "Ок.",
+];
 
 export function TodayPage(props: { onGoChallenges: () => void }) {
   type Flag = "MIN" | "BONUS" | "SKIP";
@@ -17,6 +35,8 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   const [pickOpen, setPickOpen] = useState(false);
   const focusCardRef = useRef<HTMLDivElement | null>(null);
   const [pickTop, setPickTop] = useState<number>(120);
+  const [congratsOpen, setCongratsOpen] = useState(false);
+  const [congratsText, setCongratsText] = useState("Зафиксировано.");
 
   const {
     boot,
@@ -134,8 +154,47 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
     setPickOpen(true);
   };
 
+  const closeCongrats = () => {
+    if (today) {
+      try {
+        localStorage.setItem(`${LS_CONGRATS_PREFIX}${today.date}`, "1");
+      } catch {
+        // ignore
+      }
+    }
+    setCongratsOpen(false);
+  };
+
+  useEffect(() => {
+    if (today == null) return;    
+    if (congratsOpen) return;
+
+    const allDone = 
+      (today.all ?? []).length > 0 && 
+      (today.all ?? []).every((x) => x.status_view != null);
+    if (!allDone) return;
+
+    const dateKey = `${LS_CONGRATS_PREFIX}${today.date}`;
+    const already = (() => {
+      try {
+        return localStorage.getItem(dateKey) === "1";
+      } catch {
+        return false;
+      }
+    })();
+
+    if (already) return;
+
+    // pick a line (no heavy randomness; stable enough)
+    const idx = Math.abs(String(today.date).split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % CONGRATS_LINES.length;
+    setCongratsText(CONGRATS_LINES[idx] ?? "Зафиксировано.");
+    setCongratsOpen(true);
+    try {
+      localStorage.setItem(dateKey, "1");
+    } catch {}    
+  }, [today, congratsOpen]);
+
   // HARD GATE: do not render intermediate UI before the first real /today payload.
-  // No skeletons here: empty is better than dirty.
   if (today == null) {
     return <div />;
   }
@@ -184,6 +243,10 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
       <TodayCard title="Мои челленджи" onClick={props.onGoChallenges}>
         <div style={{ fontSize: 13, opacity: 0.75 }}>Все ваши цели и настройки — в одном месте</div>
       </TodayCard>
+
+      {congratsOpen && (
+        <CongratsToast title={CONGRATS_TITLE} text={congratsText} onClose={closeCongrats} />
+      )}
     </div>
   );
 }
