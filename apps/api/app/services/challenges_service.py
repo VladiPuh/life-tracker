@@ -12,12 +12,16 @@ from app.repositories.challenges_crud_repo import (
 async def create_user_challenge(
     db: AsyncSession, user_id: int, payload: ChallengeCreate
 ) -> int:
+    miss_policy = payload.miss_policy
+    if payload.type == "NO_DO":
+        miss_policy = "MIN"
+
     ch = Challenge(
         user_id=user_id,
         title=payload.title,
         description=payload.description,
         type=payload.type,
-        miss_policy=payload.miss_policy,
+        miss_policy=miss_policy,
     )
     await create_challenge(db, ch)
     await db.commit()
@@ -49,6 +53,7 @@ async def get_user_challenge_view(
 
     return {
         "id": ch.id,
+        "type": ch.type,
         "title": ch.title,
         "description": ch.description,
         "miss_policy": ch.miss_policy,
@@ -76,6 +81,7 @@ async def list_user_challenges(db: AsyncSession, user_id: int) -> list[dict]:
     return [
         {
             "id": ch.id,
+            "type": ch.type,
             "title": ch.title,
             "description": ch.description,
             "miss_policy": ch.miss_policy,
