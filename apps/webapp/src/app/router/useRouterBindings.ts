@@ -63,6 +63,7 @@ export function useRouterBindings(params: {
     screen: params.screen,
     placeholder: params.placeholder,
 
+    go: params.go,
     onGoChallenges,
 
     templates,

@@ -54,5 +54,6 @@ export type Screen =
   | "TEMPLATES"
   | "PROFILE"
   | "CHALLENGES"
+  | "CHALLENGES_LIST"
 ;
 

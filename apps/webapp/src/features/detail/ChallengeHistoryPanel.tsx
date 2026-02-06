@@ -108,7 +108,15 @@ export function ChallengeHistoryPanel(props: { challengeId: number; days?: numbe
               )}
 
               {it.comment && it.comment.trim() !== "" && (
-                <div style={{ marginTop: 8, lineHeight: 1.35, opacity: 0.8 }}>
+                <div
+                  style={{
+                    marginTop: 8,
+                    lineHeight: 1.35,
+                    opacity: 0.8,
+                    overflowWrap: "anywhere",
+                    wordBreak: "break-word",
+                  }}
+                >
                   {it.comment}
                 </div>
               )}

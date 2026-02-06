@@ -45,20 +45,6 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
-      <button
-        onClick={onBack}
-        style={{
-          border: "1px solid rgba(0,0,0,0.12)",
-          background: "white",
-          borderRadius: 12,
-          padding: "10px 12px",
-          cursor: "pointer",
-          fontWeight: 800,
-          marginBottom: 12,
-        }}
-      >
-        ← Назад
-      </button>
 
       {loading && <div style={{ opacity: 0.7 }}>Загрузка…</div>}
 
