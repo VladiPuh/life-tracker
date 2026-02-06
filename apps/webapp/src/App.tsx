@@ -14,6 +14,7 @@ import { getActiveTab, getPageTitle, shouldShowBackBar } from "./app/appViewMode
 import { usePlaceholder } from "./app/state/usePlaceholder";
 import { useRouterBindings } from "./app/router/useRouterBindings";
 import { BetaNoticeOverlay } from "./shared/beta/BetaNoticeOverlay";
+import { LandscapeLockOverlay } from "./shared/orientation/LandscapeLockOverlay";
 
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
@@ -80,7 +81,12 @@ export default function App() {
       title={pageTitle}
       buildLabel={BUILD_LABEL}
       backBar={{ show: showBackBar, onBack: onBackBar }}
-      overlay={<BetaNoticeOverlay />}
+      overlay={
+        <>
+          <LandscapeLockOverlay />
+          <BetaNoticeOverlay />
+        </>
+      }
       bottomNav={
         <BottomNav
           active={activeTab}

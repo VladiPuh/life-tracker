@@ -111,3 +111,41 @@ button:focus-visible {
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
 }
+
+/* A7: Landscape lock (disable horizontal mode) */
+.lt-landscape-lock {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--lt-bg);
+  color: var(--lt-text);
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--app-pad) + var(--safe-top)) var(--app-pad)
+    calc(var(--app-pad) + var(--safe-bottom));
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.lt-landscape-lock__card {
+  width: 100%;
+  max-width: 520px;
+  border: 1px solid var(--lt-border);
+  background: var(--lt-card);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.lt-landscape-lock__text {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  opacity: 0.95;
+}
+
+@media (orientation: landscape) {
+  .lt-landscape-lock {
+    display: flex;
+  }
+}
