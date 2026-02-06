@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "../../shared/api/client";
+import { ChallengeHistoryPanel } from "./ChallengeHistoryPanel";
 
 type ChallengeDto = {
   id: number;
+  type: "DO" | "NO_DO";
   title: string;
   description?: string | null;
-  miss_policy: string;
   is_active: boolean;
-  created_at?: string | null;
-  updated_at?: string | null;
+  icon?: string | null;
 };
 
 export default function DetailScreen(props: { challengeId: number; onBack: () => void }) {
@@ -53,14 +53,12 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
           borderRadius: 12,
           padding: "10px 12px",
           cursor: "pointer",
-          fontWeight: 700,
+          fontWeight: 800,
           marginBottom: 12,
         }}
       >
         ← Назад
       </button>
-
-      <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>Детали челленджа</div>
 
       {loading && <div style={{ opacity: 0.7 }}>Загрузка…</div>}
 
@@ -73,20 +71,35 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
       {!loading && !err && !item && <div style={{ opacity: 0.7 }}>Не найден.</div>}
 
       {!loading && !err && item && (
-        <div style={{ padding: 14, borderRadius: 14, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.02)" }}>
-          <div style={{ fontSize: 16, fontWeight: 900 }}>{item.title}</div>
-
-          {item.description && (
-            <div style={{ marginTop: 8, fontSize: 13, opacity: 0.8, lineHeight: 1.35 }}>
-              {item.description}
+        <>
+          <div
+            style={{
+              padding: 14,
+              borderRadius: 14,
+              border: "1px solid rgba(0,0,0,0.08)",
+              background: "rgba(0,0,0,0.02)",
+            }}
+          >
+            <div style={{ fontSize: 16, fontWeight: 900, color: "var(--lt-text)", display: "flex", gap: 8, alignItems: "center" }}>
+              {item.icon ? <span style={{ fontSize: 18, lineHeight: 1 }}>{item.icon}</span> : null}
+              <span>{item.title}</span>
             </div>
-          )}
 
-          <div style={{ marginTop: 12, fontSize: 12, opacity: 0.7 }}>
-            <div>miss_policy: {item.miss_policy}</div>
-            <div>is_active: {String(item.is_active)}</div>
+            {item.description && (
+              <div style={{ marginTop: 8, fontSize: 13, opacity: 0.8, lineHeight: 1.35 }}>
+                {item.description}
+              </div>
+            )}
+
+            {!item.is_active && (
+              <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>
+                ⏸ Пауза
+              </div>
+            )}
           </div>
-        </div>
+
+          <ChallengeHistoryPanel challengeId={challengeId} days={60} />
+        </>
       )}
     </div>
   );
