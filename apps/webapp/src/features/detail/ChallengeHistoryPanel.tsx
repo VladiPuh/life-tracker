@@ -21,7 +21,7 @@ function StatusPill(props: { v: Item["status_view"] }) {
         padding: "4px 8px",
         borderRadius: 999,
         border: "1px solid var(--lt-border)",
-        background: "rgba(0,0,0,0.02)",
+        background: "var(--lt-soft)",
         whiteSpace: "nowrap",
         fontWeight: 800,
         color: "var(--lt-text)",
@@ -90,10 +90,10 @@ export function ChallengeHistoryPanel(props: { challengeId: number; days?: numbe
             <div
               key={it.date}
               style={{
-                padding: 12,
-                borderRadius: 14,
-                border: "1px solid rgba(0,0,0,0.08)",
-                background: "rgba(0,0,0,0.02)",
+                padding: 14,
+                borderRadius: 18,
+                border: "1px solid var(--lt-border)",
+                background: "var(--lt-card)",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>

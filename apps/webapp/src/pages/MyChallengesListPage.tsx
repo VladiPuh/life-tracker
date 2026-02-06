@@ -61,7 +61,6 @@ export function MyChallengesListPage(props: {
 
     return () => {
       const cur = (window as any).__LT_BACK_OVERRIDE__;
-      // снимаем override только если он наш
       if (typeof cur === "function") (window as any).__LT_BACK_OVERRIDE__ = undefined;
     };
   }, [props]);  
@@ -74,10 +73,10 @@ export function MyChallengesListPage(props: {
         style={{
           width: "100%",
           textAlign: "left",
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.03)",
-          borderRadius: 16,
-          padding: 14,
+          border: "1px solid var(--lt-border)",
+          background: "var(--lt-card)",
+          borderRadius: 18,
+          padding: 16,
           cursor: "pointer",
           color: "var(--lt-text)",
         }}
@@ -88,8 +87,8 @@ export function MyChallengesListPage(props: {
               style={{
                 width: 42,
                 height: 42,
-                borderRadius: 14,
-                background: "rgba(255,255,255,0.06)",
+                borderRadius: 16,
+                background: "var(--lt-soft)",
                 display: "grid",
                 placeItems: "center",
                 fontSize: 18,
@@ -117,9 +116,15 @@ export function MyChallengesListPage(props: {
 
   return (
     <div style={{ padding: 16, maxWidth: 560, margin: "0 auto" }}>
-      <div style={{ fontSize: 28, fontWeight: 950, marginTop: 8 }}>Мои челленджи</div>
-      <div style={{ marginTop: 14, fontSize: 24, fontWeight: 950 }}>{title}</div>
-      <div style={{ marginTop: 6, opacity: 0.75 }}>{subtitle}</div>
+      <div style={{ fontSize: 20, fontWeight: 950, marginTop: 8, color: "var(--lt-text)" }}>
+        Мои челленджи
+      </div>
+      <div style={{ marginTop: 10, fontSize: 18, fontWeight: 950, color: "var(--lt-text)" }}>
+        {title}
+      </div>
+      <div style={{ marginTop: 6, opacity: 0.7, color: "var(--lt-hint)" }}>
+        {subtitle}
+      </div>
 
       <div style={{ marginTop: 16 }}>
         {loading ? <div style={{ opacity: 0.7 }}>Загрузка…</div> : null}

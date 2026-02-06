@@ -10,10 +10,10 @@ function CardRow(props: { title: string; subtitle: string; onClick?: () => void 
         if (e.key === "Enter" || e.key === " ") props.onClick?.();
       }}
       style={{
-        padding: 14,
-        borderRadius: 16,
-        border: "1px solid rgba(0,0,0,0.08)",
-        background: "rgba(0,0,0,0.02)",
+        padding: 16,
+        borderRadius: 18,
+        border: "1px solid var(--lt-border)",
+        background: "var(--lt-card)",
         cursor: "pointer",
         userSelect: "none",
       }}
@@ -29,11 +29,11 @@ function CardRow(props: { title: string; subtitle: string; onClick?: () => void 
 export default function MyChallengesPage(props: { onOpenType?: (t: ChallengeType) => void }) {
   return (
     <div style={{ padding: 16, maxWidth: 520, margin: "0 auto", fontFamily: "system-ui, Arial" }}>
-      <div style={{ fontSize: 22, fontWeight: 950, marginBottom: 10, color: "var(--lt-text)" }}>
+      <div style={{ fontSize: 20, fontWeight: 950, marginBottom: 10, color: "var(--lt-text)" }}>
         Мои челленджи
       </div>
 
-      <div style={{ opacity: 0.75, lineHeight: 1.35, marginBottom: 14, color: "var(--lt-text)" }}>
+      <div style={{ opacity: 0.7, lineHeight: 1.35, marginBottom: 14, color: "var(--lt-hint)" }}>
         Выбери раздел.
       </div>
 
