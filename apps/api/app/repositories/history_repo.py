@@ -33,4 +33,4 @@ async def get_challenge_logs_since(
         .where(and_(*conditions))
         .order_by(DailyLog.date.desc())
     )
-
+    return q.scalars().all()
