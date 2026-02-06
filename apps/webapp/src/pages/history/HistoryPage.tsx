@@ -31,7 +31,25 @@ type HistoryDayDetailDto = {
 // and only switch to DETAIL after:
 // 1) a small minimum delay (intentional transition)
 // 2) the detail data is ready (no "white flash" between screens)
-const MIN_NAV_DELAY_MS = 120;
+const MIN_NAV_DELAY_MS = 260;
+
+function waitRafMs(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = () => {
+      const dt = performance.now() - t0;
+      if (dt >= ms) {
+        if (raf) cancelAnimationFrame(raf);
+        resolve();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  });
+}
+
 
 export function HistoryPage() {
   const [daysData, setDaysData] = useState<HistoryDayDto[] | null>(null);
@@ -129,12 +147,7 @@ export function HistoryPage() {
 
   const hasAny = days.length > 0;
 
-  const shellStyle: CSSProperties = {
-    maxWidth: 520,
-    margin: "0 auto",
-    padding: 16,
-    fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial",
-  };
+  const shellStyle: CSSProperties = {};
 
   const openDay = async (day: string) => {
     if (openingDay || selectedDay) return; // prevent double-nav / spamming
@@ -144,7 +157,7 @@ export function HistoryPage() {
     const seq = (openingSeq.current += 1);
 
     // 1) minimum delay (intentional)
-    const minDelay = new Promise((r) => setTimeout(r, MIN_NAV_DELAY_MS));
+    const minDelay = waitRafMs(MIN_NAV_DELAY_MS);
 
     // 2) prefetch detail while list is still visible (no flash)
     const fetchDetail = (async () => {
@@ -172,9 +185,9 @@ export function HistoryPage() {
     } finally {
       // Keep highlight for a tiny moment even if detail is instant
       if (openingSeq.current === seq) {
-        window.setTimeout(() => {
+        void waitRafMs(80).then(() => {
           if (openingSeq.current === seq) setOpeningDay(null);
-        }, 60);
+        });
       }
     }
   };
@@ -201,6 +214,11 @@ export function HistoryPage() {
         }}
       />
     );
+  }
+
+  // HARD GATE: do not render intermediate LIST UI before first /history/days payload.
+  if (daysData === null) {
+    return <div />;
   }
 
   // LIST VIEW

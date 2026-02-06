@@ -11,7 +11,9 @@ export function HistoryDaysList(props: {
   daysDataIsNull: boolean;
   onOpenDay: (day: string) => void;
 }) {
-  const { shellStyle, days, openingDay, hasAny, err, loading, daysDataIsNull, onOpenDay } = props;
+  const { shellStyle, days, openingDay, hasAny, err, loading,  onOpenDay } = props;
+
+  const isBoot = false; // boot gated in HistoryPage
 
   return (
     <div style={shellStyle}>
@@ -37,7 +39,9 @@ export function HistoryDaysList(props: {
         </div>
       )}
 
+      {/* ✅ ВАЖНО: пока идёт первый fetch — НЕ показываем "Пока здесь нет фактов" */}
       {!hasAny ? (
+
         <div
           style={{
             padding: 14,
@@ -46,7 +50,9 @@ export function HistoryDaysList(props: {
             background: "rgba(0,0,0,0.02)",
           }}
         >
-          <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>Пока здесь нет фактов</div>
+          <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 6 }}>
+            Пока здесь нет фактов
+          </div>
           <div style={{ fontSize: 13, opacity: 0.75, maxWidth: 420 }}>
             История появится после первых отметок в Today.
           </div>
@@ -89,7 +95,7 @@ export function HistoryDaysList(props: {
                   <div style={{ fontSize: 12, opacity: 0.8 }}>✅ {x.min}</div>
                   <div style={{ fontSize: 12, opacity: 0.8 }}>⭐ {x.bonus}</div>
                   <div style={{ fontSize: 12, opacity: 0.8 }}>↩️ {x.skip}</div>
-                  <div style={{ fontSize: 12, opacity: 0.8 }}>⚑ {x.fail}</div>
+                  <div style={{ fontSize: 12, opacity: 0.8 }}>❌ {x.fail}</div>
                 </div>
               </div>
             );
@@ -97,7 +103,8 @@ export function HistoryDaysList(props: {
         </div>
       )}
 
-      {loading && daysDataIsNull && <div style={{ opacity: 0.7, marginTop: 10 }}>Загрузка…</div>}
+      {/* ✅ убрали "Загрузка..." совсем */}
+      {loading && !isBoot ? <div style={{ height: 0 }} /> : null}
     </div>
   );
 }

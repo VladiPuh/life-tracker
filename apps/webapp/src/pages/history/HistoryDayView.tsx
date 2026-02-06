@@ -66,8 +66,8 @@ export function HistoryDayView(props: {
         {toast && (
         <div
           style={{
-            position: "sticky",
-            top: "calc(10px + var(--safe-top, 0px))",
+            position: "relative",
+            top: "auto",
             zIndex: 50,
 
             marginTop: 8,

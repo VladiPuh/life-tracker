@@ -16,19 +16,28 @@ export function BottomNav(props: {
   const [pending, setPending] = useState<TabId | null>(null);
   const rafRef = useRef<number | null>(null);
 
+  // Intentional delay (no setTimeout). Keep it short so navigation doesn't feel heavy.
+  const NAV_DELAY_MS = 260;
+
   const go = (tab: TabId) => {
     if (props.active === tab) return;
     if (pending) return;
 
     setPending(tab);
 
-    // микро-задержка: 2 rAF, без таймеров
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = requestAnimationFrame(() => {
+    // intentional delay: keep current screen visible while the next one warms up
+    const t0 = performance.now();
+    const tick = () => {
+      const dt = performance.now() - t0;
+      if (dt >= NAV_DELAY_MS) {
         props.onGo(tab);
         setPending(null);
-      });
-    });
+        rafRef.current = null;
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
   };
 
   const Item = (p: {

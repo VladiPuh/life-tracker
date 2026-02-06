@@ -17,7 +17,9 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   const [pickOpen, setPickOpen] = useState(false);
   const focusCardRef = useRef<HTMLDivElement | null>(null);
   const [pickTop, setPickTop] = useState<number>(120);
+
   const {
+    boot,
     waiting,
     current,
     challengeTitle,
@@ -34,19 +36,30 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   });
 
   useEffect(() => {
+    if (!boot) return;
+    // пока today не загрузился — форма фиксации должна быть гарантированно закрыта
+    setPending(null);
+    setNote("");
+    setSavedPulse(false);
+    setErr(null);
+  }, [boot]);
+
+  useEffect(() => {
     // Если override стал невалидным (челлендж уже отмечен сегодня / пропал) — сбрасываем
     if (!today) return;
     if (focusOverrideId == null) return;
 
-    const it = today.all.find(
-      (x: TodayItem) => x.challenge_id === focusOverrideId
-    );
-      if (!it || it.status_view != null) return;
+    const it = today.all.find((x: TodayItem) => x.challenge_id === focusOverrideId);
+    if (!it || it.status_view != null) {
+      setFocusOverrideId(null);
+      return;
+    }
   }, [today, focusOverrideId]);
 
   useEffect(() => {
     void loadToday();
   }, [loadToday]);
+
   useEffect(() => {
     if (!savedPulse) return;
     const t = window.setTimeout(() => setSavedPulse(false), 1200);
@@ -64,6 +77,7 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   };
 
   const saveForm = async () => {
+    if (boot) return;
     if (saving) return;
     if (!current || !pending) return;
 
@@ -84,35 +98,34 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
   };
 
   const requestPending = (flag: Flag) => {
+    if (boot) return;
     if (saving || !current) return;
-    setPending(flag);        // разрешаем переключать
+    setPending(flag);
     setSavedPulse(false);
   };
 
-  // TODO: условие появления блока НЕ ДЕЛАТЬ (когда есть challenge типа “avoid/не делать”)
   const hasNoDoChallenges = false;
 
-    const onNextFocus = () => {
+  const onNextFocus = () => {
+    if (boot) return;
     if (!waiting.length) return;
 
     const curId = current?.challenge_id ?? null;
     const idx =
-      curId != null
-        ? waiting.findIndex((x: TodayItem) => x.challenge_id === curId)
-        : -1;
+      curId != null ? waiting.findIndex((x: TodayItem) => x.challenge_id === curId) : -1;
 
     const next = waiting[(idx + 1 + waiting.length) % waiting.length];
     setFocusOverrideId(next.challenge_id);
-    closeForm(); // на всякий случай закрываем форму статуса
+    closeForm();
   };
 
   const onOpenPick = () => {
+    if (boot) return;
     if (!waiting.length) return;
 
     const r = focusCardRef.current?.getBoundingClientRect();
     if (r) {
-      const top = Math.round(r.top + 8); // модалка начинается примерно на уровне "Фокус дня"
-      // ограничим, чтобы не прилипало к самому верху
+      const top = Math.round(r.top + 8);
       setPickTop(Math.max(72, top));
     } else {
       setPickTop(120);
@@ -121,9 +134,16 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
     setPickOpen(true);
   };
 
+  // HARD GATE: do not render intermediate UI before the first real /today payload.
+  // No skeletons here: empty is better than dirty.
+  if (today == null) {
+    return <div />;
+  }
+
   return (
     <div>
       <FocusSection
+        boot={boot}
         pickOpen={pickOpen}
         pickTop={pickTop}
         onClosePick={() => setPickOpen(false)}
@@ -155,20 +175,14 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
         savedPulse={savedPulse}
       />
 
-      {/* НЕ ДЕЛАТЬ — появляется только если есть такие челленджи */}
       {hasNoDoChallenges && (
         <TodayCard title="Не делать">
           <div style={{ opacity: 0.7, fontSize: 13 }}>Список (свернуто) — следующим шагом</div>
         </TodayCard>
       )}
 
-      {/* Мои челленджи — слот под будущий список/экран */}
-      <TodayCard title="Мои челленджи"
-        onClick={props.onGoChallenges}
-      >
-        <div style={{ fontSize: 13, opacity: 0.75 }}>
-          Все ваши цели и настройки — в одном месте
-        </div>
+      <TodayCard title="Мои челленджи" onClick={props.onGoChallenges}>
+        <div style={{ fontSize: 13, opacity: 0.75 }}>Все ваши цели и настройки — в одном месте</div>
       </TodayCard>
     </div>
   );

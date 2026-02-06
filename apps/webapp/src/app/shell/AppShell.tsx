@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 type Props = {
   title: string;
   children: React.ReactNode;
-
   bottomNav: React.ReactNode;
   buildLabel?: string | null;
   backBar?: {
@@ -11,6 +10,7 @@ type Props = {
     onBack: () => void;
     label?: string;
   };
+  overlay?: React.ReactNode;
 };
 
 // No visualViewport: TG iOS WebView + vv = race conditions.
@@ -19,7 +19,7 @@ type Props = {
 // NOTE: keep this small; too large makes navigation feel sluggish.
 const SHOW_AFTER_BLUR_MS = 220;
 
-export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Props) {
+export function AppShell({ title, children, bottomNav, buildLabel, backBar, overlay }: Props) {
   const [isInputActive, setIsInputActive] = useState(false);
   const [isPostBlurHold, setIsPostBlurHold] = useState(false);
 
@@ -103,6 +103,7 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
   const showBottomUI = useMemo(() => {
     return !isInputActive && !isPostBlurHold;
   }, [isInputActive, isPostBlurHold]);
+
   const disableBottomUIAnim = isInputActive;
 
   // IMPORTANT: When keyboard is open, do NOT reserve space for BottomNav/BackBar.
@@ -118,7 +119,6 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
 
   const bottomOpacity = showBottomUI ? 1 : 0;
   const bottomPE = showBottomUI ? ("auto" as const) : ("none" as const);
-
   const bottomTransform = showBottomUI ? "translateY(0)" : "translateY(18px)";
 
   return (
@@ -265,6 +265,9 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar }: Pr
       >
         {bottomNav}
       </div>
+
+      {/* Overlay (e.g., beta notice). Rendered last to stay above all UI. */}
+      {overlay ?? null}
     </div>
   );
 }
