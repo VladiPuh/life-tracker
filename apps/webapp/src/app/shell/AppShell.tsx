@@ -11,6 +11,7 @@ type Props = {
     label?: string;
   };
   overlay?: React.ReactNode;
+  scrollMode?: "auto" | "locked";
 };
 
 // No visualViewport: TG iOS WebView + vv = race conditions.
@@ -19,7 +20,7 @@ type Props = {
 // NOTE: keep this small; too large makes navigation feel sluggish.
 const SHOW_AFTER_BLUR_MS = 220;
 
-export function AppShell({ title, children, bottomNav, buildLabel, backBar, overlay }: Props) {
+export function AppShell({ title, children, bottomNav, buildLabel, backBar, overlay, scrollMode }: Props) {
   const [isInputActive, setIsInputActive] = useState(false);
   const [isPostBlurHold, setIsPostBlurHold] = useState(false);
 
@@ -168,9 +169,9 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar, over
       <div
         style={{
           flex: 1,
-          overflowY: "auto",
+          overflowY: scrollMode === "locked" ? "hidden" : "auto",
           overflowX: "hidden",
-          overscrollBehaviorY: "contain",
+          overscrollBehaviorY: scrollMode === "locked" ? "none" : "contain",
           paddingLeft: "var(--app-pad)",
           paddingRight: "var(--app-pad)",
           paddingTop: "calc(var(--app-pad) + var(--topbar-gap))",

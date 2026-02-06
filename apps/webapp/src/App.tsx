@@ -81,6 +81,7 @@ export default function App() {
       title={pageTitle}
       buildLabel={BUILD_LABEL}
       backBar={{ show: showBackBar, onBack: onBackBar }}
+      scrollMode={screen === "ADD" ? "locked" : "auto"}
       overlay={
         <>
           <LandscapeLockOverlay />
