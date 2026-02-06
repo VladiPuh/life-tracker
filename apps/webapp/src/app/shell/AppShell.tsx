@@ -121,6 +121,7 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar, over
   const bottomOpacity = showBottomUI ? 1 : 0;
   const bottomPE = showBottomUI ? ("auto" as const) : ("none" as const);
   const bottomTransform = showBottomUI ? "translateY(0)" : "translateY(18px)";
+  const isScrollLocked = scrollMode === "locked" && !isInputActive;
 
   return (
     <div
@@ -169,9 +170,9 @@ export function AppShell({ title, children, bottomNav, buildLabel, backBar, over
       <div
         style={{
           flex: 1,
-          overflowY: scrollMode === "locked" ? "hidden" : "auto",
+          overflowY: isScrollLocked ? "hidden" : "auto",
           overflowX: "hidden",
-          overscrollBehaviorY: scrollMode === "locked" ? "none" : "contain",
+          overscrollBehaviorY: isScrollLocked ? "none" : "contain",
           paddingLeft: "var(--app-pad)",
           paddingRight: "var(--app-pad)",
           paddingTop: "calc(var(--app-pad) + var(--topbar-gap))",
