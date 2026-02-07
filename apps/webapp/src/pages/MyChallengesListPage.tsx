@@ -1,18 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { apiGet } from "../shared/api/client";
 import { useAsyncResource } from "../shared/hooks/useAsyncResource";
 import { backController } from "../shared/nav/backController";
-
-type Challenge = {
-  id: number;
-  title: string;
-  description?: string | null;
-  type: "DO" | "NO_DO";
-  is_active: boolean;
-  icon?: string | null;
-};
-
-let challengesListCache: Challenge[] | null = null;
+import {
+  fetchChallengesList,
+  readChallengesListCache,
+  type ChallengeListItem as Challenge,
+} from "../features/detail/detailResource";
 
 export function MyChallengesListPage(props: {
   type: "DO" | "NO_DO";
@@ -29,23 +22,14 @@ export function MyChallengesListPage(props: {
   }, []);
 
   const resource = useAsyncResource<Challenge[]>({
-    loader: async () => {
-      const json = await apiGet<Challenge[]>("/challenges");
-      return Array.isArray(json) ? json : [];
-    },
+    loader: fetchChallengesList,
     deps: [],
-    initialData: challengesListCache ?? [],
+    initialData: readChallengesListCache(),
   });
 
   const all = resource.data ?? [];
   const loading = resource.loading;
   const err = resource.error;
-
-  useEffect(() => {
-    if (!resource.error && resource.data) {
-      challengesListCache = resource.data;
-    }
-  }, [resource.data, resource.error]);
 
   const title =
     props.type === "DO"

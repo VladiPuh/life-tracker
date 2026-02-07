@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { apiDelete, apiPatch } from "../../shared/api/client";
 import { ChallengeHistoryPanel } from "./ChallengeHistoryPanel";
 import { useAsyncResource } from "../../shared/hooks/useAsyncResource";
 import {
+  deleteChallenge,
   fetchChallenge,
+  patchChallengeActive,
   readChallengeCache,
   type ChallengeDto,
   writeChallengeCache,
@@ -43,7 +44,7 @@ export default function DetailScreen(props: {
     if (!item) return;
     const next = !item.is_active;
 
-    await apiPatch(`/challenges/${item.id}`, { is_active: next });
+    await patchChallengeActive(item.id, next);
     const patched = { ...item, is_active: next };
     setItemOverride(patched);
     writeChallengeCache(patched);
@@ -57,7 +58,7 @@ export default function DetailScreen(props: {
     );
     if (!ok) return;
 
-    await apiDelete(`/challenges/${item.id}`);
+    await deleteChallenge(item.id);
 
     if (!backController.run()) {
       try {

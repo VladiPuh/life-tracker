@@ -3,9 +3,9 @@ import type { HistoryDayDetailDto } from "./dto";
 import { useEffect, useState } from "react";
 import { HistoryItemCard } from "./components/HistoryItemCard";
 import { HistoryChallengeEdit } from "./HistoryChallengeEdit";
-import { LifeTrackerApi } from "../../shared/api/lifetracker";
 import { HistoryEmptyState } from "./components/HistoryEmptyState";
 import { HistoryDayHeader } from "./components/HistoryDayHeader";
+import { setHistoryDailyFlag } from "./historyResource";
 
 export function HistoryDayView(props: {
   shellStyle: CSSProperties;
@@ -144,7 +144,7 @@ export function HistoryDayView(props: {
                           return;
                         }
 
-                        await LifeTrackerApi.setDailyFlag(
+                        await setHistoryDailyFlag(
                           it.challenge_id,
                           draft.status_view,
                           draft.comment,

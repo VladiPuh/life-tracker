@@ -1,4 +1,4 @@
-import { apiGet } from "../../shared/api/client";
+import { apiGet, apiPost } from "../../shared/api/client";
 import type { HistoryDayDetailDto } from "./dto";
 
 export type HistoryDayDto = {
@@ -62,4 +62,18 @@ export function prefetchHistoryDayDetail(day: string): Promise<HistoryDayDetailD
 
   historyDayDetailInFlight.set(day, req);
   return req;
+}
+
+export async function setHistoryDailyFlag(
+  challenge_id: number,
+  flag: "MIN" | "BONUS" | "SKIP" | "FAIL",
+  comment?: string | null,
+  minutes_fact?: number | null
+): Promise<{ ok: true }> {
+  return apiPost("/daily-log/upsert", {
+    challenge_id,
+    flag,
+    comment: comment ?? null,
+    minutes_fact: minutes_fact ?? null,
+  }) as Promise<{ ok: true }>;
 }
