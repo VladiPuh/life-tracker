@@ -57,6 +57,16 @@ async def on_startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+        # --- SAFE ALTER: challenges.deleted_at (soft-delete) ---
+        try:
+            res = await conn.exec_driver_sql("PRAGMA table_info(challenges)")
+            cols = [row[1] for row in res.fetchall()]  # row[1] = name
+            if "deleted_at" not in cols:
+                await conn.exec_driver_sql("ALTER TABLE challenges ADD COLUMN deleted_at DATETIME")
+        except Exception as e:
+            # не блокируем запуск, но логируем
+            log.warning("SAFE ALTER challenges.deleted_at failed: %r", e)
+
     # 2) Инициализация 3 шаблонов (добавляем только недостающие)
     async with SessionLocal() as db:
         need = {

@@ -3,8 +3,6 @@ from sqlalchemy.sql import func
 from datetime import datetime
 from .db import Base
 
-deleted_at = Column(DateTime, nullable=True, default=None)
-
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -30,6 +28,7 @@ class Challenge(Base):
 
     is_active = Column(Boolean, nullable=False, default=True)
     is_template = Column(Boolean, nullable=False, default=False)
+    deleted_at = Column(DateTime(timezone=True), nullable=True, default=None)
 
     # Поля из твоего Excel (все nullable — MVP)
     goal = Column(Text, nullable=True)
