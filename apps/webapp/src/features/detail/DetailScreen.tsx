@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { apiGet } from "../../shared/api/client";
+import { apiDelete, apiGet, apiPatch } from "../../shared/api/client";
 import { ChallengeHistoryPanel } from "./ChallengeHistoryPanel";
 
 type ChallengeDto = {
@@ -43,6 +43,28 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
     };
   }, [challengeId]);
 
+  async function togglePause() {
+    if (!item) return;
+    const next = !item.is_active;
+
+    await apiPatch(`/challenges/${item.id}`, { is_active: next });
+    setItem({ ...item, is_active: next });
+  }
+
+  async function onDelete() {
+    if (!item) return;
+
+    const ok = confirm("Удалить челлендж? Он исчезнет из приложения, но история сохранится на время.");
+    if (!ok) return;
+
+    await apiDelete(`/challenges/${item.id}`);
+
+    // после удаления — уходим назад системным back bar
+    (window as any).__LT_BACK_OVERRIDE__?.(); // если есть
+    // если override нет — просто назад через history
+    try { window.history.back(); } catch {}
+  }
+
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: 16, fontFamily: "system-ui, Arial" }}>
 
@@ -66,9 +88,52 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
               background: "rgba(0,0,0,0.02)",
             }}
           >
-            <div style={{ fontSize: 16, fontWeight: 900, color: "var(--lt-text)", display: "flex", gap: 8, alignItems: "center" }}>
-              {item.icon ? <span style={{ fontSize: 18, lineHeight: 1 }}>{item.icon}</span> : null}
-              <span>{item.title}</span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+              }}
+            >
+              <div style={{ fontSize: 16, fontWeight: 900, color: "var(--lt-text)", display: "flex", gap: 8, alignItems: "center" }}>
+                {item.icon ? <span style={{ fontSize: 18, lineHeight: 1 }}>{item.icon}</span> : null}
+                <span>{item.title}</span>
+              </div>
+
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={togglePause}
+                  style={{
+                    border: "1px solid var(--lt-border)",
+                    background: "var(--lt-card)",
+                    borderRadius: 12,
+                    padding: "8px 10px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    color: "var(--lt-text)",
+                    opacity: 0.9,
+                  }}
+                >
+                  {item.is_active ? "⏸ Пауза" : "▶︎ Вкл"}
+                </button>
+
+                <button
+                  onClick={onDelete}
+                  style={{
+                    border: "1px solid rgba(255,0,0,0.25)",
+                    background: "transparent",
+                    borderRadius: 12,
+                    padding: "8px 10px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    color: "var(--lt-text)",
+                    opacity: 0.9,
+                  }}
+                >
+                  🗑
+                </button>
+              </div>
             </div>
 
             {item.description && (

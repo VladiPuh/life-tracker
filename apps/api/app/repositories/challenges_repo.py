@@ -14,6 +14,7 @@ async def get_active_user_challenges(db: AsyncSession, user_id: int) -> list[Cha
                 Challenge.user_id == user_id,
                 Challenge.is_active == True,
                 Challenge.is_template == False,
+                Challenge.deleted_at.is_(None),
             )
         )
         .order_by(Challenge.id.asc())

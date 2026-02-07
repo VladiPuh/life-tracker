@@ -8,7 +8,7 @@ const API_BASE =
   (DEV ? "http://127.0.0.1:8000" : "https://api.lifetracker.site/api");
 
 async function request<T>(
-  method: "GET" | "POST" | "PATCH",
+  method: "GET" | "POST" | "PATCH" | "DELETE",
   path: string,
   body?: any
 ): Promise<T> {
@@ -23,7 +23,7 @@ async function request<T>(
     "X-Telegram-Init-Data": initData,
   };
 
-  if (method !== "GET") headers["Content-Type"] = "application/json";
+  if (method !== "GET" && method !== "DELETE") headers["Content-Type"] = "application/json";
 
   const r = await fetch(`${API_BASE}${path}`, {
     method,
@@ -75,4 +75,8 @@ export function apiPost<T>(path: string, body?: any): Promise<T> {
 
 export function apiPatch<T>(path: string, body: any): Promise<T> {
   return request<T>("PATCH", path, body);
+}
+
+export function apiDelete<T>(path: string): Promise<T> {
+  return request<T>("DELETE", path);
 }

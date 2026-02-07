@@ -10,6 +10,7 @@ from app.services.challenges_service import (
     patch_user_challenge,
     get_user_challenge_view,
     list_user_challenges,
+    soft_delete_user_challenge,
 )
 
 router = APIRouter()
@@ -56,3 +57,15 @@ async def get_challenge(
     if not out:
         raise HTTPException(status_code=404, detail="Challenge not found")
     return out
+
+
+@router.delete("/challenges/{challenge_id}")
+async def delete_challenge(
+    challenge_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    ok = await soft_delete_user_challenge(db, user.id, challenge_id)
+    if not ok:
+        raise HTTPException(404, "Challenge not found")
+    return {"ok": True}

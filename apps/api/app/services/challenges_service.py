@@ -74,6 +74,7 @@ async def list_user_challenges(db: AsyncSession, user_id: int) -> list[dict]:
     q = await db.execute(
         select(Challenge)
         .where(Challenge.user_id == user_id)
+        .where(Challenge.deleted_at.is_(None))
         .order_by(Challenge.id.desc())
     )
     items = q.scalars().all()
@@ -91,3 +92,16 @@ async def list_user_challenges(db: AsyncSession, user_id: int) -> list[dict]:
         }
         for ch in items
     ]
+
+from datetime import datetime, timezone
+
+async def soft_delete_user_challenge(db: AsyncSession, user_id: int, challenge_id: int) -> bool:
+    ch = await get_user_challenge(db, challenge_id, user_id)
+    if not ch:
+        return False
+
+    ch.is_active = False
+    ch.deleted_at = datetime.now(timezone.utc)
+
+    await db.commit()
+    return True

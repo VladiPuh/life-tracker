@@ -1,6 +1,9 @@
 from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey, Text, DateTime
 from sqlalchemy.sql import func
+from datetime import datetime
 from .db import Base
+
+deleted_at = Column(DateTime, nullable=True, default=None)
 
 class User(Base):
     __tablename__ = "users"
