@@ -96,7 +96,7 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
                 gap: 10,
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 900, color: "var(--lt-text)", display: "flex", gap: 8, alignItems: "center" }}>
+              <div style={{ fontSize: 18, fontWeight: 950, lineHeight: 1.15, color: "var(--lt-text)", display: "flex", gap: 8, alignItems: "center" }}>
                 {item.icon ? <span style={{ fontSize: 18, lineHeight: 1 }}>{item.icon}</span> : null}
                 <span>{item.title}</span>
               </div>

@@ -1,5 +1,5 @@
 // LT-SOURCE: AUTO 2026-02-01 03:55
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { ScreenRouter } from "./ScreenRouter";
 import type { PlaceholderKind } from "./ScreenRouter";
 import type { Screen } from "../../shared/domain/types";
@@ -24,6 +24,7 @@ export function useRouterBindings(params: {
 }) {
   const { templates, addTemplate } = useTemplatesState();
   const { newTitle, setNewTitle, newDesc, setNewDesc, newType, setNewType, create } = useAddState();
+  const [addError, setAddError] = useState<string | null>(null);
 
   const onGoChallenges = useCallback(() => {
     params.closePlaceholder();
@@ -42,9 +43,12 @@ export function useRouterBindings(params: {
 
   const onCreate = useCallback(async () => {
     try {
+      setAddError(null);
       await create();
       params.goToday();
-    } catch (e: any) {}
+    } catch (e: any) {
+      setAddError(e?.message ? String(e.message) : "Ошибка создания");
+    }
   }, [create, params]);
 
   const onOpenChallenge = useCallback(
@@ -77,6 +81,7 @@ export function useRouterBindings(params: {
       newType,
       setNewType,
       onCreate,
+      error: addError,
     },
 
     selectedId: params.selectedId,

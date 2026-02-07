@@ -22,6 +22,8 @@ type AddProps = {
   setNewType: (v: "DO" | "NO_DO") => void;
 
   onCreate: () => void | Promise<void>;
+
+  error?: string | null;
 };
 
 export function ScreenRouter(props: {

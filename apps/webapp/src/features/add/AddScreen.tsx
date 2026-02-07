@@ -11,6 +11,7 @@ type Props = {
   setNewType: (v: ChallengeType) => void;
 
   onCreate: () => void | Promise<void>;
+  error?: string | null;
 };
 
 export function AddScreen(props: Props) {
@@ -32,6 +33,7 @@ export function AddScreen(props: Props) {
             Название*
             <input
               value={newTitle}
+              maxLength={48}
               onChange={(e) => setNewTitle(e.target.value)}
               style={{
                 width: "100%",
@@ -41,6 +43,7 @@ export function AddScreen(props: Props) {
                 border: "1px solid var(--lt-border)",
                 background: "var(--lt-bg)",
                 color: "var(--lt-text)",
+                
               }}
               placeholder="Читать / Спорт / Не курить"
             />
@@ -50,6 +53,7 @@ export function AddScreen(props: Props) {
             Описание (опционально)
             <textarea
               value={newDesc}
+              maxLength={240}
               onChange={(e) => setNewDesc(e.target.value)}
               style={{
                 width: "100%",
@@ -122,6 +126,12 @@ export function AddScreen(props: Props) {
               </div>
             </label>
           </div>
+          
+          {props.error ? (
+            <div style={{ padding: 10, borderRadius: 12, border: "1px solid rgba(255,0,0,0.25)" }}>
+              {props.error}
+            </div>
+          ) : null}
 
           <button onClick={onCreate}>Создать</button>
         </div>

@@ -13,21 +13,33 @@ type Resp = {
   items: Item[];
 };
 
-function StatusPill(props: { v: Item["status_view"] }) {
+const RU_DAY_MONTH = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" });
+
+function fmtDayMonth(dateIso: string) {
+  const d = new Date(`${dateIso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return dateIso;
+  return RU_DAY_MONTH.format(d);
+}
+
+function statusEmoji(v: Item["status_view"]) {
+  if (v === "BONUS") return "⭐";
+  if (v === "MIN") return "✅";
+  if (v === "SKIP") return "↩️";
+  return "❌"; // FAIL
+}
+
+function StatusMark(props: { v: Item["status_view"] }) {
   return (
     <span
       style={{
-        fontSize: 12,
-        padding: "4px 8px",
-        borderRadius: 999,
-        border: "1px solid var(--lt-border)",
-        background: "transparent",
-        whiteSpace: "nowrap",
-        fontWeight: 800,
-        color: "var(--lt-text)",
+        fontSize: 14,
+        lineHeight: 1,
+        opacity: 0.9,
       }}
+      aria-label={props.v}
+      title={props.v}
     >
-      {props.v}
+      {statusEmoji(props.v)}
     </span>
   );
 }
@@ -97,8 +109,10 @@ export function ChallengeHistoryPanel(props: { challengeId: number; days?: numbe
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                <div style={{ fontWeight: 900, color: "var(--lt-text)" }}>{it.date}</div>
-                <StatusPill v={it.status_view} />
+                <div style={{ fontWeight: 800, fontSize: 13, opacity: 0.8, color: "var(--lt-text)" }}>
+                  {fmtDayMonth(it.date)}
+                </div>
+                <StatusMark v={it.status_view} />
               </div>
 
               {typeof it.minutes_fact === "number" && (
