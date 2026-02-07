@@ -10,20 +10,29 @@ export function useTodayDerived(args: {
   note: string;
 }) {
   const boot = args.today === null;
+  const all = args.today?.all ?? [];
 
   const waiting = useMemo(() => {
-    const all = args.today?.all ?? [];
-    return all.filter((x: TodayItem) => x.status_view == null);
-  }, [args.today]);
+    return all.filter((x: TodayItem) => x.type === "DO" && x.status_view == null);
+  }, [all]);
 
-  const baseCurrent = args.today?.first_uncompleted ?? waiting[0] ?? null;
+  const baseCurrent = useMemo(() => {
+    const first = args.today?.first_uncompleted ?? null;
+    if (first && first.type === "DO" && first.status_view == null) return first;
+    return waiting[0] ?? null;
+  }, [args.today, waiting]);
 
   const current = useMemo(() => {
     if (args.focusOverrideId == null) return baseCurrent;
     const found =
-      (args.today?.all ?? []).find((x) => x.challenge_id === args.focusOverrideId) ?? null;
+      all.find(
+        (x) =>
+          x.challenge_id === args.focusOverrideId &&
+          x.type === "DO" &&
+          x.status_view == null
+      ) ?? null;
     return found ?? baseCurrent;
-  }, [args.today, args.focusOverrideId, baseCurrent]);
+  }, [all, args.focusOverrideId, baseCurrent]);
 
   const challengeTitle = boot ? "…" : current?.title ?? "На сегодня всё";
   const currentStatus = boot ? null : current?.status_view ?? null;

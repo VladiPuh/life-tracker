@@ -1,14 +1,6 @@
-type Status = "MIN" | "BONUS" | "SKIP" | "FAIL";
+import { STATUS_META, type StatusKey } from "../../../shared/statusMeta";
 
-const STATUS_META: Record<
-  Status,
-  { emoji: string; label: string }
-> = {
-  MIN: { emoji: "🙂", label: "MIN" },
-  BONUS: { emoji: "🔥", label: "BONUS" },
-  SKIP: { emoji: "⏸️", label: "SKIP" },
-  FAIL: { emoji: "❌", label: "FAIL" },
-};
+type Status = StatusKey;
 
 export function HistoryStatusPicker(props: {
   value: Status;

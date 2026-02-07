@@ -70,7 +70,7 @@ export function TodayPage(props: { onGoChallenges: () => void; onGoHistory: () =
     if (focusOverrideId == null) return;
 
     const it = today.all.find((x: TodayItem) => x.challenge_id === focusOverrideId);
-    if (!it || it.status_view != null) {
+    if (!it || it.status_view != null || it.type !== "DO") {
       setFocusOverrideId(null);
       return;
     }

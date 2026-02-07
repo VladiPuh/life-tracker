@@ -1,18 +1,12 @@
-import { apiGet } from "../../shared/api/client";
-import { getStatusEmoji, type StatusKey } from "../../shared/statusMeta";
+import { getStatusEmoji } from "../../shared/statusMeta";
 import { useAsyncResource } from "../../shared/hooks/useAsyncResource";
+import {
+  fetchChallengeHistory,
+  readChallengeHistoryCache,
+  type ChallengeHistoryItem,
+} from "./challengeHistoryResource";
 
-type Item = {
-  date: string;
-  status_view: StatusKey;
-  minutes_fact?: number | null;
-  comment?: string | null;
-};
-
-type Resp = {
-  challenge_id: number;
-  items: Item[];
-};
+type Item = ChallengeHistoryItem;
 
 const RU_DAY_MONTH = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long" });
 
@@ -40,16 +34,15 @@ function StatusMark(props: { v: Item["status_view"] }) {
 
 export function ChallengeHistoryPanel(props: { challengeId: number; days?: number }) {
   const days = props.days ?? 30;
+  const initial = readChallengeHistoryCache(props.challengeId, days);
 
   const resource = useAsyncResource<Item[]>({
-    loader: async () => {
-      const json = await apiGet<Resp>(`/challenges/${props.challengeId}/history?days=${days}`);
-      return Array.isArray(json?.items) ? json.items : [];
-    },
+    loader: () => fetchChallengeHistory(props.challengeId, days),
     deps: [props.challengeId, days],
-    initialData: [],
+    initialData: initial,
   });
 
+  const hasData = resource.data !== null;
   const items = resource.error ? [] : resource.data ?? [];
   const loading = resource.loading;
   const err = resource.error;
@@ -60,7 +53,7 @@ export function ChallengeHistoryPanel(props: { challengeId: number; days?: numbe
         История
       </div>
 
-      {loading && <div style={{ opacity: 0.7, fontSize: 12 }}>Загрузка…</div>}
+      {loading ? <div style={{ height: 0 }} /> : null}
 
       {err && (
         <div style={{ padding: 10, borderRadius: 12, border: "1px solid rgba(255,0,0,0.25)" }}>
@@ -68,13 +61,13 @@ export function ChallengeHistoryPanel(props: { challengeId: number; days?: numbe
         </div>
       )}
 
-      {!loading && !err && items.length === 0 && (
+      {!loading && !err && hasData && items.length === 0 && (
         <div style={{ opacity: 0.7, lineHeight: 1.4 }}>
           Пока нет записей по этому челленджу.
         </div>
       )}
 
-      {!loading && !err && items.length > 0 && (
+      {!loading && !err && hasData && items.length > 0 && (
         <div style={{ display: "grid", gap: 10 }}>
           {items.map((it) => (
             <div

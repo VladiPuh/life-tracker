@@ -6,6 +6,8 @@ import type { Screen } from "../../shared/domain/types";
 
 import { useTemplatesState } from "../../state/templates";
 import { useAddState } from "../../state/add";
+import { prefetchChallenge } from "../../features/detail/detailResource";
+import { prefetchChallengeHistory } from "../../features/detail/challengeHistoryResource";
 
 type ScreenRouterProps = Parameters<typeof ScreenRouter>[0];
 
@@ -62,7 +64,11 @@ export function useRouterBindings(params: {
   }, [save, params]);
 
   const onOpenChallenge = useCallback(
-    (id: number) => {
+    async (id: number) => {
+      await Promise.all([
+        prefetchChallenge(id),
+        prefetchChallengeHistory(id, 60),
+      ]);
       params.setSelectedId(id);
       params.go("DETAIL");
     },

@@ -41,6 +41,11 @@ export function useAsyncResource<T>(params: UseAsyncResourceParams<T>) {
   const mountedRef = useRef(true);
   const requestSeqRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
+  const loaderRef = useRef(loader);
+
+  useEffect(() => {
+    loaderRef.current = loader;
+  }, [loader]);
 
   useEffect(() => {
     return () => {
@@ -60,7 +65,7 @@ export function useAsyncResource<T>(params: UseAsyncResourceParams<T>) {
     setError(null);
 
     try {
-      const next = await callLoader(loader, controller.signal);
+      const next = await callLoader(loaderRef.current, controller.signal);
 
       if (!mountedRef.current) return;
       if (controller.signal.aborted) return;
@@ -79,7 +84,7 @@ export function useAsyncResource<T>(params: UseAsyncResourceParams<T>) {
 
       setLoading(false);
     }
-  }, [loader]);
+  }, []);
 
   useEffect(() => {
     if (!immediate || !enabled) return;
