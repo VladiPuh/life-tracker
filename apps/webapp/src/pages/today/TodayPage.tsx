@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useTodayState } from "../../state/today";
-import { TodayCard } from "./";
-import { FocusSection } from "./";
+import { TodayCard } from "./TodayCard";
+import { FocusSection } from "./FocusSection";
 import { useTodayDerived } from "./useTodayDerived";
 import type { TodayItem } from "../../shared/domain/types";
 import { CongratsToast } from "../../shared/congrats/CongratsToast";
