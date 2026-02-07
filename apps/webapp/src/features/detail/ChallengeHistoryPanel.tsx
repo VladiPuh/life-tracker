@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
 import { apiGet } from "../../shared/api/client";
+import { getStatusEmoji, type StatusKey } from "../../shared/statusMeta";
+import { useAsyncResource } from "../../shared/hooks/useAsyncResource";
 
 type Item = {
   date: string;
-  status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
+  status_view: StatusKey;
   minutes_fact?: number | null;
   comment?: string | null;
 };
@@ -21,13 +22,6 @@ function fmtDayMonth(dateIso: string) {
   return RU_DAY_MONTH.format(d);
 }
 
-function statusEmoji(v: Item["status_view"]) {
-  if (v === "BONUS") return "⭐";
-  if (v === "MIN") return "✅";
-  if (v === "SKIP") return "↩️";
-  return "❌"; // FAIL
-}
-
 function StatusMark(props: { v: Item["status_view"] }) {
   return (
     <span
@@ -39,7 +33,7 @@ function StatusMark(props: { v: Item["status_view"] }) {
       aria-label={props.v}
       title={props.v}
     >
-      {statusEmoji(props.v)}
+      {getStatusEmoji(props.v)}
     </span>
   );
 }
@@ -47,34 +41,18 @@ function StatusMark(props: { v: Item["status_view"] }) {
 export function ChallengeHistoryPanel(props: { challengeId: number; days?: number }) {
   const days = props.days ?? 30;
 
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const resource = useAsyncResource<Item[]>({
+    loader: async () => {
+      const json = await apiGet<Resp>(`/challenges/${props.challengeId}/history?days=${days}`);
+      return Array.isArray(json?.items) ? json.items : [];
+    },
+    deps: [props.challengeId, days],
+    initialData: [],
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setErr(null);
-      try {
-        const json = await apiGet<Resp>(`/challenges/${props.challengeId}/history?days=${days}`);
-        if (!cancelled) setItems(Array.isArray(json?.items) ? json.items : []);
-      } catch (e) {
-        if (!cancelled) {
-          setErr(e instanceof Error ? e.message : String(e));
-          setItems([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [props.challengeId, days]);
+  const items = resource.error ? [] : resource.data ?? [];
+  const loading = resource.loading;
+  const err = resource.error;
 
   return (
     <div style={{ marginTop: 14 }}>

@@ -4,6 +4,7 @@ import { HistoryDaysList } from "./HistoryDaysList";
 import { HistoryDayView } from "./HistoryDayView";
 import { formatDateRu } from "./formatDateRu";
 import { statusLabel } from "./statusLabel";
+import { useAsyncResource } from "../../shared/hooks/useAsyncResource";
 
 type HistoryDayDto = {
   date: string; // YYYY-MM-DD
@@ -52,16 +53,48 @@ function waitRafMs(ms: number): Promise<void> {
 
 
 export function HistoryPage() {
-  const [daysData, setDaysData] = useState<HistoryDayDto[] | null>(null);
-
   const [selectedDay, setSelectedDay] = useState<string | null>(null); // committed (router state)
   const [detail, setDetail] = useState<HistoryDayDetailDto | null>(null);
 
   const [openingDay, setOpeningDay] = useState<string | null>(null); // UX-only (pressed/highlighted)
   const openingSeq = useRef(0);
 
-  const [err, setErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [prefetchErr, setPrefetchErr] = useState<string | null>(null);
+
+  const daysResource = useAsyncResource<HistoryDayDto[]>({
+    loader: async () => {
+      const json = await apiGet<HistoryDayDto[]>("/history/days");
+      return Array.isArray(json) ? json : [];
+    },
+    deps: [],
+  });
+
+  const needsDetailLoad = Boolean(selectedDay) && (!detail || detail.date !== selectedDay);
+  const detailResource = useAsyncResource<HistoryDayDetailDto>({
+    loader: async () => {
+      return apiGet<HistoryDayDetailDto>(`/history/day/${selectedDay}`);
+    },
+    deps: [selectedDay],
+    enabled: needsDetailLoad,
+  });
+
+  useEffect(() => {
+    if (!selectedDay) return;
+    setPrefetchErr(null);
+  }, [selectedDay]);
+
+  useEffect(() => {
+    if (!detailResource.data) return;
+    if (!selectedDay) return;
+    if (detailResource.data.date !== selectedDay) return;
+    setDetail(detailResource.data);
+  }, [detailResource.data, selectedDay]);
+
+  const daysData = daysResource.data ?? (daysResource.error ? [] : null);
+  const err = selectedDay
+    ? prefetchErr ?? detailResource.error
+    : prefetchErr ?? daysResource.error;
+  const loading = selectedDay ? detailResource.loading : daysResource.loading;
 
   // When user goes back from HISTORY_DAY -> LIST, we must reflect it in local state
   useEffect(() => {
@@ -78,68 +111,12 @@ export function HistoryPage() {
       setSelectedDay(null);
       setDetail(null);
       setOpeningDay(null);
-      setErr(null);
+      setPrefetchErr(null);
     };
 
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
-
-  // load list
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadDays() {
-      setLoading(true);
-      setErr(null);
-      try {
-        const json = await apiGet<HistoryDayDto[]>("/history/days");
-        if (!cancelled) setDaysData(Array.isArray(json) ? json : []);
-      } catch (e) {
-        if (!cancelled) {
-          setErr(e instanceof Error ? e.message : String(e));
-          setDaysData([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void loadDays();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // load detail when selected (e.g. on browser Back/Forward)
-  useEffect(() => {
-    if (!selectedDay) {
-      setDetail(null);
-      return;
-    }
-    if (detail?.date === selectedDay) return;
-
-    let cancelled = false;
-
-    async function loadDetail() {
-      setLoading(true);
-      setErr(null);
-      try {
-        const json = await apiGet<HistoryDayDetailDto>(`/history/day/${selectedDay}`);
-        if (!cancelled) setDetail(json);
-      } catch (e) {
-        if (!cancelled) setErr(e instanceof Error ? e.message : String(e));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void loadDetail();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDay]);
 
   const days = useMemo(() => {
     return (daysData ?? []).map((x) => ({ ...x, dateLabel: formatDateRu(x.date) }));
@@ -151,7 +128,7 @@ export function HistoryPage() {
 
   const openDay = async (day: string) => {
     if (openingDay || selectedDay) return; // prevent double-nav / spamming
-    setErr(null);
+    setPrefetchErr(null);
     setOpeningDay(day);
 
     const seq = (openingSeq.current += 1);
@@ -180,7 +157,7 @@ export function HistoryPage() {
       setSelectedDay(day);
     } catch (e) {
       if (openingSeq.current !== seq) return;
-      setErr(e instanceof Error ? e.message : String(e));
+      setPrefetchErr(e instanceof Error ? e.message : String(e));
       setOpeningDay(null);
     } finally {
       // Keep highlight for a tiny moment even if detail is instant

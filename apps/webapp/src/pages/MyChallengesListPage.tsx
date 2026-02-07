@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { apiGet } from "../shared/api/client";
+import { useAsyncResource } from "../shared/hooks/useAsyncResource";
 
 type Challenge = {
   id: number;
@@ -16,31 +17,17 @@ export function MyChallengesListPage(props: {
   // назад делаем через твой нижний BackBar / системный back
   onBack: () => void;
 }) {
-  const [all, setAll] = useState<Challenge[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setErr(null);
-      try {
-        const json = await apiGet<Challenge[]>("/challenges");
-        if (!cancelled) setAll(Array.isArray(json) ? json : []);
-      } catch (e) {
-        if (!cancelled) setErr(e instanceof Error ? e.message : String(e));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const resource = useAsyncResource<Challenge[]>({
+    loader: async () => {
+      const json = await apiGet<Challenge[]>("/challenges");
+      return Array.isArray(json) ? json : [];
+    },
+    deps: [],
+    initialData: [],
+  });
+  const all = resource.data ?? [];
+  const loading = resource.loading;
+  const err = resource.error;
 
   const title = props.type === "DO" ? "Активные" : "Постоянные";
   const subtitle = props.type === "DO" ? "Делаю действие" : "Норма по умолчанию (не делаю)";

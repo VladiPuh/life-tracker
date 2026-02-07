@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiDelete, apiGet, apiPatch } from "../../shared/api/client";
 import { ChallengeHistoryPanel } from "./ChallengeHistoryPanel";
+import { useAsyncResource } from "../../shared/hooks/useAsyncResource";
 
 type ChallengeDto = {
   id: number;
@@ -18,41 +19,26 @@ export default function DetailScreen(props: {
 }) {
   const { challengeId } = props;
 
-  const [item, setItem] = useState<ChallengeDto | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [itemOverride, setItemOverride] = useState<ChallengeDto | null>(null);
+  const resource = useAsyncResource<ChallengeDto>({
+    loader: () => apiGet<ChallengeDto>(`/challenges/${challengeId}`),
+    deps: [challengeId],
+  });
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setErr(null);
-      try {
-        const json = await apiGet<ChallengeDto>(`/challenges/${challengeId}`);
-        if (!cancelled) setItem(json);
-      } catch (e) {
-        if (!cancelled) {
-          setErr(e instanceof Error ? e.message : String(e));
-          setItem(null);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
+    setItemOverride(null);
   }, [challengeId]);
+
+  const item = itemOverride ?? (resource.error ? null : resource.data);
+  const err = resource.error;
+  const loading = resource.loading;
 
   async function togglePause() {
     if (!item) return;
     const next = !item.is_active;
 
     await apiPatch(`/challenges/${item.id}`, { is_active: next });
-    setItem({ ...item, is_active: next });
+    setItemOverride({ ...item, is_active: next });
   }
 
   async function onDelete() {
