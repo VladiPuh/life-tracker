@@ -26,7 +26,8 @@ export function useDetailState() {
   }, []);
 
   const saveTitle = useCallback(async (challengeId: number) => {
-    const payload: ChallengePatch = { title: editTitle.trim() || null };
+    const title = editTitle.trim();
+    const payload: ChallengePatch = title ? { title } : {};
     await LifeTrackerApi.patchChallenge(challengeId, payload);
     await loadChallenge(challengeId);
   }, [editTitle, loadChallenge]);
