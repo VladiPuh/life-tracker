@@ -23,7 +23,7 @@ const CONGRATS_LINES: string[] = [
   "Ок.",
 ];
 
-export function TodayPage(props: { onGoChallenges: () => void }) {
+export function TodayPage(props: { onGoChallenges: () => void; onGoHistory: () => void }) {
   type Flag = "MIN" | "BONUS" | "SKIP";
   const [pending, setPending] = useState<Flag | null>(null);
   const [note, setNote] = useState<string>("");
@@ -239,6 +239,11 @@ export function TodayPage(props: { onGoChallenges: () => void }) {
           <div style={{ opacity: 0.7, fontSize: 13 }}>Список (свернуто) — следующим шагом</div>
         </TodayCard>
       )}
+
+
+      <TodayCard title="История" onClick={props.onGoHistory}>
+        <div style={{ fontSize: 13, opacity: 0.75 }}>Прошлые дни и редактирование фактов</div>
+      </TodayCard>
 
       <TodayCard title="Мои челленджи" onClick={props.onGoChallenges}>
         <div style={{ fontSize: 13, opacity: 0.75 }}>Все ваши цели и настройки — в одном месте</div>

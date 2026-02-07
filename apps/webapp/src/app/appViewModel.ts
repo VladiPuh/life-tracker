@@ -9,16 +9,11 @@ export function getActiveTab(params: {
   screen: string;
   placeholder: PlaceholderKind | null;
 }): TabId {
-  const { screen, placeholder } = params;
+  const { screen } = params;
 
-  if (placeholder === "INSIGHTS") return "insights";
-  if (placeholder === "PROFILE") return "profile";
-
+  // BottomNav is intentionally minimal in MVP:
+  // only "Главная" and "Новый" are present.
   if (screen === "ADD") return "new";
-  if (screen === "TEMPLATES") return "templates";
-  if (screen === "HISTORY" || screen.startsWith("HISTORY_")) return "history";
-
-  // включая TODAY и все прочие fallback-экраны
   return "today";
 }
 
@@ -38,7 +33,7 @@ export function getPageTitle(params: {
   if (screen === "CHALLENGES") return "Челленджи";
   if (screen === "DETAIL") return "Челлендж";
 
-  return "Сегодня";
+  return "Главная";
 }
 
 export function shouldShowBackBar(params: {

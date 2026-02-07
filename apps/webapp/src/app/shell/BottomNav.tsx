@@ -1,13 +1,7 @@
 // LT-SOURCE: AUTO 2026-02-01 03:03
 import { useRef, useState } from "react";
 
-export type TabId =
-  | "insights"
-  | "history"
-  | "today"
-  | "new"
-  | "templates"
-  | "profile";
+export type TabId = "today" | "new";
 
 export function BottomNav(props: {
   active: TabId;
@@ -40,11 +34,7 @@ export function BottomNav(props: {
     rafRef.current = requestAnimationFrame(tick);
   };
 
-  const Item = (p: {
-    id: TabId;
-    label: string;
-    emphasize?: boolean;
-  }) => {
+  const Item = (p: { id: TabId; label: string; emphasize?: boolean }) => {
     const isActive = props.active === p.id;
     const isPending = pending === p.id;
 
@@ -89,12 +79,8 @@ export function BottomNav(props: {
         boxSizing: "border-box",
       }}
     >
-      <Item id="insights" label="Инсайты" />
-      <Item id="history" label="История" />
-      <Item id="today" label="Сегодня" emphasize />
+      <Item id="today" label="Главная" emphasize />
       <Item id="new" label="Новый" emphasize />
-      <Item id="templates" label="Шаблоны" />
-      <Item id="profile" label="Профиль" />
     </div>
   );
 }

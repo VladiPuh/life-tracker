@@ -66,7 +66,7 @@ export function ScreenRouter(props: {
   if (screen === "TODAY") {
     if (placeholder === "INSIGHTS") return <PlaceholderCard title="Инсайты" text="Скоро" />;
     if (placeholder === "PROFILE") return <PlaceholderCard title="Профиль" text="Скоро" />;
-    return <TodayPage onGoChallenges={onGoChallenges} />;
+    return <TodayPage onGoChallenges={onGoChallenges} onGoHistory={() => go("HISTORY")} />;
   }
 
   if (screen === "HISTORY") return <HistoryPage />;
@@ -109,5 +109,5 @@ export function ScreenRouter(props: {
       <PlaceholderCard title="Челлендж" text="Не выбран" />
     );
   }
-  return <TodayPage onGoChallenges={onGoChallenges} />;
+  return <TodayPage onGoChallenges={onGoChallenges} onGoHistory={() => go("HISTORY")} />;
 }

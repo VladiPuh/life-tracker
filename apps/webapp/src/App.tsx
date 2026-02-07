@@ -24,8 +24,8 @@ export default function App() {
   const didTgInit = useRef(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const { resetShowAll } = useTodayState();
-  const { screen, go, goBack, goToday, goTemplates, goAdd } = useNav();
-  const { placeholder, openPlaceholder, closePlaceholder } = usePlaceholder();
+  const { screen, go, goBack, goToday, goAdd } = useNav();
+  const { placeholder, closePlaceholder } = usePlaceholder();
 
   const { bindings: routerBindings } = useRouterBindings({
     screen,
@@ -73,6 +73,13 @@ export default function App() {
       closePlaceholder();
       return;
     }
+
+    // UX: "Новый" (ADD) always goes back to Главная, not to the previous screen.
+    if (screen === "ADD") {
+      goToday();
+      return;
+    }
+
     goBack();
   };
 
@@ -92,21 +99,9 @@ export default function App() {
         <BottomNav
           active={activeTab}
           onGo={(tab: TabId) => {
-            if (tab !== "insights" && tab !== "profile") closePlaceholder();
+            // BottomNav is minimal in MVP: Главная + Новый
             if (tab === "today") return goToday();
-            if (tab === "history") return go("HISTORY");
             if (tab === "new") return goAdd();
-            if (tab === "templates") return goTemplates();
-            if (tab === "insights") {
-              goToday();
-              openPlaceholder("INSIGHTS");
-              return;
-            }
-            if (tab === "profile") {
-              goToday();
-              openPlaceholder("PROFILE");
-              return;
-            }
           }}
         />
       }
