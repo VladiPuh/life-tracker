@@ -2,7 +2,6 @@ import { useRef, type RefObject } from "react";
 import { TodayCard } from "./TodayCard";
 import type { TodayItem } from "../../shared/domain/types";
 import { StatusButton } from "./components/StatusButton";
-import { FocusPickDialog } from "./components/FocusPickDialog";
 import { useAutosizeTextarea } from "../../shared/ui/useAutosizeTextarea";
 
 type Props = {
