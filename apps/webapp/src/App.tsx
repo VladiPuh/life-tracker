@@ -15,6 +15,7 @@ import { usePlaceholder } from "./app/state/usePlaceholder";
 import { useRouterBindings } from "./app/router/useRouterBindings";
 import { BetaNoticeOverlay } from "./shared/beta/BetaNoticeOverlay";
 import { LandscapeLockOverlay } from "./shared/orientation/LandscapeLockOverlay";
+import { backController } from "./shared/nav/backController";
 
 declare const __BUILD_ID__: string;
 const BUILD_LABEL = __BUILD_ID__;
@@ -63,19 +64,17 @@ export default function App() {
   const showBackBar = shouldShowBackBar({ screen, placeholder });
 
   const onBackBar = () => {
-    const ov = (window as any).__LT_BACK_OVERRIDE__ as undefined | (() => boolean | void);
-    if (typeof ov === "function") {
-      const handled = ov();
-      if (handled === true) return;
-    }
+    if (backController.run()) return;
 
     if (placeholder !== null) {
       closePlaceholder();
       return;
     }
 
-    // UX: "Новый" (ADD) always goes back to Главная, not to the previous screen.
-    if (screen === "ADD") {
+    // UX:
+    // - ADD in create mode: back to Today
+    // - ADD in edit mode: back by structure (history stack)
+    if (screen === "ADD" && !routerBindings.addProps.editing) {
       goToday();
       return;
     }

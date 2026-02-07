@@ -5,9 +5,11 @@ import { HistoryEditActions } from "./components/HistoryEditActions";
 import { HistoryEditHeader } from "./components/HistoryEditHeader";
 import { HistoryMinutesInput } from "./components/HistoryMinutesInput";
 import { HistoryCommentInput } from "./components/HistoryCommentInput";
+import { getStatusEmoji, type StatusKey } from "../../shared/statusMeta";
+import { backController } from "../../shared/nav/backController";
 
 type Draft = {
-  status_view: "MIN" | "BONUS" | "SKIP" | "FAIL";
+  status_view: StatusKey;
   minutes_fact: number | null;
   comment: string | null;
 };
@@ -16,13 +18,6 @@ const COMMENT_MAX = 280;
 const MINUTES_MAX_CHARS = 4;
 
 type Status = Draft["status_view"];
-
-const STATUS_EMOJI: Record<Status, string> = {
-  MIN: "✅",
-  BONUS: "⭐",
-  SKIP: "↩️",
-  FAIL: "❌",
-};
 
 export function HistoryChallengeEdit(props: {
   it: HistoryDayDetailItemDto;
@@ -53,9 +48,10 @@ export function HistoryChallengeEdit(props: {
   };
 
   useEffect(() => {
-    (window as any).__LT_EDIT_CANCEL__ = () => handleCancel();
+    const handler = () => handleCancel();
+    backController.push(handler);
     return () => {
-      delete (window as any).__LT_EDIT_CANCEL__;
+      backController.pop(handler);
     };
   }, [dirty, reset, onCancel, saving]);
 
@@ -130,7 +126,7 @@ export function HistoryChallengeEdit(props: {
                   userSelect: "none",
                 }}
               >
-                {STATUS_EMOJI[s]}
+                {getStatusEmoji(s)}
               </button>
             );
           })}

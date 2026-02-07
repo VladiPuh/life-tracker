@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { apiGet } from "../shared/api/client";
 import { useAsyncResource } from "../shared/hooks/useAsyncResource";
+import { backController } from "../shared/nav/backController";
 
 type Challenge = {
   id: number;
@@ -11,61 +12,102 @@ type Challenge = {
   icon?: string | null;
 };
 
+let challengesListCache: Challenge[] | null = null;
+
 export function MyChallengesListPage(props: {
   type: "DO" | "NO_DO";
-  onOpenChallenge: (id: number) => void;
-  // назад делаем через твой нижний BackBar / системный back
+  onOpenChallenge: (id: number) => void | Promise<void>;
   onBack: () => void;
 }) {
+  const [openingId, setOpeningId] = useState<number | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const resource = useAsyncResource<Challenge[]>({
     loader: async () => {
       const json = await apiGet<Challenge[]>("/challenges");
       return Array.isArray(json) ? json : [];
     },
     deps: [],
-    initialData: [],
+    initialData: challengesListCache ?? [],
   });
+
   const all = resource.data ?? [];
   const loading = resource.loading;
   const err = resource.error;
 
-  const title = props.type === "DO" ? "Активные" : "Постоянные";
-  const subtitle = props.type === "DO" ? "Делаю действие" : "Норма по умолчанию (не делаю)";
+  useEffect(() => {
+    if (!resource.error && resource.data) {
+      challengesListCache = resource.data;
+    }
+  }, [resource.data, resource.error]);
+
+  const title =
+    props.type === "DO"
+      ? "\u0410\u043A\u0442\u0438\u0432\u043D\u044B\u0435"
+      : "\u041F\u043E\u0441\u0442\u043E\u044F\u043D\u043D\u044B\u0435";
+  const subtitle =
+    props.type === "DO"
+      ? "\u0414\u0435\u043B\u0430\u044E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435"
+      : "\u041D\u043E\u0440\u043C\u0430 \u043F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E (\u043D\u0435 \u0434\u0435\u043B\u0430\u044E)";
 
   const items = useMemo(() => {
     const byType = all.filter((x) => x.type === props.type);
-    // пауза — отдельным блоком, как у тебя уже принято
     const active = byType.filter((x) => x.is_active);
     const paused = byType.filter((x) => !x.is_active);
     return { active, paused };
   }, [all, props.type]);
 
   useEffect(() => {
-    (window as any).__LT_BACK_OVERRIDE__ = () => {
+    const handler = () => {
       props.onBack();
       return true;
     };
+    backController.push(handler);
 
     return () => {
-      const cur = (window as any).__LT_BACK_OVERRIDE__;
-      if (typeof cur === "function") (window as any).__LT_BACK_OVERRIDE__ = undefined;
+      backController.pop(handler);
     };
-  }, [props]);  
+  }, [props.onBack]);
 
   function Row(p: { it: Challenge }) {
     const it = p.it;
+    const isOpening = openingId === it.id;
+    const listLocked = openingId !== null;
+
     return (
       <button
-        onClick={() => props.onOpenChallenge(it.id)}
+        disabled={listLocked}
+        onClick={async () => {
+          if (listLocked) return;
+
+          setOpeningId(it.id);
+          try {
+            await props.onOpenChallenge(it.id);
+          } finally {
+            if (mountedRef.current) {
+              setOpeningId((cur) => (cur === it.id ? null : cur));
+            }
+          }
+        }}
         style={{
           width: "100%",
+          boxSizing: "border-box",
           textAlign: "left",
           border: "1px solid var(--lt-border)",
           background: "transparent",
           borderRadius: 14,
           padding: "12px 14px",
-          cursor: "pointer",
+          cursor: listLocked ? "default" : "pointer",
           color: "var(--lt-text)",
+          transform: isOpening ? "scale(0.99)" : "scale(1)",
+          opacity: listLocked && !isOpening ? 0.85 : 1,
+          transition: "transform 120ms ease, opacity 120ms ease",
         }}
       >
         <div style={{ opacity: 0.7, display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -103,9 +145,9 @@ export function MyChallengesListPage(props: {
   }
 
   return (
-    <div style={{ padding: 16, maxWidth: 560, margin: "0 auto" }}>
+    <div style={{ padding: 16, width: "100%", boxSizing: "border-box", overflowX: "clip" }}>
       <div style={{ fontSize: 20, fontWeight: 950, marginTop: 8, color: "var(--lt-text)" }}>
-        Мои челленджи
+        {"\u041C\u043E\u0438 \u0447\u0435\u043B\u043B\u0435\u043D\u0434\u0436\u0438"}
       </div>
       <div style={{ marginTop: 10, fontSize: 18, fontWeight: 950, color: "var(--lt-text)" }}>
         {title}
@@ -115,16 +157,15 @@ export function MyChallengesListPage(props: {
       </div>
 
       <div style={{ marginTop: 16 }}>
-        {loading ? <div style={{ opacity: 0.7 }}>Загрузка…</div> : null}
         {err ? (
           <div style={{ padding: 12, borderRadius: 14, border: "1px solid rgba(255,0,0,0.25)" }}>
-            Ошибка: {err}
+            {"\u041E\u0448\u0438\u0431\u043A\u0430"}: {err}
           </div>
         ) : null}
 
         {!loading && !err && items.active.length === 0 && items.paused.length === 0 ? (
           <div style={{ marginTop: 14, opacity: 0.7, lineHeight: 1.35 }}>
-            Здесь пока пусто.
+            {"\u0417\u0434\u0435\u0441\u044C \u043F\u043E\u043A\u0430 \u043F\u0443\u0441\u0442\u043E."}
           </div>
         ) : null}
 
@@ -139,7 +180,7 @@ export function MyChallengesListPage(props: {
         {items.paused.length > 0 ? (
           <div style={{ marginTop: 18 }}>
             <div style={{ fontSize: 14, fontWeight: 900, opacity: 0.8, marginBottom: 10 }}>
-              Пауза
+              {"\u041F\u0430\u0443\u0437\u0430"}
             </div>
             <div style={{ display: "grid", gap: 12 }}>
               {items.paused.map((it) => (
@@ -150,7 +191,6 @@ export function MyChallengesListPage(props: {
         ) : null}
       </div>
 
-      {/* верхнюю кнопку "Назад" не делаем — у тебя есть нижняя */}
       <div style={{ height: 12 }} />
     </div>
   );
