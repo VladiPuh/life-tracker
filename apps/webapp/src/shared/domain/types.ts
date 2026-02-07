@@ -3,6 +3,7 @@ export type StatusView = "MIN" | "BONUS" | "SKIP" | "FAIL" | null;
 export type TodayItem = {
   challenge_id: number;
   title: string;
+  type: "DO" | "NO_DO";
   status_view: StatusView | null;
 };
 

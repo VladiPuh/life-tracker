@@ -88,124 +88,7 @@ export function FocusSection(props: FocusSectionProps) {
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 999,
-                    border: "1px solid var(--lt-border)",
-                    background: "rgba(255,255,255,0.04)",
-                  }}
-                />
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 999,
-                    border: "1px solid var(--lt-border)",
-                    background: "rgba(255,255,255,0.04)",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: 14, marginTop: 14 }}>
-              <SkeletonBar w={92} h={36} r={999} />
-              <SkeletonBar w={92} h={36} r={999} />
-              <SkeletonBar w={92} h={36} r={999} />
-            </div>
-
-            <div style={{ marginTop: 14, maxWidth: 420 }}>
-              <div
-                style={{
-                  padding: 10,
-                  borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "rgba(255,255,255,0.03)",
-                }}
-              >
-                <SkeletonBar w={320} h={56} r={12} />
-              </div>
-              <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                <SkeletonBar w={110} h={38} r={12} />
-                <SkeletonBar w={90} h={38} r={12} />
-                <SkeletonBar w={90} h={38} r={12} />
-              </div>
-            </div>
-          </TodayCard>
-        </div>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <FocusPickDialog
-        pickOpen={props.pickOpen}
-        pickTop={props.pickTop}
-        onClosePick={props.onClosePick}
-        waiting={props.waiting}
-        current={props.current}
-        onPickChallenge={props.onPickChallenge}
-      />
-
-      <div ref={props.focusCardRef}>
-        <TodayCard title="Фокус дня">
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 16, fontWeight: 800 }}>{props.challengeTitle}</div>
-
-              {props.currentStatus && (
-                <div style={{ marginTop: 6 }}>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      padding: "4px 8px",
-                      borderRadius: 999,
-                      border: "1px solid rgba(0,0,0,0.12)",
-                      background: "var(--lt-card)",
-                      opacity: 0.85,
-                    }}
-                  >
-                    Сегодня: {props.currentStatus}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
-              <button
-                onClick={props.onOpenPick}
-                disabled={!waitingCount}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 999,
-                  border: "1px solid var(--lt-border)",
-                  background: "var(--lt-card2)",
-                  opacity: waitingCount ? 1 : 0.5,
-                }}
-              >
-                ⟳
-              </button>
-
-              <button
-                onClick={props.onNextFocus}
-                disabled={!waitingCount}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 999,
-                  border: "1px solid var(--lt-border)",
-                  background: "var(--lt-card2)",
-                  opacity: waitingCount ? 1 : 0.5,
-                }}
-              >
-                →
-              </button>
-            </div>
-          </div>
+                        </div>
 
           {props.err && (
             <div
@@ -224,7 +107,7 @@ export function FocusSection(props: FocusSectionProps) {
           )}
 
           {props.current ? (
-            <div style={{ display: "flex", gap: 14, marginTop: 14 }}>
+            <div style={{ display: "flex", gap: 14, marginTop: 14, justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
               <StatusButton
                 title="Минимальный шаг выполнен"
                 icon="✅"
@@ -232,6 +115,66 @@ export function FocusSection(props: FocusSectionProps) {
                 selected={props.pending === "MIN"}
                 onClick={() => props.requestPending("MIN")}
               />
+              <div style={{ position: "relative" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  top: -26,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  display: "flex",
+                  gap: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={props.onOpenPick}
+                  disabled={!waitingCount}
+                  title="Выбрать челлендж"
+                  aria-label="Выбрать челлендж"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 999,
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--lt-text)",
+                    opacity: waitingCount ? 0.9 : 0.4,
+                    cursor: waitingCount ? "pointer" : "default",
+                    padding: 0,
+                    lineHeight: 1,
+                    fontSize: 18,
+                  }}
+                >
+                  ⟳
+                </button>
+
+                <button
+                  type="button"
+                  onClick={props.onNextFocus}
+                  disabled={!waitingCount}
+                  title="Следующий челлендж"
+                  aria-label="Следующий челлендж"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 999,
+                    border: "none",
+                    background: "transparent",
+                    color: "var(--lt-text)",
+                    opacity: waitingCount ? 0.9 : 0.4,
+                    cursor: waitingCount ? "pointer" : "default",
+                    padding: 0,
+                    lineHeight: 1,
+                    fontSize: 18,
+                  }}
+                >
+                  →
+                </button>
+              </div>
+
               <StatusButton
                 title="Сделал больше обычного"
                 icon="⭐"
@@ -246,6 +189,7 @@ export function FocusSection(props: FocusSectionProps) {
                 selected={props.pending === "SKIP"}
                 onClick={() => props.requestPending("SKIP")}
               />
+            </div>
             </div>
           ) : (
             <div style={{ marginTop: 10, fontSize: 13, opacity: 0.75 }}>На сегодня всё.</div>

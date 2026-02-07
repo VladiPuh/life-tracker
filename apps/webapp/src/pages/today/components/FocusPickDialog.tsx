@@ -42,6 +42,7 @@ export function FocusPickDialog(props: {
         <div style={{ fontWeight: 800, marginBottom: 10 }}>Выбери фокус</div>
 
         {props.waiting
+          .filter((x) => x.type === "DO")
           .filter((x) => x.challenge_id !== props.current?.challenge_id)
           .map((x) => (
             <button
