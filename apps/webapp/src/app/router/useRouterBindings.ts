@@ -23,7 +23,17 @@ export function useRouterBindings(params: {
   closePlaceholder: () => void;
 }) {
   const { templates, addTemplate } = useTemplatesState();
-  const { newTitle, setNewTitle, newDesc, setNewDesc, newType, setNewType, create } = useAddState();
+  const {
+    newTitle,
+    setNewTitle,
+    newDesc,
+    setNewDesc,
+    newType,
+    setNewType,
+    save,
+    editingId,
+    startEdit,
+  } = useAddState();
   const [addError, setAddError] = useState<string | null>(null);
 
   const onGoChallenges = useCallback(() => {
@@ -44,12 +54,12 @@ export function useRouterBindings(params: {
   const onCreate = useCallback(async () => {
     try {
       setAddError(null);
-      await create();
+      await save();
       params.goToday();
     } catch (e: any) {
-      setAddError(e?.message ? String(e.message) : "Ошибка создания");
+      setAddError(e?.message ? String(e.message) : "Ошибка сохранения");
     }
-  }, [create, params]);
+  }, [save, params]);
 
   const onOpenChallenge = useCallback(
     (id: number) => {
@@ -57,6 +67,14 @@ export function useRouterBindings(params: {
       params.go("DETAIL");
     },
     [params]
+  );
+
+  const onEditChallenge = useCallback(
+    (ch: { id: number; title: string; description?: string | null; type: "DO" | "NO_DO" }) => {
+      startEdit(ch);
+      params.goAdd();
+    },
+    [startEdit, params]
   );
 
   const onBackFromDetail = useCallback(() => {
@@ -82,11 +100,13 @@ export function useRouterBindings(params: {
       setNewType,
       onCreate,
       error: addError,
+      editing: editingId !== null,
     },
 
     selectedId: params.selectedId,
     onOpenChallenge,
     onBackFromDetail,
+    onEditChallenge,
   };
 
   return { bindings };

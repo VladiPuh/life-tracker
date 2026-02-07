@@ -24,6 +24,7 @@ type AddProps = {
   onCreate: () => void | Promise<void>;
 
   error?: string | null;
+  editing?: boolean;
 };
 
 export function ScreenRouter(props: {
@@ -41,19 +42,22 @@ export function ScreenRouter(props: {
 
   selectedId: number | null;
   onOpenChallenge: (id: number) => void;
+  onEditChallenge: (ch: { id: number; title: string; description?: string | null; type: "DO" | "NO_DO" }) => void;
   onBackFromDetail: () => void;
 }) {
+
   const {
     screen,
     placeholder,
-    go,
     onGoChallenges,
     templates,
     onAddTemplate,
     addProps,
     selectedId,
     onOpenChallenge,
+    onEditChallenge,
     onBackFromDetail,
+    go,
   } = props;
 
   // локально держим выбранный тип для списка
@@ -96,11 +100,14 @@ export function ScreenRouter(props: {
 
   if (screen === "DETAIL") {
     return selectedId !== null ? (
-      <DetailScreen challengeId={selectedId} onBack={onBackFromDetail} />
+      <DetailScreen
+        challengeId={selectedId}
+        onBack={onBackFromDetail}
+        onEdit={onEditChallenge}
+      />
     ) : (
       <PlaceholderCard title="Челлендж" text="Не выбран" />
     );
   }
-
   return <TodayPage onGoChallenges={onGoChallenges} />;
 }

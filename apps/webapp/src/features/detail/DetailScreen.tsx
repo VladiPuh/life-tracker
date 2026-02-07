@@ -11,7 +11,11 @@ type ChallengeDto = {
   icon?: string | null;
 };
 
-export default function DetailScreen(props: { challengeId: number; onBack: () => void }) {
+export default function DetailScreen(props: {
+  challengeId: number;
+  onBack: () => void;
+  onEdit: (ch: { id: number; title: string; description?: string | null; type: "DO" | "NO_DO" }) => void;
+}) {
   const { challengeId } = props;
 
   const [item, setItem] = useState<ChallengeDto | null>(null);
@@ -103,6 +107,29 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
 
               <div style={{ display: "flex", gap: 8 }}>
                 <button
+                  onClick={() =>
+                    props.onEdit({
+                      id: item.id,
+                      title: item.title,
+                      description: item.description,
+                      type: item.type,
+                    })
+                  }
+                  style={{
+                    border: "1px solid var(--lt-border)",
+                    background: "transparent",
+                    borderRadius: 12,
+                    padding: "8px 10px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    color: "var(--lt-text)",
+                    opacity: 0.75,
+                  }}
+                >
+                  ✏️
+                </button>
+
+                <button
                   onClick={togglePause}
                   style={{
                     border: "1px solid var(--lt-border)",
@@ -135,7 +162,7 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
                 </button>
               </div>
             </div>
-
+            
             {item.description && (
               <div style={{ marginTop: 8, fontSize: 13, opacity: 0.8, lineHeight: 1.35 }}>
                 {item.description}

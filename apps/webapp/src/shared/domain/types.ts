@@ -32,10 +32,12 @@ export type HistoryResponse = {
 };
 
 export type ChallengePatch = {
-  title?: string | null;
+  title?: string;
   description?: string | null;
-  miss_policy?: "FAIL" | "MIN";
   is_active?: boolean;
+
+  type?: "DO" | "NO_DO";
+  miss_policy?: "FAIL" | "MIN";
 };
 
 export type ChallengeFull = {

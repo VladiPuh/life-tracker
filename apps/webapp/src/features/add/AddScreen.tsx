@@ -12,10 +12,12 @@ type Props = {
 
   onCreate: () => void | Promise<void>;
   error?: string | null;
+
+  editing?: boolean;
 };
 
 export function AddScreen(props: Props) {
-  const { newTitle, setNewTitle, newDesc, setNewDesc, newType, setNewType, onCreate } = props;
+  const { newTitle, setNewTitle, newDesc, setNewDesc, newType, setNewType, onCreate, } = props;
 
   return (
     <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
@@ -27,7 +29,9 @@ export function AddScreen(props: Props) {
           background: "var(--lt-card)",
         }}
       >
-        <div style={{ fontSize: 18, fontWeight: 700 }}>Добавить челендж</div>
+        <div style={{ fontSize: 18, fontWeight: 700 }}>
+          {props.editing ? "Редактировать челлендж" : "Добавить челлендж"}
+        </div>
         <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
           <label>
             Название*
@@ -133,7 +137,9 @@ export function AddScreen(props: Props) {
             </div>
           ) : null}
 
-          <button onClick={onCreate}>Создать</button>
+          <button onClick={onCreate}>
+            {props.editing ? "Сохранить" : "Создать"}
+          </button>
         </div>
       </div>
     </div>
