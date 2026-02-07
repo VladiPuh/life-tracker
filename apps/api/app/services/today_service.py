@@ -24,6 +24,7 @@ async def build_today_view(db, user, day: date):
         item = {
             "challenge_id": ch.id,
             "title": ch.title,
+            "type": ch.type,
             "status_view": status_view,
         }
         items.append(item)

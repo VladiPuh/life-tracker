@@ -34,6 +34,7 @@ class DailyFlagSet(BaseModel):
 class TodayItem(BaseModel):
     challenge_id: int
     title: str
+    type: ChallengeType
     status_view: Optional[Literal["MIN", "BONUS", "SKIP", "FAIL"]] = None
 
 class TemplateOut(BaseModel):
