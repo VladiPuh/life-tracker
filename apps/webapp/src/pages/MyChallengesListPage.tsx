@@ -74,21 +74,22 @@ export function MyChallengesListPage(props: {
           width: "100%",
           textAlign: "left",
           border: "1px solid var(--lt-border)",
-          background: "var(--lt-card)",
-          borderRadius: 18,
-          padding: 16,
+          background: "transparent",
+          borderRadius: 14,
+          padding: "12px 14px",
           cursor: "pointer",
           color: "var(--lt-text)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+        <div style={{ opacity: 0.7, display: "flex", alignItems: "flex-start", gap: 10 }}>
           {it.icon ? (
             <div
               style={{
                 width: 42,
                 height: 42,
-                borderRadius: 16,
-                background: "var(--lt-soft)",
+                borderRadius: 12,
+                border: "1px solid var(--lt-border)",
+                background: "transparent",
                 display: "grid",
                 placeItems: "center",
                 fontSize: 18,
@@ -100,11 +101,11 @@ export function MyChallengesListPage(props: {
           ) : null}
 
           <div style={{ flex: "1 1 auto", minWidth: 0 }}>
-            <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.15 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.15 }}>
               {it.title}
             </div>
             {it.description ? (
-              <div style={{ marginTop: 6, opacity: 0.75, lineHeight: 1.25 }}>
+              <div style={{ marginTop: 6, opacity: 0.65, lineHeight: 1.25, color: "var(--lt-hint)" }}>
                 {it.description}
               </div>
             ) : null}

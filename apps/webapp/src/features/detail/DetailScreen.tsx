@@ -106,13 +106,13 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
                   onClick={togglePause}
                   style={{
                     border: "1px solid var(--lt-border)",
-                    background: "var(--lt-card)",
+                    background: "transparent",
                     borderRadius: 12,
                     padding: "8px 10px",
                     fontWeight: 800,
                     cursor: "pointer",
                     color: "var(--lt-text)",
-                    opacity: 0.9,
+                    opacity: 0.75,
                   }}
                 >
                   {item.is_active ? "⏸ Пауза" : "▶︎ Вкл"}
@@ -121,14 +121,14 @@ export default function DetailScreen(props: { challengeId: number; onBack: () =>
                 <button
                   onClick={onDelete}
                   style={{
-                    border: "1px solid rgba(255,0,0,0.25)",
+                    border: "1px solid var(--lt-border)",
                     background: "transparent",
                     borderRadius: 12,
                     padding: "8px 10px",
                     fontWeight: 800,
                     cursor: "pointer",
                     color: "var(--lt-text)",
-                    opacity: 0.9,
+                    opacity: 0.5,
                   }}
                 >
                   🗑
